@@ -113,9 +113,21 @@ app.get('/admin/dashboard', async (req, res) => {
   const today = await Visit.countDocuments({
     createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
   });
+
+  const uniqueVisitors = await Visit.distinct('ip');
+  const totalUnique = uniqueVisitors.length;
+
+  const totalDownloads = await Download.countDocuments();
+
   const visits = await Visit.find().sort({ createdAt: -1 }).limit(20);
 
-  res.render('admin/dashboard', { total, today, visits });
+  res.render('admin/dashboard', {
+    total,
+    today,
+    totalUnique,
+    totalDownloads,
+    visits
+  });
 });
 
 const PORT = process.env.PORT || 3000;
