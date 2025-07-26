@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= videoData.title %> - TikTok Video</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0; padding: 20px;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #3b82f6;
+      text-align: center;
+      margin-bottom: 10px;
+      user-select: none;
+    }
+    .video-container {
+      max-width: 600px;
+      width: 100%;
+      background: #222;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 0 20px #3b82f6aa;
+      margin-bottom: 20px;
+    }
+    video {
+      width: 100%;
+      border-radius: 10px;
+      background: black;
+    }
+    .info {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .info p {
+      margin: 6px 0;
+    }
+    .buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background-color: #3b82f6;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <h1><%= videoData.title %></h1>
+
+  <div class="video-container">
+    <video controls poster="<%= videoData.cover %>">
+      <source src="<%= videoData.hdplay || videoData.play %>" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <div class="info">
+    <p>Author: <strong>@<%= videoData.username %></strong></p>
+  </div>
+
+  <div class="buttons">
+    <% if(videoData.music) { %>
+      <a class="btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.music) %>&username=<%= videoData.username %>&type=music" download>
+        🎵 Download MP3
+      </a>
+    <% } %>
+
+    <% if(videoData.play) { %>
+      <a class="btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.play) %>&username=<%= videoData.username %>&type=play" download>
+        📽️ Download SD Video
+      </a>
+    <% } %>
+
+    <% if(videoData.hdplay) { %>
+      <a class="btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.hdplay) %>&username=<%= videoData.username %>&type=hdplay" download>
+        📽️ Download HD Video
+      </a>
+    <% } %>
+  </div>
+</body>
+</html>
