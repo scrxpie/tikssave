@@ -5,19 +5,20 @@
   <title>TikTok Downloader</title>
   <link rel="stylesheet" href="/css/style.css" />
   <style>
+    /* Genel stil */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 700px;
-      margin: 30px auto 50px;
+      max-width: 650px;
+      margin: 30px auto 60px;
       padding: 0 20px;
-      background-color: #f5f5f7;
+      background-color: #fafafa;
       color: #222;
-      line-height: 1.6;
+      line-height: 1.5;
     }
     h1 {
       text-align: center;
-      margin-bottom: 5px;
-      color: #333;
+      margin-bottom: 15px;
+      color: #222;
     }
     p.visitors {
       text-align: center;
@@ -27,15 +28,15 @@
     }
     form#mainForm {
       display: flex;
-      justify-content: center;
       gap: 10px;
-      margin-bottom: 15px;
+      justify-content: center;
+      margin-bottom: 20px;
     }
     input[type="text"] {
       flex-grow: 1;
       padding: 12px 15px;
       font-size: 1em;
-      border-radius: 6px;
+      border-radius: 8px;
       border: 1px solid #ccc;
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
       transition: border-color 0.3s;
@@ -43,18 +44,19 @@
     input[type="text"]:focus {
       border-color: #f5c518;
       outline: none;
-      box-shadow: 0 0 6px #f5c518;
+      box-shadow: 0 0 8px #f5c518;
     }
     button {
-      padding: 12px 20px;
+      padding: 12px 18px;
       font-size: 1em;
       background-color: #f5c518;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       color: #111;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: background-color 0.3s;
+      flex-shrink: 0;
     }
     button:hover {
       background-color: #ddb700;
@@ -63,15 +65,15 @@
       display: none;
       flex-direction: column;
       gap: 12px;
-      margin: 20px auto 40px;
-      max-width: 300px;
+      margin: 15px auto 40px;
+      max-width: 320px;
     }
     .download-btn {
       background-color: #222;
       color: #f5c518;
       padding: 14px;
       font-weight: 700;
-      border-radius: 6px;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
       width: 100%;
@@ -80,42 +82,74 @@
     .download-btn:hover {
       background-color: #444;
     }
-    hr {
-      margin: 40px 0 25px;
-      border: none;
-      border-top: 1px solid #ccc;
-    }
-    .faq {
-      max-width: 600px;
+
+    /* Accordion stil */
+    .accordion {
+      max-width: 650px;
       margin: 0 auto;
-    }
-    .faq h2 {
-      color: #333;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    .faq-item {
-      background: white;
       border-radius: 8px;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+      background: white;
+      overflow: hidden;
+    }
+    .accordion-item {
+      border-bottom: 1px solid #ddd;
+    }
+    .accordion-item:last-child {
+      border-bottom: none;
+    }
+    .accordion-header {
+      background-color: #f9f9f9;
+      cursor: pointer;
       padding: 15px 20px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 6px rgb(0 0 0 / 0.07);
-    }
-    .faq-item h3 {
-      margin: 0 0 8px;
       font-weight: 600;
-      font-size: 1.1em;
-      color: #222;
+      color: #333;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.3s;
     }
-    .faq-item p {
-      margin: 0;
+    .accordion-header:hover {
+      background-color: #f5c518;
+      color: #111;
+    }
+    .accordion-header.active {
+      background-color: #f5c518;
+      color: #111;
+    }
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      padding: 0 20px;
+      background-color: white;
       color: #444;
+      transition: max-height 0.35s ease;
       font-size: 0.95em;
+    }
+    .accordion-content p {
+      margin: 15px 0;
+    }
+    .accordion-content.open {
+      padding-top: 15px;
+      padding-bottom: 15px;
+    }
+
+    /* Ok simgesi */
+    .accordion-header::after {
+      content: "▶";
+      font-size: 0.8em;
+      transition: transform 0.3s;
+      color: #666;
+    }
+    .accordion-header.active::after {
+      transform: rotate(90deg);
+      color: #111;
     }
   </style>
 </head>
 <body>
-  <h1>TikTok Video & Audio Downloader</h1>
+  <h1>TikTok Downloader</h1>
   <p class="visitors">Total Visitors: <%= count %></p>
 
   <form id="mainForm" onsubmit="return false;">
@@ -126,39 +160,50 @@
 
   <div id="options"></div>
 
-  <hr />
-
-  <section class="faq">
-    <h2>How to Download TikTok Videos</h2>
-
-    <div class="faq-item">
-      <h3>1. Get the TikTok Video Link</h3>
-      <p>Open TikTok app or website, click “Share” on the video you want, then select “Copy Link”.</p>
+  <section class="accordion" aria-label="Frequently Asked Questions">
+    <div class="accordion-item">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq1" id="faq1-button">
+        How do I get the TikTok video link?
+      </button>
+      <div id="faq1" class="accordion-content" role="region" aria-labelledby="faq1-button">
+        <p>Open the TikTok app or website, tap “Share” on the video, then select “Copy Link” to get the video URL.</p>
+      </div>
     </div>
 
-    <div class="faq-item">
-      <h3>2. Paste the Link Above</h3>
-      <p>Paste the copied link into the input box above and click the “Fetch Links” button.</p>
+    <div class="accordion-item">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq2" id="faq2-button">
+        How do I paste the link and download?
+      </button>
+      <div id="faq2" class="accordion-content" role="region" aria-labelledby="faq2-button">
+        <p>Paste the copied URL into the input box above, click “Fetch Links” to get download options, then click a button to start downloading.</p>
+      </div>
     </div>
 
-    <div class="faq-item">
-      <h3>3. Choose Your Download Option</h3>
-      <p>After the links load, click the button for MP3 (audio only), SD video, or HD video (if available) to download the file directly.</p>
+    <div class="accordion-item">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq3" id="faq3-button">
+        What download quality options are available?
+      </button>
+      <div id="faq3" class="accordion-content" role="region" aria-labelledby="faq3-button">
+        <p>You can download audio only (MP3), standard video quality (SD), or high-quality video (HD) if available.</p>
+      </div>
     </div>
 
-    <div class="faq-item">
-      <h3>4. Enjoy Your Download</h3>
-      <p>Save the video or audio file on your device and enjoy offline playback!</p>
+    <div class="accordion-item">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq4" id="faq4-button">
+        Why are some videos not available in HD?
+      </button>
+      <div id="faq4" class="accordion-content" role="region" aria-labelledby="faq4-button">
+        <p>Not all TikTok videos have HD versions accessible through this service due to TikTok's streaming restrictions.</p>
+      </div>
     </div>
 
-    <div class="faq-item">
-      <h3>Why Are Some Videos Not Available in HD?</h3>
-      <p>Not all TikTok videos have HD versions accessible via our service due to TikTok’s streaming limitations.</p>
-    </div>
-
-    <div class="faq-item">
-      <h3>Is This Service Free and Safe?</h3>
-      <p>Yes! Our downloader is completely free and does not store your downloaded files. We respect your privacy and security.</p>
+    <div class="accordion-item">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq5" id="faq5-button">
+        Is this service free and safe?
+      </button>
+      <div id="faq5" class="accordion-content" role="region" aria-labelledby="faq5-button">
+        <p>Yes! Our downloader is completely free and respects your privacy. We do not store your downloads.</p>
+      </div>
     </div>
   </section>
 
@@ -209,6 +254,26 @@
       link.setAttribute('download', '');
       link.click();
     }
+
+    // Accordion functionality
+    const accordions = document.querySelectorAll('.accordion-header');
+
+    accordions.forEach(acc => {
+      acc.addEventListener('click', () => {
+        const expanded = acc.getAttribute('aria-expanded') === 'true';
+        // Close all
+        accordions.forEach(a => {
+          a.setAttribute('aria-expanded', 'false');
+          document.getElementById(a.getAttribute('aria-controls')).classList.remove('open');
+        });
+
+        // Toggle current
+        if (!expanded) {
+          acc.setAttribute('aria-expanded', 'true');
+          document.getElementById(acc.getAttribute('aria-controls')).classList.add('open');
+        }
+      });
+    });
   </script>
 </body>
 </html>
