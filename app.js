@@ -5,6 +5,7 @@ const path = require('path');
 const fetch = require('node-fetch');
 const https = require('https');
 const sanitize = require('sanitize-filename');
+const session = require('express-session');
 const Visit = require('./models/Visit');
 
 const app = express();
@@ -14,6 +15,13 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Oturum yönetimi
+app.use(session({
+  secret: process.env.ADMIN_PASSWORD,
+  resave: false,
+  saveUninitialized: true
+}));
 
 // MongoDB bağlantısı
 mongoose.connect(process.env.MONGO_URI, {
@@ -55,7 +63,7 @@ app.post('/get-links', async (req, res) => {
   }
 });
 
-// Proxy download route (mp3 veya mp4)
+// Proxy download route (mp3/mp4)
 app.get('/proxy-download', (req, res) => {
   const { url, username, type } = req.query;
   if (!url) return res.status(400).send('Video linki yok');
@@ -74,15 +82,33 @@ app.get('/proxy-download', (req, res) => {
   });
 });
 
-// Admin paneli (token ile)
-app.get('/admin', (req, res) => {
-  const auth = req.headers.authorization;
-  if (!auth || auth !== `Bearer ${process.env.ADMIN_PASSWORD}`) {
-    return res.status(401).send('Unauthorized');
+
+// ✅ Admin login sayfası
+app.get('/admin/login', (req, res) => {
+  res.render('admin/login', { error: null });
+});
+
+app.post('/admin/login', (req, res) => {
+  const { password } = req.body;
+  if (password === process.env.ADMIN_PASSWORD) {
+    req.session.authenticated = true;
+    res.redirect('/admin/dashboard');
+  } else {
+    res.render('admin/login', { error: 'Wrong password' });
   }
-  Visit.find().sort({ createdAt: -1 }).limit(20).then(visits => {
-    res.render('admin', { visits });
+});
+
+// ✅ Admin dashboard (giriş sonrası)
+app.get('/admin/dashboard', async (req, res) => {
+  if (!req.session.authenticated) return res.redirect('/admin/login');
+
+  const total = await Visit.countDocuments();
+  const today = await Visit.countDocuments({
+    createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
   });
+  const visits = await Visit.find().sort({ createdAt: -1 }).limit(20);
+
+  res.render('admin/dashboard', { total, today, visits });
 });
 
 const PORT = process.env.PORT || 3000;
