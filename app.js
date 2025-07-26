@@ -13,7 +13,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // JSON body için
+app.use(express.json());
 
 // MongoDB bağlantısı
 mongoose.connect(process.env.MONGO_URI, {
@@ -22,7 +22,7 @@ mongoose.connect(process.env.MONGO_URI, {
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
-// Ana Sayfa
+// Ana sayfa + sayaç
 app.get('/', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
@@ -31,7 +31,7 @@ app.get('/', async (req, res) => {
   res.render('index', { count });
 });
 
-// TikWM üzerinden linkleri al
+// TikWM API'den linkleri al
 app.post('/get-links', async (req, res) => {
   const { url } = req.body;
   try {
@@ -42,28 +42,27 @@ app.post('/get-links', async (req, res) => {
       return res.json({ success: false, message: 'Video info alınamadı.' });
     }
 
-    const links = {
+    res.json({
       success: true,
       play: data.data.play,
       hdplay: data.data.hdplay,
       music: data.data.music,
       username: data.data.author?.unique_id || 'unknown'
-    };
-
-    res.json(links);
+    });
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
 
-// İndirme işlemi (proxy olarak)
+// Proxy download route (mp3 veya mp4)
 app.get('/proxy-download', (req, res) => {
-  const { url, username } = req.query;
+  const { url, username, type } = req.query;
   if (!url) return res.status(400).send('Video linki yok');
 
   const timestamp = Date.now();
-  const filename = sanitize(`ttdownload_@${username || 'unknown'}_${timestamp}.mp4`);
+  const extension = (type === 'music') ? 'mp3' : 'mp4';
+  const filename = sanitize(`ttdownload_@${username || 'unknown'}_${timestamp}.${extension}`);
 
   https.get(url, fileRes => {
     res.setHeader('Content-Type', 'application/octet-stream');
@@ -75,7 +74,7 @@ app.get('/proxy-download', (req, res) => {
   });
 });
 
-// Admin Paneli
+// Admin paneli (token ile)
 app.get('/admin', (req, res) => {
   const auth = req.headers.authorization;
   if (!auth || auth !== `Bearer ${process.env.ADMIN_PASSWORD}`) {
