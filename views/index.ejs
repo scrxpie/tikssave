@@ -1,71 +1,43 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TikTok Downloader - MP4 & MP3</title>
+  <title>TikTok Downloader</title>
   <style>
     :root {
-      --bg-dark: #1e1e1e;
-      --bg-light: #f4f4f4;
-      --text-dark: #e0e0e0;
-      --text-light: #1e1e1e;
-      --accent: #3b82f6;
-      --gray: #888;
-    }
-    [data-theme="dark"] {
-      background-color: var(--bg-dark);
-      color: var(--text-dark);
-    }
-    [data-theme="light"] {
-      background-color: var(--bg-light);
-      color: var(--text-light);
+      --bg: #1e1e1e;
+      --text: #e0e0e0;
+      --gray: #aaa;
+      --blue: #3b82f6;
+      --blue-dark: #2563eb;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 20px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px 15px 60px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: background-color 0.4s, color 0.4s;
+      min-height: 100vh;
     }
 
     h1 {
       font-size: 2.5rem;
-      color: var(--accent);
+      color: var(--blue);
+      font-weight: 800;
       margin-bottom: 10px;
-      text-align: center;
-    }
-
-    .theme-switch {
-      position: fixed;
-      top: 15px;
-      right: 20px;
-      background: transparent;
-      border: 2px solid var(--accent);
-      border-radius: 50px;
-      padding: 8px 16px;
-      cursor: pointer;
-      font-size: 1rem;
-      color: var(--accent);
-      transition: background 0.3s;
-    }
-
-    .theme-switch:hover {
-      background: var(--accent);
-      color: #fff;
     }
 
     .visitors {
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: var(--gray);
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
     form {
@@ -82,19 +54,19 @@
       padding: 14px;
       font-size: 1rem;
       border: none;
-      border-radius: 8px;
-      background-color: #333;
+      border-radius: 10px;
+      background: #333;
       color: #fff;
     }
 
     button {
-      padding: 14px 20px;
+      padding: 14px 18px;
       font-size: 1rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
+      font-weight: bold;
       cursor: pointer;
       transition: 0.3s;
-      font-weight: bold;
     }
 
     .paste-btn {
@@ -102,19 +74,41 @@
       color: #fff;
     }
 
+    .clear-btn {
+      background-color: #555;
+      color: #fff;
+    }
+
     .fetch-btn {
-      background-color: var(--accent);
+      background-color: var(--blue);
       color: #fff;
     }
 
     .fetch-btn:hover {
-      background-color: #2563eb;
+      background-color: var(--blue-dark);
+    }
+
+    #status {
+      margin-top: 20px;
+      color: var(--gray);
+      font-size: 1rem;
+      display: none;
+    }
+
+    #notify {
+      background-color: #333;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      display: none;
+      box-shadow: 0 0 8px #000;
     }
 
     #options {
       display: none;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       width: 100%;
       max-width: 600px;
       margin-bottom: 40px;
@@ -124,17 +118,63 @@
       background-color: #1e40af;
       color: #fff;
       padding: 14px;
-      font-size: 1.1rem;
-      border-radius: 8px;
-      border: none;
+      font-size: 1rem;
+      border-radius: 10px;
       cursor: pointer;
+      transition: 0.3s;
     }
 
-    .loading {
-      margin: 20px 0;
-      font-size: 1.1rem;
+    .download-btn:hover {
+      background-color: var(--blue);
+    }
+
+    #about {
+      max-width: 600px;
+      text-align: left;
       color: var(--gray);
+      margin-top: 30px;
+      line-height: 1.6;
+    }
+
+    #about h2 {
+      color: var(--blue);
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .accordion {
+      margin-top: 30px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .accordion-item {
+      background: #2a2a2a;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .accordion-header {
+      padding: 15px 18px;
+      cursor: pointer;
+      background: #333;
+      font-weight: bold;
+      color: var(--blue);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .accordion-header:hover {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .accordion-content {
+      padding: 15px 18px;
       display: none;
+      background: #1f1f1f;
+      color: #ccc;
     }
 
     .footer {
@@ -146,45 +186,78 @@
     }
 
     @media (max-width: 480px) {
-      h1 {
-        font-size: 2rem;
-      }
-      button, input {
-        font-size: 1rem;
-      }
+      h1 { font-size: 2rem; }
+      input, button { font-size: 1rem; }
     }
   </style>
 </head>
 <body>
-  <button class="theme-switch" onclick="toggleTheme()">🌙 / ☀️</button>
-
   <h1>TikTok Downloader</h1>
   <p class="visitors">Total Visitors: <%= count %></p>
 
+  <div id="notify">Link pasted! ✅</div>
+
   <form onsubmit="return false;">
-    <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." required />
-    <button type="button" class="paste-btn" onclick="pasteLink()">Paste</button>
+    <input type="text" id="videoUrl" placeholder="Paste TikTok link..." required oninput="togglePasteClear()" />
+    <button type="button" id="pasteClearBtn" class="paste-btn" onclick="pasteLink()">Paste</button>
     <button type="button" class="fetch-btn" onclick="fetchLinks()">Download</button>
   </form>
 
-  <div id="status" class="loading">Fetching download links...</div>
+  <div id="status">Fetching download links...</div>
   <div id="options"></div>
 
-  <div class="footer">© <%= new Date().getFullYear() %> tikssave.com – All rights reserved.</div>
+  <section id="about">
+    <h2>Unlimited TikTok Downloads</h2>
+    <p>Download unlimited TikTok videos without watermark in high-quality MP4 or MP3. No registration required.</p>
+
+    <h2>MP4 & MP3 Formats</h2>
+    <p>Convert any TikTok to video or audio in one click — totally free.</p>
+  </section>
+
+  <section class="accordion">
+    <div class="accordion-item">
+      <div class="accordion-header" onclick="toggleAccordion(this)">How to copy TikTok link? <span>▶</span></div>
+      <div class="accordion-content">Open TikTok, tap Share → Copy Link.</div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header" onclick="toggleAccordion(this)">Why is HD not available? <span>▶</span></div>
+      <div class="accordion-content">Not all videos have HD formats. TikTok limits some qualities.</div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header" onclick="toggleAccordion(this)">Is this free? <span>▶</span></div>
+      <div class="accordion-content">Yes. It’s 100% free and safe. We don’t store your data.</div>
+    </div>
+  </section>
+
+  <div class="footer">© <%= new Date().getFullYear() %> tikssave.com</div>
 
   <script>
-    function toggleTheme() {
-      const html = document.documentElement;
-      html.dataset.theme = html.dataset.theme === 'light' ? 'dark' : 'light';
+    function pasteLink() {
+      navigator.clipboard.readText().then(text => {
+        document.getElementById('videoUrl').value = text;
+        document.getElementById('notify').style.display = 'block';
+        togglePasteClear();
+        setTimeout(() => {
+          document.getElementById('notify').style.display = 'none';
+        }, 2500);
+      });
     }
 
-    function pasteLink() {
-      navigator.clipboard.readText()
-        .then(text => {
-          document.getElementById('videoUrl').value = text;
-          alert("Link pasted! ✅");
-        })
-        .catch(() => alert("Clipboard access denied"));
+    function togglePasteClear() {
+      const input = document.getElementById('videoUrl');
+      const btn = document.getElementById('pasteClearBtn');
+      if (input.value.trim()) {
+        btn.textContent = "Clear";
+        btn.className = "clear-btn";
+        btn.onclick = () => {
+          input.value = '';
+          togglePasteClear();
+        };
+      } else {
+        btn.textContent = "Paste";
+        btn.className = "paste-btn";
+        btn.onclick = pasteLink;
+      }
     }
 
     async function fetchLinks() {
@@ -231,6 +304,20 @@
       link.href = `/proxy-download?url=${encodeURIComponent(data[type])}&username=${data.username}&type=${type}`;
       link.setAttribute('download', '');
       link.click();
+    }
+
+    function toggleAccordion(el) {
+      const content = el.nextElementSibling;
+      const arrow = el.querySelector("span");
+      if (content.style.display === "block") {
+        content.style.display = "none";
+        arrow.textContent = "▶";
+      } else {
+        document.querySelectorAll('.accordion-content').forEach(c => c.style.display = "none");
+        document.querySelectorAll('.accordion-header span').forEach(a => a.textContent = "▶");
+        content.style.display = "block";
+        arrow.textContent = "▼";
+      }
     }
   </script>
 </body>
