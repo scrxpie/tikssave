@@ -64,9 +64,16 @@ app.post('/get-links', async (req, res) => {
 });
 
 // Proxy download route (mp3/mp4)
-app.get('/proxy-download', (req, res) => {
+const Download = require('./models/Download');
+
+// Proxy route içine ekle:
+app.get('/proxy-download', async (req, res) => {
   const { url, username, type } = req.query;
   if (!url) return res.status(400).send('Video linki yok');
+
+  // ✅ Download log ekle
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  await new Download({ url, ip }).save();
 
   const timestamp = Date.now();
   const extension = (type === 'music') ? 'mp3' : 'mp4';
