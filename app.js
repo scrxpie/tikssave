@@ -8,8 +8,15 @@ const sanitize = require('sanitize-filename');
 const session = require('express-session');
 const Visit = require('./models/Visit');
 
+const { customAlphabet } = require('nanoid');
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
+
+function generateShortId() {
+  return nanoid();
+}
+
 const app = express();
-const { generateShortId } = require('../utils');  // yolunu kendi dosya yapına göre ayarla
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -39,7 +46,7 @@ app.get('/', async (req, res) => {
   res.render('index', { count });
 });
 
-// TikWM API'den linkleri al
+// TikWM API'den linkleri al (video bilgisi)
 app.post('/get-links', async (req, res) => {
   const { url } = req.body;
   try {
@@ -51,14 +58,14 @@ app.post('/get-links', async (req, res) => {
     }
 
     res.json({
-  success: true,
-  play: data.data.play,
-  hdplay: data.data.hdplay,
-  music: data.data.music,
-  username: data.data.author?.unique_id || 'unknown',
-  title: data.data.title,
-  cover: data.data.cover
-});
+      success: true,
+      play: data.data.play,
+      hdplay: data.data.hdplay,
+      music: data.data.music,
+      username: data.data.author?.unique_id || 'unknown',
+      title: data.data.title,
+      cover: data.data.cover
+    });
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: 'Sunucu hatası.' });
@@ -68,12 +75,11 @@ app.post('/get-links', async (req, res) => {
 // Proxy download route (mp3/mp4)
 const Download = require('./models/Download');
 
-// Proxy route içine ekle:
 app.get('/proxy-download', async (req, res) => {
   const { url, username, type } = req.query;
   if (!url) return res.status(400).send('Video linki yok');
 
-  // ✅ Download log ekle
+  // Download log ekle
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   await new Download({ url, ip }).save();
 
@@ -91,8 +97,60 @@ app.get('/proxy-download', async (req, res) => {
   });
 });
 
+// Yeni: kısa link üret ve dön
+const videoCache = new Map(); // shortId => gerçek video url ve meta verisi (basit cache)
 
-// ✅ Admin login sayfası
+// /tiktok komutu mantığı - shortId üret, cachele, dön
+app.post('/tiktok', async (req, res) => {
+  const { url } = req.body;
+  if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
+
+  try {
+    // TikWM API'den video bilgisi çek
+    const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
+    const data = await response.json();
+
+    if (!data || data.code !== 0) {
+      return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
+    }
+
+    // Kısa ID oluştur
+    const shortId = generateShortId();
+
+    // Cache'e kaydet (en azından url ve meta)
+    videoCache.set(shortId, {
+      play: data.data.play,
+      hdplay: data.data.hdplay,
+      music: data.data.music,
+      username: data.data.author?.unique_id || 'unknown',
+      title: data.data.title,
+      cover: data.data.cover
+    });
+
+    // Kullanıcıya kısa link ver
+    res.json({ success: true, shortId });
+
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Sunucu hatası.' });
+  }
+});
+
+// shortId ile sayfa aç (video oynatma + indirme seçenekleri)
+app.get('/:shortId', (req, res) => {
+  const { shortId } = req.params;
+  const videoData = videoCache.get(shortId);
+
+  if (!videoData) {
+    return res.status(404).send('Video bulunamadı veya link süresi doldu.');
+  }
+
+  // videoData'yı sayfaya gönder
+  res.render('videoPage', { videoData });
+});
+
+
+// Admin login sayfası
 app.get('/admin/login', (req, res) => {
   res.render('admin/login', { error: null });
 });
@@ -107,7 +165,7 @@ app.post('/admin/login', (req, res) => {
   }
 });
 
-// ✅ Admin dashboard (giriş sonrası)
+// Admin dashboard
 app.get('/admin/dashboard', async (req, res) => {
   if (!req.session.authenticated) return res.redirect('/admin/login');
 
