@@ -153,9 +153,15 @@ app.get('/:shortId', async (req, res) => {
 
   try {
     const videoData = await VideoLink.findOne({ shortId });
-    if (!videoData) return res.status(404).send('Video bulunamadı veya link süresi doldu.');
+    if (!videoData) return res.status(404).send('Video bulunamadı.');
 
-    res.render('videoPage', { videoData });
+    // Direkt mp4 linkine yönlendir
+    // Öncelik: hdplay varsa onu, yoksa play kullan
+    const targetUrl = videoData.hdplay || videoData.play;
+    if (!targetUrl) return res.status(404).send('Video linki bulunamadı.');
+
+    res.redirect(targetUrl); // 302 redirect
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Sunucu hatası.');
