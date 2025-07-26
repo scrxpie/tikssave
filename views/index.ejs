@@ -1,380 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TikTok Downloader</title>
-  <style>
-    /* Genel reset ve font */
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #2f2f2f;
-      color: #e0e0e0;
-      margin: 0;
-      padding: 20px 15px 60px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    h1 {
-      font-size: 2.6rem;
-      margin-bottom: 10px;
-      text-align: center;
-      color: #3b82f6;
-      font-weight: 800;
-      user-select: none;
-    }
-    p.visitors {
-      font-size: 1rem;
-      margin-bottom: 25px;
-      color: #bbb;
-    }
-    form#mainForm {
-      display: flex;
-      width: 100%;
-      max-width: 600px;
-      gap: 10px;
-      margin-bottom: 30px;
-    }
-    input[type="text"] {
-      flex: 1;
-      padding: 16px 20px;
-      font-size: 1.25rem;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      background-color: #444;
-      color: #eee;
-      transition: background-color 0.3s;
-    }
-    input[type="text"]::placeholder {
-      color: #bbb;
-    }
-    input[type="text"]:focus {
-      background-color: #555;
-    }
-    button {
-      padding: 16px 24px;
-      font-size: 1.25rem;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      transition: background-color 0.3s;
-      user-select: none;
-      flex-shrink: 0;
-    }
-    button:hover {
-      filter: brightness(1.1);
-    }
-    button:active {
-      filter: brightness(0.9);
-    }
-    button.paste-btn {
-      background-color: #666;
-      color: #ddd;
-    }
-    button.paste-btn:hover {
-      background-color: #777;
-    }
-    button.fetch-btn {
-      background-color: #3b82f6;  /* canlı mavi */
-      color: #fff;
-      box-shadow: 0 0 12px #3b82f6aa;
-    }
-    button.fetch-btn:hover {
-      background-color: #2563eb;
-      box-shadow: 0 0 20px #2563ebcc;
-    }
-
-    #options {
-      display: none;
-      flex-direction: column;
-      gap: 20px;
-      width: 100%;
-      max-width: 600px;
-      margin-bottom: 40px;
-    }
-    .download-btn {
-      background-color: #1e40af;  /* koyu mavi */
-      color: #a5b4fc;  /* açık mavi */
-      font-weight: 700;
-      font-size: 1.3rem;
-      padding: 18px 15px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 0 10px #3b82f655;
-      transition: background-color 0.3s, box-shadow 0.3s;
-      user-select: none;
-      width: 100%;
-    }
-    .download-btn:hover {
-      background-color: #3b82f6;
-      color: #fff;
-      box-shadow: 0 0 20px #3b82f6cc;
-    }
-
-    /* Accordion stil */
-    .accordion {
-      width: 100%;
-      max-width: 600px;
-      background-color: #383838;
-      border-radius: 12px;
-      box-shadow: 0 4px 14px rgb(0 0 0 / 0.5);
-      overflow: hidden;
-      user-select: none;
-    }
-    .accordion-item {
-      border-bottom: 1px solid #555;
-    }
-    .accordion-item:last-child {
-      border-bottom: none;
-    }
-    .accordion-header {
-      background-color: #444;
-      cursor: pointer;
-      padding: 18px 24px;
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: #3b82f6;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: background-color 0.3s;
-    }
-    .accordion-header:hover {
-      background-color: #3b82f6;
-      color: #fff;
-    }
-    .accordion-header.active {
-      background-color: #3b82f6;
-      color: #fff;
-    }
-    .accordion-content {
-      max-height: 0;
-      overflow: hidden;
-      background-color: #2a2a2a;
-      color: #ddd;
-      padding: 0 24px;
-      font-size: 1rem;
-      transition: max-height 0.35s ease;
-    }
-    .accordion-content.open {
-      padding: 15px 24px 20px;
-      max-height: 600px; /* biraz daha geniş yaptım */
-    }
-    .accordion-content p {
-      margin: 0;
-      line-height: 1.6;
-    }
-    .accordion-header::after {
-      content: "▶";
-      font-size: 1rem;
-      transition: transform 0.3s;
-      color: #a5b4fc;
-    }
-    .accordion-header.active::after {
-      transform: rotate(90deg);
-      color: #fff;
-    }
-
-    /* About/Info section */
-    #about {
-      max-width: 600px;
-      margin: 0 auto 60px;
-      color: #ccc;
-      font-size: 1.1rem;
-      line-height: 1.8;
-      text-align: left;
-    }
-    #about h2 {
-      color: #3b82f6;
-      font-weight: 700;
-      margin-bottom: 18px;
-      font-size: 1.8rem;
-    }
-    #about p {
-      margin-bottom: 30px;
-    }
-
-    /* Responsive */
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 2rem;
-      }
-      input[type="text"], button, .download-btn, .accordion-header {
-        font-size: 1.1rem;
-        padding: 14px 16px;
-      }
-      #options {
-        max-width: 100%;
-      }
-      form#mainForm {
-        flex-direction: column;
-      }
-      button {
-        width: 100%;
-        margin-top: 10px;
-      }
-      #about {
-        font-size: 1rem;
-        line-height: 1.6;
-      }
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>TikTok Video Downloader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <h1>TikTok Downloader</h1>
-  <p class="visitors">Total Visitors: <%= count %></p>
+  <div class="container">
+    <header>
+      <h1>TikTok Video Downloader</h1>
+      <p>Download TikTok videos in MP4 or MP3 without watermark.</p>
+    </header>
 
-  <form id="mainForm" onsubmit="return false;">
-    <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." required />
-    <button type="button" class="paste-btn" onclick="pasteLink()">Paste</button>
-    <button type="button" class="fetch-btn" onclick="fetchLinks()">Download</button>
-  </form>
+    <section class="input-area">
+      <form id="download-form">
+        <input type="text" name="url" id="url" placeholder="Paste your TikTok link here..." required>
+        <button type="button" id="paste-btn">Paste</button>
+        <button type="submit" id="download-btn">Download</button>
+      </form>
+    </section>
 
-  <div id="options"></div>
-
-  <section id="about" aria-label="About TikTok Downloader">
-    <h2>Unlimited TikTok Downloads</h2>
-    <p>Download TikTok videos as much as you want without any limits — totally free and easy to use. Our downloader lets you save your favorite videos anytime, anywhere.</p>
-    
-    <h2>No Watermarks</h2>
-    <p>Save TikTok videos in MP4 format without any watermarks or TikTok logos — clean videos ready for sharing or personal use.</p>
-    
-    <h2>MP4 and MP3 Formats</h2>
-    <p>Choose to download videos in high-quality MP4 or convert to MP3 audio. Whether you want the video or just the sound, our tool makes it easy.</p>
-    
-    <h2>How to Download TikTok Videos</h2>
-    <p>
-      Simply paste the TikTok video link above, click “Fetch Links”, and then choose your preferred format and quality to download instantly. No registration or software needed.
-    </p>
-  </section>
-
-  <section class="accordion" aria-label="Frequently Asked Questions">
-    <div class="accordion-item">
-      <button class="accordion-header" aria-expanded="false" aria-controls="faq1" id="faq1-button">
-        How do I get the TikTok video link?
-      </button>
-      <div id="faq1" class="accordion-content" role="region" aria-labelledby="faq1-button">
-        <p>Open the TikTok app or website, tap “Share” on the video, then select “Copy Link” to get the video URL.</p>
+    <section class="options" id="quality-options" style="display:none;">
+      <h3>Select Format</h3>
+      <div class="btn-group">
+        <button data-type="music" class="format-btn">MP3</button>
+        <button data-type="360p" class="format-btn">360p</button>
+        <button data-type="720p" class="format-btn">720p</button>
+        <button data-type="1080p" class="format-btn">1080p</button>
       </div>
-    </div>
+    </section>
 
-    <div class="accordion-item">
-      <button class="accordion-header" aria-expanded="false" aria-controls="faq2" id="faq2-button">
-        How do I paste the link and download?
-      </button>
-      <div id="faq2" class="accordion-content" role="region" aria-labelledby="faq2-button">
-        <p>Paste the copied URL into the input box above, click “Download” to get download options, then click a button to start downloading.</p>
+    <section class="info">
+      <h2>Why use our downloader?</h2>
+      <ul>
+        <li>✅ Unlimited TikTok downloads</li>
+        <li>✅ No watermark in videos</li>
+        <li>✅ MP3 & MP4 support</li>
+        <li>✅ Fast and secure</li>
+        <li>✅ Works on all devices</li>
+      </ul>
+    </section>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+
+      <div class="faq-item">
+        <button class="faq-question">Is it really free?</button>
+        <div class="faq-answer">Yes! You can download as many TikTok videos as you like for free.</div>
       </div>
-    </div>
 
-    <div class="accordion-item">
-      <button class="accordion-header" aria-expanded="false" aria-controls="faq3" id="faq3-button">
-        What download quality options are available?
-      </button>
-      <div id="faq3" class="accordion-content" role="region" aria-labelledby="faq3-button">
-        <p>You can download audio only (MP3), standard video quality (SD), or high-quality video (HD) if available.</p>
+      <div class="faq-item">
+        <button class="faq-question">Does it work on mobile?</button>
+        <div class="faq-answer">Yes, our downloader is fully responsive and works perfectly on all smartphones.</div>
       </div>
-    </div>
 
-    <div class="accordion-item">
-      <button class="accordion-header" aria-expanded="false" aria-controls="faq4" id="faq4-button">
-        Why are some videos not available in HD?
-      </button>
-      <div id="faq4" class="accordion-content" role="region" aria-labelledby="faq4-button">
-        <p>Not all TikTok videos have HD versions accessible through this service due to TikTok's streaming restrictions.</p>
+      <div class="faq-item">
+        <button class="faq-question">Can I download MP3 from TikTok?</button>
+        <div class="faq-answer">Yes, just paste the video link and choose the MP3 option after analyzing.</div>
       </div>
-    </div>
+    </section>
 
-    <div class="accordion-item">
-      <button class="accordion-header" aria-expanded="false" aria-controls="faq5" id="faq5-button">
-        Is this service free and safe?
-      </button>
-      <div id="faq5" class="accordion-content" role="region" aria-labelledby="faq5-button">
-        <p>Yes! Our downloader is completely free and respects your privacy. We do not store your downloads.</p>
-      </div>
-    </div>
-  </section>
+    <footer>
+      <p>&copy; <%= new Date().getFullYear() %> Tikssave. All rights reserved.</p>
+    </footer>
+  </div>
 
-  <script>
-    function pasteLink() {
-      navigator.clipboard.readText().then(text => {
-        document.getElementById('videoUrl').value = text;
-      }).catch(() => alert("Clipboard access denied"));
-    }
-
-    async function fetchLinks() {
-      const url = document.getElementById('videoUrl').value.trim();
-      if (!url) return alert("Please enter a TikTok URL.");
-
-      try {
-        const res = await fetch('/get-links', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url })
-        });
-
-        const data = await res.json();
-
-        if (!data.success) return alert(data.message);
-
-        window.downloadData = data;
-        const container = document.getElementById('options');
-        container.innerHTML = '';
-
-        if (data.music) {
-          container.innerHTML += `<button class="download-btn" onclick="download('music')">🎵 MP3 (Audio Only)</button>`;
-        }
-        if (data.play) {
-          container.innerHTML += `<button class="download-btn" onclick="download('play')">📽️ SD Video (Normal Quality)</button>`;
-        }
-        if (data.hdplay) {
-          container.innerHTML += `<button class="download-btn" onclick="download('hdplay')">📽️ HD Video (High Quality)</button>`;
-        }
-
-        container.style.display = 'flex';
-      } catch (err) {
-        alert("Error fetching download links.");
-        console.error(err);
-      }
-    }
-
-    function download(type) {
-      const data = window.downloadData;
-      if (!data[type]) return alert("This quality is not available.");
-
-      const link = document.createElement('a');
-      link.href = `/proxy-download?url=${encodeURIComponent(data[type])}&username=${data.username}&type=${type}`;
-      link.setAttribute('download', '');
-      link.click();
-    }
-
-    // Accordion functionality
-    const accordions = document.querySelectorAll('.accordion-header');
-
-    accordions.forEach(acc => {
-      acc.addEventListener('click', () => {
-        const expanded = acc.getAttribute('aria-expanded') === 'true';
-        // Close all
-        accordions.forEach(a => {
-          a.setAttribute('aria-expanded', 'false');
-          document.getElementById(a.getAttribute('aria-controls')).classList.remove('open');
-        });
-
-        // Toggle current
-        if (!expanded) {
-          acc.setAttribute('aria-expanded', 'true');
-          document.getElementById(acc.getAttribute('aria-controls')).classList.add('open');
-        }
-      });
-    });
-  </script>
+  <script src="/js/main.js"></script>
 </body>
 </html>
