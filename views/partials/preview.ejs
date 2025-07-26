@@ -1,0 +1,18 @@
+<% if (videoData) { %>
+  <div id="preview-container" style="max-width: 600px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+    <img src="<%= videoData.thumbnail %>" alt="Video thumbnail" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.7);" />
+    <h2 style="color: #3b82f6; text-align: center; margin: 0 0 10px;"><%= videoData.title %></h2>
+
+    <div id="options" style="width: 100%; display: flex; flex-direction: column; gap: 15px;">
+      <% if (videoData.music) { %>
+        <button class="download-btn" onclick="download('music')">🎵 MP3 (Audio Only)</button>
+      <% } %>
+      <% if (videoData.play) { %>
+        <button class="download-btn" onclick="download('play')">📽️ SD Video (Normal Quality)</button>
+      <% } %>
+      <% if (videoData.hdplay) { %>
+        <button class="download-btn" onclick="download('hdplay')">📽️ HD Video (High Quality)</button>
+      <% } %>
+    </div>
+  </div>
+<% } %>
