@@ -32,13 +32,16 @@ app.post('/download', async (req, res) => {
   try {
     const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
     const data = await response.json();
-    if (!data || data.code !== 0) {
-      return res.render('result', { error: 'Video indirilemedi.', video: null });
+
+    if (!data || data.code !== 0 || !data.data.play) {
+      return res.status(400).send('Video could not be downloaded.');
     }
-    res.render('result', { video: data.data, error: null });
+
+    // Otomatik olarak mp4 linkine yönlendiriyoruz
+    res.redirect(data.data.play);
   } catch (err) {
     console.error(err);
-    res.render('result', { error: 'Sunucu hatası.', video: null });
+    res.status(500).send('Server error.');
   }
 });
 
