@@ -12,52 +12,50 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
+      padding: 2rem;
     }
 
     h1 {
-      margin-bottom: 0.5rem;
-      font-size: 2rem;
       color: #00bcd4;
     }
 
-    p {
-      margin-top: 0;
-      font-size: 0.95rem;
-      color: #888;
-    }
-
-    .visitor-count {
-      margin-top: 10px;
-      font-size: 0.9rem;
-      color: #666;
-    }
-
     form {
-      margin-top: 2rem;
       display: flex;
       gap: 8px;
-      width: 90%;
+      margin-top: 1rem;
+      width: 100%;
       max-width: 500px;
     }
 
-    input[type="text"] {
+    input {
       flex: 1;
       padding: 10px;
       font-size: 1rem;
+      background: #222;
+      color: white;
       border: none;
       border-radius: 6px;
-      background: #222;
-      color: #fff;
-      outline: none;
     }
 
     button {
+      padding: 10px;
+      border: none;
       background: #00bcd4;
-      color: #000;
+      color: black;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #options {
+      margin-top: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .download-btn {
+      background: #00bcd4;
+      color: black;
       padding: 10px 16px;
       border: none;
       border-radius: 6px;
@@ -65,29 +63,64 @@
       cursor: pointer;
     }
 
-    button:hover {
-      background: #009db1;
-    }
-
-    footer {
-      margin-top: auto;
-      font-size: 0.8rem;
-      color: #555;
-      padding: 1rem;
+    .visitor-count {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
+
   <h1>TikTok Downloader</h1>
-  <p>Download videos without watermark</p>
+  <div class="visitor-count">Total Visitors: <%= count %></div>
 
-  <p class="visitor-count">Total Visitors: <%= count %></p>
-
-  <form action="/download" method="POST">
-    <input type="text" name="url" placeholder="Paste TikTok video URL..." required />
-    <button type="submit">Download</button>
+  <form id="mainForm">
+    <input type="text" id="videoUrl" placeholder="Paste TikTok URL..." required />
+    <button type="button" onclick="pasteLink()">Yapıştır</button>
   </form>
 
-  <footer>© 2025 TikTok Downloader</footer>
+  <button onclick="fetchLinks()" style="margin-top:10px;">Download</button>
+
+  <div id="options">
+    <button class="download-btn" onclick="download('music')">MP3</button>
+    <button class="download-btn" onclick="download('hdplay')">HD (No Watermark)</button>
+    <button class="download-btn" onclick="download('play')">No Watermark</button>
+  </div>
+
+  <script>
+    function pasteLink() {
+      navigator.clipboard.readText().then(text => {
+        document.getElementById('videoUrl').value = text;
+      });
+    }
+
+    async function fetchLinks() {
+      const url = document.getElementById('videoUrl').value;
+      if (!url) return alert("Please enter a URL");
+
+      const res = await fetch('/get-links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+
+      const data = await res.json();
+      if (!data.success) return alert(data.message);
+
+      window.downloadData = data; // globalde sakla
+      document.getElementById('options').style.display = 'flex';
+    }
+
+    function download(type) {
+      const data = window.downloadData;
+      if (!data[type]) return alert("This quality is not available");
+
+      const link = document.createElement('a');
+      link.href = `/proxy-download?url=${encodeURIComponent(data[type])}&username=${data.username}`;
+      link.setAttribute('download', '');
+      link.click();
+    }
+  </script>
 </body>
 </html>
