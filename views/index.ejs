@@ -2,109 +2,146 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TikTok Downloader</title>
-  <link rel="stylesheet" href="/css/style.css" />
   <style>
-    /* Genel stil */
+    /* Genel reset ve font */
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 650px;
-      margin: 30px auto 60px;
-      padding: 0 20px;
-      background-color: #fafafa;
-      color: #222;
-      line-height: 1.5;
+      background-color: #2f2f2f;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px 15px 60px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
+      font-size: 2.6rem;
+      margin-bottom: 10px;
       text-align: center;
-      margin-bottom: 15px;
-      color: #222;
+      color: #f5c518;
+      font-weight: 800;
+      user-select: none;
     }
     p.visitors {
-      text-align: center;
-      font-size: 0.9em;
-      color: #666;
+      font-size: 1rem;
       margin-bottom: 25px;
+      color: #bbb;
     }
     form#mainForm {
       display: flex;
+      width: 100%;
+      max-width: 600px;
       gap: 10px;
-      justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
     input[type="text"] {
-      flex-grow: 1;
-      padding: 12px 15px;
-      font-size: 1em;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-      transition: border-color 0.3s;
+      flex: 1;
+      padding: 16px 20px;
+      font-size: 1.25rem;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background-color: #444;
+      color: #eee;
+      transition: background-color 0.3s;
+    }
+    input[type="text"]::placeholder {
+      color: #bbb;
     }
     input[type="text"]:focus {
-      border-color: #f5c518;
-      outline: none;
-      box-shadow: 0 0 8px #f5c518;
+      background-color: #555;
     }
     button {
-      padding: 12px 18px;
-      font-size: 1em;
-      background-color: #f5c518;
+      padding: 16px 24px;
+      font-size: 1.25rem;
+      border-radius: 10px;
       border: none;
-      border-radius: 8px;
-      color: #111;
-      font-weight: 700;
       cursor: pointer;
+      font-weight: 700;
       transition: background-color 0.3s;
+      user-select: none;
       flex-shrink: 0;
     }
     button:hover {
-      background-color: #ddb700;
+      filter: brightness(1.1);
     }
+    button:active {
+      filter: brightness(0.9);
+    }
+    button.paste-btn {
+      background-color: #666;
+      color: #ddd;
+    }
+    button.paste-btn:hover {
+      background-color: #777;
+    }
+    button.fetch-btn {
+      background-color: #f5c518;
+      color: #222;
+      box-shadow: 0 0 12px #f5c518aa;
+    }
+    button.fetch-btn:hover {
+      background-color: #ddb700;
+      box-shadow: 0 0 20px #ddb700cc;
+    }
+
     #options {
       display: none;
       flex-direction: column;
-      gap: 12px;
-      margin: 15px auto 40px;
-      max-width: 320px;
+      gap: 20px;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 40px;
     }
     .download-btn {
-      background-color: #222;
+      background-color: #444;
       color: #f5c518;
-      padding: 14px;
       font-weight: 700;
-      border-radius: 8px;
+      font-size: 1.3rem;
+      padding: 18px 15px;
+      border-radius: 12px;
       border: none;
       cursor: pointer;
+      box-shadow: 0 0 10px #f5c51855;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      user-select: none;
       width: 100%;
-      transition: background-color 0.3s;
     }
     .download-btn:hover {
-      background-color: #444;
+      background-color: #f5c518;
+      color: #222;
+      box-shadow: 0 0 20px #f5c518cc;
     }
 
     /* Accordion stil */
     .accordion {
-      max-width: 650px;
-      margin: 0 auto;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
-      background: white;
+      width: 100%;
+      max-width: 600px;
+      background-color: #383838;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgb(0 0 0 / 0.5);
       overflow: hidden;
+      user-select: none;
     }
     .accordion-item {
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #555;
     }
     .accordion-item:last-child {
       border-bottom: none;
     }
     .accordion-header {
-      background-color: #f9f9f9;
+      background-color: #444;
       cursor: pointer;
-      padding: 15px 20px;
-      font-weight: 600;
-      color: #333;
-      user-select: none;
+      padding: 18px 24px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #f5c518;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -112,39 +149,59 @@
     }
     .accordion-header:hover {
       background-color: #f5c518;
-      color: #111;
+      color: #222;
     }
     .accordion-header.active {
       background-color: #f5c518;
-      color: #111;
+      color: #222;
     }
     .accordion-content {
       max-height: 0;
       overflow: hidden;
-      padding: 0 20px;
-      background-color: white;
-      color: #444;
+      background-color: #2a2a2a;
+      color: #ddd;
+      padding: 0 24px;
+      font-size: 1rem;
       transition: max-height 0.35s ease;
-      font-size: 0.95em;
-    }
-    .accordion-content p {
-      margin: 15px 0;
     }
     .accordion-content.open {
-      padding-top: 15px;
-      padding-bottom: 15px;
+      padding: 15px 24px 20px;
+      max-height: 500px; /* yeterince büyük */
     }
-
-    /* Ok simgesi */
+    .accordion-content p {
+      margin: 0;
+      line-height: 1.5;
+    }
     .accordion-header::after {
       content: "▶";
-      font-size: 0.8em;
+      font-size: 1rem;
       transition: transform 0.3s;
-      color: #666;
+      color: #ccc;
     }
     .accordion-header.active::after {
       transform: rotate(90deg);
-      color: #111;
+      color: #222;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2rem;
+      }
+      input[type="text"], button, .download-btn, .accordion-header {
+        font-size: 1.1rem;
+        padding: 14px 16px;
+      }
+      #options {
+        max-width: 100%;
+      }
+      form#mainForm {
+        flex-direction: column;
+      }
+      button {
+        width: 100%;
+        margin-top: 10px;
+      }
     }
   </style>
 </head>
@@ -154,8 +211,8 @@
 
   <form id="mainForm" onsubmit="return false;">
     <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." required />
-    <button type="button" onclick="pasteLink()">Paste</button>
-    <button type="button" onclick="fetchLinks()">Fetch Links</button>
+    <button type="button" class="paste-btn" onclick="pasteLink()">Paste</button>
+    <button type="button" class="fetch-btn" onclick="fetchLinks()">Fetch Links</button>
   </form>
 
   <div id="options"></div>
