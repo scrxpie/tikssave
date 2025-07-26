@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+  <p>Total Visits: <%= total %></p>
+  <p>Today's Visits: <%= today %></p>
+
+  <h2>Recent Visits</h2>
+  <table border="1">
+    <tr>
+      <th>IP</th>
+      <th>Date</th>
+      <th>User Agent</th>
+    </tr>
+    <% visits.forEach(v => { %>
+      <tr>
+        <td><%= v.ip %></td>
+        <td><%= v.createdAt.toLocaleString() %></td>
+        <td><%= v.userAgent %></td>
+      </tr>
+    <% }) %>
+  </table>
+</body>
+</html>
