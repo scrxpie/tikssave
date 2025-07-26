@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Download Result</title>
+</head>
+<body>
+  <% if (error) { %>
+    <h2>Error:</h2>
+    <p><%= error %></p>
+  <% } else if (video) { %>
+    <h2><%= video.title %></h2>
+    <video src="<%= video.play %>" controls width="480"></video>
+    <br><br>
+    <a href="<%= video.play %>" download>Download Without Watermark</a>
+  <% } %>
+</body>
+</html>
