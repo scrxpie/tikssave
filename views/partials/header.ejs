@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TikTok Downloader</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <h1>TikTok Downloader</h1>
+
+  <form id="mainForm" onsubmit="return false;">
+    <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." required />
+    <button type="button" class="paste-btn" onclick="pasteLink()">Paste</button>
+    <button type="button" class="fetch-btn" onclick="fetchLinks()">Download</button>
+  </form>
+
+  <div id="preview" class="preview-container" style="display: none;">
+    <img id="videoThumb" src="" alt="Video Thumbnail" />
+    <h3 id="videoTitle"></h3>
+  </div>
+
+  <div id="options"></div>
