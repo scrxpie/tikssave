@@ -155,12 +155,18 @@ app.get('/:shortId', async (req, res) => {
     const videoData = await VideoLink.findOne({ shortId });
     if (!videoData) return res.status(404).send('Video bulunamadı.');
 
-    // Direkt mp4 linkine yönlendir
-    // Öncelik: hdplay varsa onu, yoksa play kullan
-    const targetUrl = videoData.hdplay || videoData.play;
-    if (!targetUrl) return res.status(404).send('Video linki bulunamadı.');
+    const videoUrl = videoData.hdplay || videoData.play;
+    if (!videoUrl) return res.status(404).send('Video linki bulunamadı.');
 
-    res.redirect(targetUrl); // 302 redirect
+    // Video dosyasını direkt sun (proxy)
+    https.get(videoUrl, fileRes => {
+      res.setHeader('Content-Type', 'video/mp4');
+      res.setHeader('Content-Disposition', `inline; filename="${sanitize(videoData.title || 'video')}.mp4"`);
+      fileRes.pipe(res);
+    }).on('error', err => {
+      console.error(err);
+      res.status(500).send('Video akışı başarısız.');
+    });
 
   } catch (err) {
     console.error(err);
