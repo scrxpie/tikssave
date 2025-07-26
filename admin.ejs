@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+</head>
+<body>
+  <h1>Recent Visits</h1>
+  <ul>
+    <% visits.forEach(v => { %>
+      <li><%= v.ip %> - <%= v.createdAt.toISOString() %></li>
+    <% }) %>
+  </ul>
+</body>
+</html>
