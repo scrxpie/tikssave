@@ -101,12 +101,17 @@ app.get('/proxy-download', async (req, res) => {
 const videoCache = new Map(); // shortId => gerçek video url ve meta verisi (basit cache)
 
 // /tiktok komutu mantığı - shortId üret, cachele, dön
+const VideoLink = require('./models/VideoLink'); // model dosyasının yolu
+
+// generateShortId fonksiyonu aynen kalabilir
+
+// /tiktok endpoint'i POST: kısa link oluştur ve MongoDB'ye kaydet
 app.post('/tiktok', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
 
   try {
-    // TikWM API'den video bilgisi çek
+    // TikWM API'den video bilgisi al
     const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
     const data = await response.json();
 
@@ -115,10 +120,16 @@ app.post('/tiktok', async (req, res) => {
     }
 
     // Kısa ID oluştur
-    const shortId = generateShortId();
+    let shortId;
+    let exists;
+    do {
+      shortId = generateShortId();
+      exists = await VideoLink.findOne({ shortId });
+    } while (exists);
 
-    // Cache'e kaydet (en azından url ve meta)
-    videoCache.set(shortId, {
+    // MongoDB'ye kaydet
+    const newVideoLink = new VideoLink({
+      shortId,
       play: data.data.play,
       hdplay: data.data.hdplay,
       music: data.data.music,
@@ -126,8 +137,8 @@ app.post('/tiktok', async (req, res) => {
       title: data.data.title,
       cover: data.data.cover
     });
+    await newVideoLink.save();
 
-    // Kullanıcıya kısa link ver
     res.json({ success: true, shortId });
 
   } catch (err) {
@@ -136,18 +147,23 @@ app.post('/tiktok', async (req, res) => {
   }
 });
 
-// shortId ile sayfa aç (video oynatma + indirme seçenekleri)
-app.get('/:shortId', (req, res) => {
+// /:shortId route'u: veritabanından çek ve sayfa render et
+app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
-  const videoData = videoCache.get(shortId);
 
-  if (!videoData) {
-    return res.status(404).send('Video bulunamadı veya link süresi doldu.');
+  try {
+    const videoData = await VideoLink.findOne({ shortId });
+    if (!videoData) return res.status(404).send('Video bulunamadı veya link süresi doldu.');
+
+    res.render('videoPage', { videoData });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Sunucu hatası.');
   }
+});
 
   // videoData'yı sayfaya gönder
-  res.render('videoPage', { videoData });
-});
+  
 
 
 // Admin login sayfası
