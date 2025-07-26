@@ -1,3 +1,115 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #1c1c1c; /* daha koyu gri */
+  color: #e0e0e0;
+  margin: 0;
+  padding: 20px 15px 60px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1 {
+  font-size: 2.6rem;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #3b82f6;
+  font-weight: 800;
+  user-select: none;
+}
+
+/* Form düzeni */
+form#mainForm {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 600px;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.input-group {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 6px;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 16px 20px;
+  font-size: 1.25rem;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  background-color: #333;
+  color: #eee;
+  transition: background-color 0.3s;
+}
+
+input[type="text"]::placeholder {
+  color: #bbb;
+}
+
+input[type="text"]:focus {
+  background-color: #444;
+}
+
+/* Butonlar */
+button {
+  padding: 16px 24px;
+  font-size: 1.25rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background-color 0.3s;
+  user-select: none;
+}
+
+.paste-btn {
+  background-color: #666;
+  color: #ddd;
+  flex-shrink: 0;
+}
+
+.paste-btn:hover {
+  background-color: #777;
+}
+
+.clear-btn {
+  background-color: #bb4444;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.clear-btn:hover {
+  background-color: #cc5555;
+}
+
+.fetch-btn {
+  background-color: #3b82f6;  /* canlı mavi */
+  color: #fff;
+  box-shadow: 0 0 12px #3b82f6aa;
+  flex-shrink: 0;
+}
+
+.fetch-btn:hover {
+  background-color: #2563eb;
+  box-shadow: 0 0 20px #2563ebcc;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  form#mainForm {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .input-group {
+    width: 100%;
+  }
+  button {
+    width: 100%;
+  }
 }
