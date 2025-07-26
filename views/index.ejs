@@ -5,13 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TikTok Downloader</title>
   <style>
-    /* Genel reset ve font */
     * {
       box-sizing: border-box;
     }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #222222; /* Koyu gri */
+      background-color: #222222;
       color: #e0e0e0;
       margin: 0;
       padding: 20px 15px 60px;
@@ -73,7 +72,7 @@
     button.paste-btn {
       background-color: #666;
       color: #ddd;
-      order: 2; /* Sağda olacak */
+      order: 2; /* Sağda */
     }
     button.paste-btn:hover {
       background-color: #777;
@@ -88,7 +87,7 @@
       background-color: #c33;
     }
     button.fetch-btn {
-      background-color: #3b82f6;  /* canlı mavi */
+      background-color: #3b82f6;
       color: #fff;
       box-shadow: 0 0 12px #3b82f6aa;
       order: 3;
@@ -108,8 +107,8 @@
       align-items: center;
     }
     .download-btn {
-      background-color: #1e40af;  /* koyu mavi */
-      color: #a5b4fc;  /* açık mavi */
+      background-color: #1e40af;
+      color: #a5b4fc;
       font-weight: 700;
       font-size: 1.3rem;
       padding: 16px 20px;
@@ -129,7 +128,6 @@
       box-shadow: 0 0 20px #3b82f6cc;
     }
 
-    /* Video preview */
     #preview-container {
       max-width: 600px;
       margin-bottom: 40px;
@@ -141,6 +139,7 @@
       background: #333;
       padding: 15px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+      display: none;
     }
     #preview-container img {
       width: 100%;
@@ -154,7 +153,6 @@
       user-select: text;
     }
 
-    /* Accordion stil */
     .accordion {
       width: 100%;
       max-width: 600px;
@@ -221,7 +219,6 @@
       color: #fff;
     }
 
-    /* About/Info section */
     #about {
       max-width: 600px;
       margin: 0 auto 60px;
@@ -241,7 +238,6 @@
       margin-bottom: 30px;
     }
 
-    /* Footer / Terms */
     footer {
       max-width: 600px;
       color: #777;
@@ -258,7 +254,6 @@
       text-decoration: underline;
     }
 
-    /* Responsive */
     @media (max-width: 480px) {
       h1 {
         font-size: 2rem;
@@ -303,7 +298,7 @@
     <button type="button" class="fetch-btn" onclick="fetchLinks()">Download</button>
   </form>
 
-  <div id="preview-container" style="display:none;">
+  <div id="preview-container">
     <img id="preview-thumbnail" src="" alt="Video thumbnail" />
     <h2 id="preview-title"></h2>
   </div>
@@ -433,16 +428,19 @@
           return;
         }
 
-        // Show preview
-        if(data.videoData) {
-          previewThumbnail.src = data.videoData.thumbnail || '';
-          previewTitle.textContent = data.videoData.title || 'No Title';
+        // Gelen veriyi global değişkene atıyoruz
+        window.downloadData = data;
+
+        // Önizleme gösterimi
+        if(data.cover && data.title) {
+          previewThumbnail.src = data.cover;
+          previewTitle.textContent = data.title;
           previewContainer.style.display = 'flex';
         } else {
           previewContainer.style.display = 'none';
         }
 
-        // Show download options
+        // İndirme butonları
         optionsContainer.innerHTML = '';
         if (data.music) {
           optionsContainer.innerHTML += `<button class="download-btn" onclick="download('music')">🎵 MP3 (Audio Only)</button>`;
@@ -462,6 +460,10 @@
     }
 
     function download(type) {
+      if (!window.downloadData || !window.downloadData[type]) {
+        alert("Download link not available.");
+        return;
+      }
       const urlEncoded = encodeURIComponent(window.downloadData[type]);
       const username = encodeURIComponent(window.downloadData.username || '');
       const link = document.createElement('a');
@@ -489,9 +491,6 @@
         }
       });
     });
-
-    // Keep the fetched data for downloads
-    window.downloadData = {};
 
   </script>
 </body>
