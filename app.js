@@ -9,7 +9,7 @@ const session = require('express-session');
 const Visit = require('./models/Visit');
 
 const app = express();
-
+const { generateShortId } = require('../utils');  // yolunu kendi dosya yapına göre ayarla
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
