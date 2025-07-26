@@ -27,6 +27,9 @@ app.get('/', async (req, res) => {
 });
 
 // Video İndirme İşlemi
+const https = require('https');
+const sanitize = require('sanitize-filename');
+
 app.post('/download', async (req, res) => {
   const { url } = req.body;
   try {
@@ -34,14 +37,28 @@ app.post('/download', async (req, res) => {
     const data = await response.json();
 
     if (!data || data.code !== 0 || !data.data.play) {
-      return res.status(400).send('Video could not be downloaded.');
+      return res.status(400).send('❌ Video could not be downloaded.');
     }
 
-    // Otomatik olarak mp4 linkine yönlendiriyoruz
-    res.redirect(data.data.play);
+    const videoUrl = data.data.play;
+
+    // Kullanıcı adı ve timestamp ile dosya ismi oluştur
+    const username = data.data.author?.unique_id || 'unknown';
+    const timestamp = Date.now();
+    const filename = sanitize(`ttdownload_@${username}_${timestamp}.mp4`);
+
+    https.get(videoUrl, (fileRes) => {
+      res.setHeader('Content-Type', 'video/mp4');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      fileRes.pipe(res);
+    }).on('error', (err) => {
+      console.error('Download error:', err);
+      res.status(500).send('❌ Failed to download video.');
+    });
+
   } catch (err) {
     console.error(err);
-    res.status(500).send('Server error.');
+    res.status(500).send('❌ Server error.');
   }
 });
 
