@@ -166,11 +166,11 @@
     }
     .accordion-content.open {
       padding: 15px 24px 20px;
-      max-height: 500px; /* yeterince büyük */
+      max-height: 600px; /* biraz daha geniş yaptım */
     }
     .accordion-content p {
       margin: 0;
-      line-height: 1.5;
+      line-height: 1.6;
     }
     .accordion-header::after {
       content: "▶";
@@ -181,6 +181,25 @@
     .accordion-header.active::after {
       transform: rotate(90deg);
       color: #fff;
+    }
+
+    /* About/Info section */
+    #about {
+      max-width: 600px;
+      margin: 0 auto 60px;
+      color: #ccc;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      text-align: left;
+    }
+    #about h2 {
+      color: #3b82f6;
+      font-weight: 700;
+      margin-bottom: 18px;
+      font-size: 1.8rem;
+    }
+    #about p {
+      margin-bottom: 30px;
     }
 
     /* Responsive */
@@ -202,6 +221,10 @@
         width: 100%;
         margin-top: 10px;
       }
+      #about {
+        font-size: 1rem;
+        line-height: 1.6;
+      }
     }
   </style>
 </head>
@@ -216,6 +239,22 @@
   </form>
 
   <div id="options"></div>
+
+  <section id="about" aria-label="About TikTok Downloader">
+    <h2>Unlimited TikTok Downloads</h2>
+    <p>Download TikTok videos as much as you want without any limits — totally free and easy to use. Our downloader lets you save your favorite videos anytime, anywhere.</p>
+    
+    <h2>No Watermarks</h2>
+    <p>Save TikTok videos in MP4 format without any watermarks or TikTok logos — clean videos ready for sharing or personal use.</p>
+    
+    <h2>MP4 and MP3 Formats</h2>
+    <p>Choose to download videos in high-quality MP4 or convert to MP3 audio. Whether you want the video or just the sound, our tool makes it easy.</p>
+    
+    <h2>How to Download TikTok Videos</h2>
+    <p>
+      Simply paste the TikTok video link above, click “Fetch Links”, and then choose your preferred format and quality to download instantly. No registration or software needed.
+    </p>
+  </section>
 
   <section class="accordion" aria-label="Frequently Asked Questions">
     <div class="accordion-item">
@@ -268,38 +307,43 @@
     function pasteLink() {
       navigator.clipboard.readText().then(text => {
         document.getElementById('videoUrl').value = text;
-      });
+      }).catch(() => alert("Clipboard access denied"));
     }
 
     async function fetchLinks() {
       const url = document.getElementById('videoUrl').value.trim();
       if (!url) return alert("Please enter a TikTok URL.");
 
-      const res = await fetch('/get-links', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-      });
+      try {
+        const res = await fetch('/get-links', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!data.success) return alert(data.message);
+        if (!data.success) return alert(data.message);
 
-      window.downloadData = data;
-      const container = document.getElementById('options');
-      container.innerHTML = '';
+        window.downloadData = data;
+        const container = document.getElementById('options');
+        container.innerHTML = '';
 
-      if (data.music) {
-        container.innerHTML += `<button class="download-btn" onclick="download('music')">🎵 MP3 (Audio Only)</button>`;
+        if (data.music) {
+          container.innerHTML += `<button class="download-btn" onclick="download('music')">🎵 MP3 (Audio Only)</button>`;
+        }
+        if (data.play) {
+          container.innerHTML += `<button class="download-btn" onclick="download('play')">📽️ SD Video (Normal Quality)</button>`;
+        }
+        if (data.hdplay) {
+          container.innerHTML += `<button class="download-btn" onclick="download('hdplay')">📽️ HD Video (High Quality)</button>`;
+        }
+
+        container.style.display = 'flex';
+      } catch (err) {
+        alert("Error fetching download links.");
+        console.error(err);
       }
-      if (data.play) {
-        container.innerHTML += `<button class="download-btn" onclick="download('play')">📽️ SD Video (Normal Quality)</button>`;
-      }
-      if (data.hdplay) {
-        container.innerHTML += `<button class="download-btn" onclick="download('hdplay')">📽️ HD Video (High Quality)</button>`;
-      }
-
-      container.style.display = 'flex';
     }
 
     function download(type) {
