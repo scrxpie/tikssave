@@ -51,12 +51,14 @@ app.post('/get-links', async (req, res) => {
     }
 
     res.json({
-      success: true,
-      play: data.data.play,
-      hdplay: data.data.hdplay,
-      music: data.data.music,
-      username: data.data.author?.unique_id || 'unknown'
-    });
+  success: true,
+  play: data.data.play,
+  hdplay: data.data.hdplay,
+  music: data.data.music,
+  username: data.data.author?.unique_id || 'unknown',
+  title: data.data.title,
+  cover: data.data.cover
+});
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: 'Sunucu hatası.' });
