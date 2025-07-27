@@ -74,7 +74,9 @@ app.post('/get-links', async (req, res) => {
     res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
-
+app.get('/discord', (req, res) => {
+  res.render('discord'); // views/discord.ejs dosyasını açacak
+});
 // Proxy indir
 app.get('/proxy-download', async (req, res) => {
   const { url, username, type } = req.query;
