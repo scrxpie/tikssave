@@ -7,23 +7,24 @@ const https = require('https');
 const sanitize = require('sanitize-filename');
 const session = require('express-session');
 const Visit = require('./models/Visit');
-
+const Download = require('./models/Download');
+const VideoLink = require('./models/VideoLink');
 const { customAlphabet } = require('nanoid');
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
+
+const app = express();
 
 function generateShortId() {
   return nanoid();
 }
 
-const app = express();
-
+// Middleware
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Oturum yönetimi
 app.use(session({
   secret: process.env.ADMIN_PASSWORD,
   resave: false,
@@ -37,7 +38,7 @@ mongoose.connect(process.env.MONGO_URI, {
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
-// Ana sayfa + sayaç
+// Ana sayfa
 app.get('/', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
@@ -46,7 +47,7 @@ app.get('/', async (req, res) => {
   res.render('index', { count });
 });
 
-// TikWM API'den linkleri al (video bilgisi)
+// TikTok API bilgisi
 app.post('/get-links', async (req, res) => {
   const { url } = req.body;
   try {
@@ -54,7 +55,7 @@ app.post('/get-links', async (req, res) => {
     const data = await response.json();
 
     if (!data || data.code !== 0) {
-      return res.json({ success: false, message: 'Video info alınamadı.' });
+      return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
     }
 
     res.json({
@@ -72,48 +73,35 @@ app.post('/get-links', async (req, res) => {
   }
 });
 
-// Proxy download route (mp3/mp4)
-const Download = require('./models/Download');
-
+// Proxy indir
 app.get('/proxy-download', async (req, res) => {
   const { url, username, type } = req.query;
   if (!url) return res.status(400).send('Video linki yok');
 
-  // Download log ekle
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   await new Download({ url, ip }).save();
 
-  const timestamp = Date.now();
-  const extension = (type === 'music') ? 'mp3' : 'mp4';
-  const safeUsername = (username || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '');
-const filename = sanitize(`ttdownload_${safeUsername}_${timestamp}.${extension}`);
- console.log('Filename:', filename);
-  
+  const extension = type === 'music' ? 'mp3' : 'mp4';
+  const safeUsername = sanitize((username || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
+  const filename = `ttdownload_${safeUsername}_${Date.now()}.${extension}`;
+  console.log('Filename:', filename);
+
   https.get(url, fileRes => {
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     fileRes.pipe(res);
   }).on('error', err => {
     console.error(err);
-    res.status(500).send('İndirme hatası');
+    res.status(500).send('İndirme hatası.');
   });
 });
 
-// Yeni: kısa link üret ve dön
-const videoCache = new Map(); // shortId => gerçek video url ve meta verisi (basit cache)
-
-// /tiktok komutu mantığı - shortId üret, cachele, dön
-const VideoLink = require('./models/VideoLink'); // model dosyasının yolu
-
-// generateShortId fonksiyonu aynen kalabilir
-
-// /tiktok endpoint'i POST: kısa link oluştur ve MongoDB'ye kaydet
+// Kısa bağlantı oluştur (POST /tiktok)
 app.post('/tiktok', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
 
   try {
-    // TikWM API'den video bilgisi al
     const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
     const data = await response.json();
 
@@ -121,7 +109,6 @@ app.post('/tiktok', async (req, res) => {
       return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
     }
 
-    // Kısa ID oluştur
     let shortId;
     let exists;
     do {
@@ -129,7 +116,6 @@ app.post('/tiktok', async (req, res) => {
       exists = await VideoLink.findOne({ shortId });
     } while (exists);
 
-    // MongoDB'ye kaydet
     const newVideoLink = new VideoLink({
       shortId,
       play: data.data.play,
@@ -139,17 +125,16 @@ app.post('/tiktok', async (req, res) => {
       title: data.data.title,
       cover: data.data.cover
     });
+
     await newVideoLink.save();
-
     res.json({ success: true, shortId });
-
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
 
-// /:shortId route'u: veritabanından çek ve sayfa render et
+// GET /:shortId → Videoyu yönlendir
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
 
@@ -158,29 +143,24 @@ app.get('/:shortId', async (req, res) => {
     if (!videoData) return res.status(404).send('Video bulunamadı.');
 
     const videoUrl = videoData.hdplay || videoData.play;
-    if (!videoUrl) return res.status(404).send('Video linki bulunamadı.');
+    if (!videoUrl) return res.status(404).send('Video bağlantısı yok.');
 
-    // Video dosyasını direkt sun (proxy)
-    https.get(videoUrl, fileRes => {
-      res.setHeader('Content-Type', 'video/mp4');
-      res.setHeader('Content-Disposition', `inline; filename="${sanitize(videoData.title || 'video')}.mp4"`);
-      fileRes.pipe(res);
-    }).on('error', err => {
+    // Dosya ismi için sanitize
+    const fileName = sanitize((videoData.title || 'video').replace(/[\s\W]+/g, '_')).substring(0, 40);
+    res.setHeader('Content-Type', 'video/mp4');
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}.mp4"`);
+
+    https.get(videoUrl, stream => stream.pipe(res)).on('error', err => {
       console.error(err);
       res.status(500).send('Video akışı başarısız.');
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).send('Sunucu hatası.');
   }
 });
 
-  // videoData'yı sayfaya gönder
-  
-
-
-// Admin login sayfası
+// Admin panel
 app.get('/admin/login', (req, res) => {
   res.render('admin/login', { error: null });
 });
@@ -195,7 +175,6 @@ app.post('/admin/login', (req, res) => {
   }
 });
 
-// Admin dashboard
 app.get('/admin/dashboard', async (req, res) => {
   if (!req.session.authenticated) return res.redirect('/admin/login');
 
@@ -205,16 +184,13 @@ app.get('/admin/dashboard', async (req, res) => {
   });
 
   const uniqueVisitors = await Visit.distinct('ip');
-  const totalUnique = uniqueVisitors.length;
-
   const totalDownloads = await Download.countDocuments();
-
   const visits = await Visit.find().sort({ createdAt: -1 }).limit(20);
 
   res.render('admin/dashboard', {
     total,
     today,
-    totalUnique,
+    totalUnique: uniqueVisitors.length,
     totalDownloads,
     visits
   });
