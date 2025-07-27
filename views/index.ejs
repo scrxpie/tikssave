@@ -3,50 +3,355 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tikssave - TikTok Downloader</title>
-  <meta name="description" content="Download TikTok videos in HD or MP3 with no watermark. Fast, free and unlimited TikTok video downloader.">
-  <meta property="og:title" content="Tikssave - Free TikTok Video Downloader">
-  <meta property="og:description" content="Save TikTok videos in MP4 or MP3, no watermark. Simple & free downloader.">
-  <meta property="og:image" content="/logo.png">
-  <meta property="og:url" content="https://tikssave.com">
-  <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5298191242036107" crossorigin="anonymous"></script>
-
+  <title>TikTok Downloader</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5298191242036107"
+     crossorigin="anonymous"></script>
   <style>
-    /* === Senin CSS'in olduğu gibi buraya yerleştirildi === */
-    /* Bu alan çok uzun olduğu için kısaltmadım — senin gönderdiğinle bire bir aynı */
-    /* Tüm stil kuralların, mobil uyumluluk dahil olmak üzere, korunmuştur */
-    
+    /* Reset ve temel ayarlar */
     * {
       box-sizing: border-box;
     }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #222;
-      color: #e0e0e0;
+      background-color: #181a1f;
+      color: #ddd;
       margin: 0;
       padding: 20px 15px 60px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     h1 {
-      font-size: 2.6rem;
-      margin-bottom: 10px;
+      font-size: 2.8rem;
+      margin-bottom: 20px;
       text-align: center;
-      color: #3b82f6;
+      color: #4f8ef7;
+      font-weight: 900;
+      user-select: none;
+      text-shadow: 0 2px 6px rgba(79,142,247,0.6);
+    }
+    form#mainForm {
+      display: flex;
+      width: 100%;
+      max-width: 600px;
+      gap: 12px;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 18px 22px;
+      font-size: 1.3rem;
+      border-radius: 14px;
+      border: 2px solid #2c2f36;
+      outline: none;
+      background-color: #252931;
+      color: #eee;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+    }
+    input[type="text"]::placeholder {
+      color: #7a7f8c;
+      font-weight: 500;
+    }
+    input[type="text"]:focus {
+      border-color: #4f8ef7;
+      box-shadow: 0 0 8px #4f8ef7aa;
+      background-color: #2f333d;
+    }
+    button {
+      padding: 16px 28px;
+      font-size: 1.25rem;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      user-select: none;
+      flex-shrink: 0;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    }
+    button:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 6px 12px rgba(79,142,247,0.8);
+    }
+    button:active {
+      filter: brightness(0.9);
+      box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
+    }
+    button.paste-btn {
+      background-color: #4b4f5a;
+      color: #ccc;
+      order: 2; /* Sağda */
+      box-shadow: inset 0 2px 6px #3a3d45;
+    }
+    button.paste-btn:hover {
+      background-color: #5f6490;
+      color: #fff;
+      box-shadow: 0 4px 10px #5f6490aa;
+    }
+    button.clear-btn {
+      background-color: #d9534f;
+      color: #fff;
+      order: 1;
+      display: none;
+      box-shadow: 0 4px 10px #c9302ccc;
+    }
+    button.clear-btn:hover {
+      background-color: #e74c3c;
+      box-shadow: 0 6px 12px #e74c3ccc;
+    }
+    button.fetch-btn {
+      background-color: #4f8ef7;
+      color: #fff;
+      box-shadow: 0 0 18px #4f8ef7bb;
+      order: 3;
       font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+    button.fetch-btn:hover {
+      background-color: #3a6ee8;
+      box-shadow: 0 0 28px #3a6ee8cc;
+    }
+
+    #options {
+      flex-direction: column;
+      gap: 18px;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 50px;
+      align-items: center;
+      display: none;
+    }
+    .download-btn {
+      background-color: #3159a5;
+      color: #b0c4f7;
+      font-weight: 700;
+      font-size: 1.35rem;
+      padding: 18px 26px;
+      border-radius: 18px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 15px #4f8ef7a0;
+      transition: background-color 0.3s, box-shadow 0.3s, transform 0.15s ease;
+      user-select: none;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .download-btn:hover {
+      background-color: #4f8ef7;
+      color: #fff;
+      box-shadow: 0 0 28px #4f8ef7dd;
+      transform: translateY(-3px);
+    }
+    .download-btn:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 2px 8px #3a6ee8aa;
+    }
+
+    #preview-container {
+      max-width: 600px;
+      margin-bottom: 50px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      border-radius: 18px;
+      background: #2a2e3b;
+      padding: 18px 20px;
+      box-shadow: 0 8px 20px rgba(20,30,50,0.7);
+      transition: background-color 0.3s ease;
       user-select: none;
     }
-    /* ... Diğer tüm stil kuralları burada devam ediyor ... */
-    /* (Satır sayısı kısıtlaması nedeniyle tamamını burada gösteremiyoruz) */
+    #preview-container img {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.75);
+      user-select: none;
+      pointer-events: none;
+    }
+    #preview-container h2 {
+      color: #4f8ef7;
+      text-align: center;
+      margin: 0 0 10px;
+      user-select: text;
+      font-weight: 700;
+      font-size: 1.4rem;
+      text-shadow: 0 1px 3px rgba(79,142,247,0.7);
+    }
+
+    .accordion {
+      width: 100%;
+      max-width: 600px;
+      background-color: #313743;
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgb(0 0 0 / 0.7);
+      overflow: hidden;
+      user-select: none;
+      margin-bottom: 70px;
+      font-weight: 600;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .accordion-item {
+      border-bottom: 1px solid #4f5690;
+    }
+    .accordion-item:last-child {
+      border-bottom: none;
+    }
+    .accordion-header {
+      background-color: #3a3f57;
+      cursor: pointer;
+      padding: 22px 28px;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #4f8ef7;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.3s;
+      user-select: none;
+      border-left: 6px solid transparent;
+    }
+    .accordion-header:hover {
+      background-color: #4f8ef7;
+      color: #f0f6ff;
+      border-left-color: #f0f6ff;
+      text-shadow: 0 0 5px rgba(240,246,255,0.8);
+    }
+    .accordion-header.active {
+      background-color: #4f8ef7;
+      color: #f0f6ff;
+      border-left-color: #f0f6ff;
+      text-shadow: 0 0 8px rgba(240,246,255,1);
+    }
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      background-color: #232732;
+      color: #cfd3e2;
+      padding: 0 28px;
+      font-size: 1rem;
+      transition: max-height 0.4s ease, padding 0.4s ease;
+      user-select: text;
+      line-height: 1.7;
+    }
+    .accordion-content.open {
+      padding: 18px 28px 22px;
+      max-height: 800px;
+    }
+    .accordion-content p {
+      margin: 0;
+      font-weight: 400;
+    }
+    .accordion-header::after {
+      content: "▶";
+      font-size: 1.1rem;
+      transition: transform 0.3s;
+      color: #a5b4fc;
+      user-select: none;
+    }
+    .accordion-header.active::after {
+      transform: rotate(90deg);
+      color: #f0f6ff;
+    }
+
+    #about {
+      max-width: 600px;
+      margin: 0 auto 60px;
+      color: #bbb;
+      font-size: 1.15rem;
+      line-height: 1.85;
+      text-align: left;
+      user-select: text;
+      font-weight: 500;
+    }
+    #about h2 {
+      color: #4f8ef7;
+      font-weight: 800;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      text-shadow: 0 0 10px rgba(79,142,247,0.8);
+    }
+    #about p {
+      margin-bottom: 34px;
+    }
+
+    footer {
+      max-width: 600px;
+      color: #666;
+      font-size: 0.95rem;
+      text-align: center;
+      margin: 30px auto 15px;
+      user-select: none;
+      font-weight: 400;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    footer a {
+      color: #4f8ef7;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+    footer a:hover {
+      color: #75a7ff;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+      input[type="text"], button, .download-btn, .accordion-header {
+        font-size: 1.15rem;
+        padding: 14px 18px;
+      }
+      #options {
+        max-width: 100%;
+      }
+      form#mainForm {
+        flex-direction: column;
+      }
+      button.paste-btn, button.clear-btn {
+        order: 2;
+        width: 100%;
+        margin-top: 10px;
+      }
+      button.fetch-btn {
+        order: 3;
+        width: 100%;
+        margin-top: 10px;
+      }
+      button {
+        width: 100%;
+        margin-top: 10px;
+      }
+      #about {
+        font-size: 1rem;
+        line-height: 1.5;
+        padding: 0 15px;
+      }
+      .accordion {
+        max-width: 100%;
+      }
+      #preview-container {
+        max-width: 100%;
+        padding: 14px;
+      }
+      .download-btn {
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
-
 <body>
-  <h1>Tikssave TikTok Downloader</h1>
+  <h1>TikTok Downloader</h1>
 
   <form id="mainForm" onsubmit="return false;">
     <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." autocomplete="off" required value="<%= videoData?.sourceUrl || '' %>" />
@@ -72,57 +377,62 @@
     <% } %>
   </div>
 
-  <section id="about">
+  <section id="about" aria-label="About TikTok Downloader">
     <h2>Unlimited TikTok Downloads</h2>
     <p>Download TikTok videos as much as you want without any limits — totally free and easy to use. Our downloader lets you save your favorite videos anytime, anywhere.</p>
-
+    
     <h2>No Watermarks</h2>
     <p>Save TikTok videos in MP4 format without any watermarks or TikTok logos — clean videos ready for sharing or personal use.</p>
-
+    
     <h2>MP4 and MP3 Formats</h2>
     <p>Choose to download videos in high-quality MP4 or convert to MP3 audio. Whether you want the video or just the sound, our tool makes it easy.</p>
-
+    
     <h2>How to Download TikTok Videos</h2>
-    <p>Simply paste the TikTok video link above, click “Download”, and then choose your preferred format and quality to download instantly. No registration or software needed.</p>
+    <p>
+      Simply paste the TikTok video link above, click “Download”, and then choose your preferred format and quality to download instantly. No registration or software needed.
+    </p>
   </section>
 
-  <section class="accordion" aria-label="FAQ">
+  <section class="accordion" aria-label="Frequently Asked Questions">
     <div class="accordion-item">
-      <button class="accordion-header" aria-expanded="false" aria-controls="faq1" id="faq1-button">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq1" id="faq1-button" tabindex="0">
         How do I get the TikTok video link?
       </button>
       <div id="faq1" class="accordion-content" role="region" aria-labelledby="faq1-button">
         <p>Open the TikTok app or website, tap “Share” on the video, then select “Copy Link” to get the video URL.</p>
       </div>
     </div>
+
     <div class="accordion-item">
-      <button class="accordion-header" aria-expanded="false" aria-controls="faq2" id="faq2-button">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq2" id="faq2-button" tabindex="0">
         How do I paste the link and download?
       </button>
       <div id="faq2" class="accordion-content" role="region" aria-labelledby="faq2-button">
         <p>Paste the copied URL into the input box above, click “Download” to get download options, then click a button to start downloading.</p>
       </div>
     </div>
+
     <div class="accordion-item">
-      <button class="accordion-header" aria-expanded="false" aria-controls="faq3" id="faq3-button">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq3" id="faq3-button" tabindex="0">
         What download quality options are available?
       </button>
       <div id="faq3" class="accordion-content" role="region" aria-labelledby="faq3-button">
         <p>You can download audio only (MP3), standard video quality (SD), or high-quality video (HD) if available.</p>
       </div>
     </div>
+
     <div class="accordion-item">
-      <button class="accordion-header" aria-expanded="false" aria-controls="faq4" id="faq4-button">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq5" id="faq5-button" tabindex="0">
         Is this service free and safe?
       </button>
-      <div id="faq4" class="accordion-content" role="region" aria-labelledby="faq4-button">
-        <p>Yes! Tikssave is 100% free, fast and safe. We do not store any of your downloads or links.</p>
+      <div id="faq5" class="accordion-content" role="region" aria-labelledby="faq5-button">
+        <p>Yes! Our downloader is completely free and respects your privacy. We do not store your downloads.</p>
       </div>
     </div>
   </section>
 
   <footer>
-    <p>© 2025 <strong>Tikssave.com</strong> — All rights reserved. | <a href="/terms">Terms of Service</a> | <a href="/privacy">Privacy Policy</a> | <a href="/rights">Rights</a></p>
+    <p>© 2025 TikTok Downloader. All rights reserved. | <a href="/terms">Terms of Service</a> | <a href="/privacy">Privacy Policy</a> | <a href="/rights">Rights</a></p>
   </footer>
 
   <script>
@@ -190,6 +500,9 @@
           return;
         }
 
+        console.log("Fetched link (play):", data.play);
+        console.log("Fetched link (hdplay):", data.hdplay);
+
         window.downloadData = data;
 
         if(data.cover && data.title) {
@@ -233,6 +546,7 @@
       link.remove();
     }
 
+    // Accordion
     const accordions = document.querySelectorAll('.accordion-header');
     accordions.forEach(acc => {
       acc.addEventListener('click', () => {
