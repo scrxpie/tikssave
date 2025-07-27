@@ -376,6 +376,8 @@
     <p>© 2025 TikTok Downloader. All rights reserved. | <a href="/terms">Terms of Service</a> | <a href="/privacy">Privacy Policy</a> | <a href="/rights">Rights</a></p>
   </footer>
 
+<!-- (dosyanın başı vs aynen duruyor...) -->
+
   <script>
     const videoUrlInput = document.getElementById('videoUrl');
     const clearBtn = document.querySelector('.clear-btn');
@@ -440,6 +442,9 @@
           alert(data.message || "Failed to fetch download links.");
           return;
         }
+
+        console.log("Fetched link (play):", data.play);
+        console.log("Fetched link (hdplay):", data.hdplay);
 
         // Gelen veriyi global değişkene atıyoruz
         window.downloadData = data;
