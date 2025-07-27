@@ -44,7 +44,7 @@ app.get('/', async (req, res) => {
   const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
   await visit.save();
   const count = await Visit.countDocuments();
-  res.render('index', { count });
+  res.render('index', { count, videoData: null }); // videoData null çünkü ana sayfa
 });
 
 // TikTok API bilgisi
@@ -65,7 +65,8 @@ app.post('/get-links', async (req, res) => {
       music: data.data.music,
       username: data.data.author?.unique_id || 'unknown',
       title: data.data.title,
-      cover: data.data.cover
+      cover: data.data.cover,
+      sourceUrl: url // video linki frontend’e otomatik eklenmesi için
     });
   } catch (err) {
     console.error(err);
@@ -134,7 +135,7 @@ app.post('/tiktok', async (req, res) => {
   }
 });
 
-// GET /:shortId → Önizleme sayfası render
+// **Burada asıl değişiklik: videoData ile index.ejs render et**
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
 
@@ -142,7 +143,8 @@ app.get('/:shortId', async (req, res) => {
     const videoData = await VideoLink.findOne({ shortId });
     if (!videoData) return res.status(404).send('Video bulunamadı.');
 
-    res.render('preview', { videoData }); // HTML sayfası döndürüyoruz
+    // videoData objesini ejs'ye gönderiyoruz
+    res.render('index', { videoData, count: null }); 
 
   } catch (err) {
     console.error(err);
