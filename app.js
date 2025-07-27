@@ -139,21 +139,30 @@ console.log('HD:', data.data.hdplay);
 
 // **Burada asıl değişiklik: videoData ile index.ejs render et**
 // GET /:shortId → Ana sayfada link girilmiş gibi göster
+// GET /:shortId → Kısa bağlantı yönlendirme veya embed oynatma
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
 
   try {
     const videoData = await VideoLink.findOne({ shortId });
-    if (!videoData) return res.status(404).send('Video bulunamadı.');
+    if (!videoData || !videoData.play) return res.status(404).send('Video bulunamadı.');
 
-    const count = await Visit.countDocuments(); // index.ejs için lazım
+    const ua = req.headers['user-agent']?.toLowerCase() || '';
+    const isBot = ['telegram', 'discord', 'twitter', 'whatsapp', 'facebook', 'linkedin', 'bot'].some(agent =>
+      ua.includes(agent)
+    );
 
+    if (isBot) {
+      // Eğer botsa direkt MP4 linkine yönlendir
+      return res.redirect(videoData.play);
+    }
+
+    const count = await Visit.countDocuments(); // index.ejs için ziyaretçi sayısı
     res.render('index', {
       count,
-      prefill: true, // video önizlemesini tetiklemek için flag
+      prefill: true,
       videoData
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).send('Sunucu hatası.');
