@@ -134,7 +134,7 @@ app.post('/tiktok', async (req, res) => {
   }
 });
 
-// GET /:shortId → Videoyu yönlendir
+// GET /:shortId → Önizleme sayfası render
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
 
@@ -142,18 +142,8 @@ app.get('/:shortId', async (req, res) => {
     const videoData = await VideoLink.findOne({ shortId });
     if (!videoData) return res.status(404).send('Video bulunamadı.');
 
-    const videoUrl = videoData.hdplay || videoData.play;
-    if (!videoUrl) return res.status(404).send('Video bağlantısı yok.');
+    res.render('preview', { videoData }); // HTML sayfası döndürüyoruz
 
-    // Dosya ismi için sanitize
-    const fileName = sanitize((videoData.title || 'video').replace(/[\s\W]+/g, '_')).substring(0, 40);
-    res.setHeader('Content-Type', 'video/mp4');
-    res.setHeader('Content-Disposition', `inline; filename="${fileName}.mp4"`);
-
-    https.get(videoUrl, stream => stream.pipe(res)).on('error', err => {
-      console.error(err);
-      res.status(500).send('Video akışı başarısız.');
-    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Sunucu hatası.');
