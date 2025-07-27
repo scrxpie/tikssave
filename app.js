@@ -137,6 +137,7 @@ app.post('/tiktok', async (req, res) => {
 });
 
 // **Burada asıl değişiklik: videoData ile index.ejs render et**
+// GET /:shortId → Ana sayfada link girilmiş gibi göster
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
 
@@ -144,8 +145,13 @@ app.get('/:shortId', async (req, res) => {
     const videoData = await VideoLink.findOne({ shortId });
     if (!videoData) return res.status(404).send('Video bulunamadı.');
 
-    // videoData objesini ejs'ye gönderiyoruz
-    res.render('index', { videoData, count: null }); 
+    const count = await Visit.countDocuments(); // index.ejs için lazım
+
+    res.render('index', {
+      count,
+      prefill: true, // video önizlemesini tetiklemek için flag
+      videoData
+    });
 
   } catch (err) {
     console.error(err);
