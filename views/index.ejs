@@ -100,13 +100,13 @@
     }
 
     #options {
-      display: none;
       flex-direction: column;
       gap: 16px;
       width: 100%;
       max-width: 600px;
       margin-bottom: 40px;
       align-items: center;
+      display: none;
     }
     .download-btn {
       background-color: #1e40af;
@@ -123,6 +123,8 @@
       width: 100%;
       max-width: 300px;
       text-align: center;
+      text-decoration: none;
+      display: inline-block;
     }
     .download-btn:hover {
       background-color: #3b82f6;
@@ -133,7 +135,7 @@
     #preview-container {
       max-width: 600px;
       margin-bottom: 40px;
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
       gap: 12px;
@@ -141,7 +143,6 @@
       background: #333;
       padding: 15px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.7);
-      display: none;
     }
     #preview-container img {
       width: 100%;
@@ -294,18 +295,28 @@
   <h1>TikTok Downloader</h1>
 
   <form id="mainForm" onsubmit="return false;">
-    <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." autocomplete="off" required />
+    <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." autocomplete="off" required value="<%= videoData?.sourceUrl || '' %>" />
     <button type="button" class="clear-btn" onclick="clearInput()">Clear</button>
     <button type="button" class="paste-btn" onclick="pasteLink()">Paste</button>
     <button type="button" class="fetch-btn" onclick="fetchLinks()">Download</button>
   </form>
 
-  <div id="preview-container">
-    <img id="preview-thumbnail" src="" alt="Video thumbnail" />
-    <h2 id="preview-title"></h2>
+  <div id="preview-container" style="<%= videoData ? 'display:flex;' : 'display:none;' %>">
+    <img id="preview-thumbnail" src="<%= videoData?.cover || '' %>" alt="Video thumbnail" />
+    <h2 id="preview-title"><%= videoData?.title || '' %></h2>
   </div>
 
-  <div id="options"></div>
+  <div id="options" style="<%= videoData ? 'display:flex; flex-direction: column; align-items:center; gap:16px;' : 'display:none;' %>">
+    <% if (videoData?.music) { %>
+      <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.music) %>&username=<%= encodeURIComponent(videoData.username) %>&type=music">🎵 MP3 (Audio Only)</a>
+    <% } %>
+    <% if (videoData?.play) { %>
+      <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.play) %>&username=<%= encodeURIComponent(videoData.username) %>&type=play">📽️ SD Video (Normal Quality)</a>
+    <% } %>
+    <% if (videoData?.hdplay) { %>
+      <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.hdplay) %>&username=<%= encodeURIComponent(videoData.username) %>&type=hdplay">📽️ HD Video (High Quality)</a>
+    <% } %>
+  </div>
 
   <section id="about" aria-label="About TikTok Downloader">
     <h2>Unlimited TikTok Downloads</h2>
