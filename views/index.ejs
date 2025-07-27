@@ -377,168 +377,8 @@
       <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.hdplay) %>&username=<%= encodeURIComponent(videoData.username) %>&type=hdplay">📽️ HD Video (High Quality)</a>
     <% } %>
   </div>
-<!-- Discord Link Butonu -->
-<a href="https://tikssave.com/discord" target="_blank" rel="noopener noreferrer" class="discord-link" aria-label="Tikssave.com on Discord">
-  <svg xmlns="http://www.w3.org/2000/svg" class="discord-icon" viewBox="0 0 245 240" fill="currentColor" aria-hidden="true" focusable="false">
-    <path d="M104.4 103.7c-5.7 0-10.3 5-10.3 11.1 0 6.2 4.6 11.1 10.3 11.1 5.7 0 10.3-5 10.3-11.1 0-6.2-4.6-11.1-10.3-11.1zm36.2 0c-5.7 0-10.3 5-10.3 11.1 0 6.2 4.6 11.1 10.3 11.1 5.7 0 10.3-5 10.3-11.1 0-6.2-4.6-11.1-10.3-11.1z"/>
-    <path d="M189.5 20H55.5C38.3 20 24 34.6 24 51.6v137.1c0 17 14.3 31.6 31.5 31.6h107.7l-5-17.6 11.3 10.7 10.7 9.9 19 16V51.6c0-17-14.3-31.6-31.5-31.6zm-39.5 152.4s-3.7-4.4-6.7-8.2c13.3-3.8 18.4-12.2 18.4-12.2-4.2 2.7-8.2 4.5-11.8 5.8-5.1 2.1-10 3.5-14.8 4.3-9.8 1.8-18.7 0-25.9-1.8-5.6-1.3-10.4-3.2-14.7-5.8-.6-.3-1.3-.6-1.9-1-.1 0-.2-.1-.3-.2-0.1 0-.2-.1-.3-.2-2.8-1.5-4.3-2.6-4.3-2.6s4.8 8 17.3 12.2c-3 3.8-6.8 8.3-6.8 8.3-22.3-.7-30.7-15.3-30.7-15.3 0-32.4 14.5-58.8 14.5-58.8 14.5-10.8 28.3-10.5 28.3-10.5l1 1.2c-18.2 5.2-26.6 13-26.6 13l1.5.9c-8.6 4.9-12.6 11.2-12.6 11.2 8.4-5 12.1-6.9 12.1-6.9 5.6-3.6 10.9-4.5 16.3-4.6 6.3-.1 12.3 1.9 17.6 5.5 0 0-3.9-6.1-12-11.1 0 0-4.1-2.3-11.2-5.5l1.6-1.8s13.7-.3 28.3 10.5c0 0 14.5 26.4 14.5 58.8 0 0-8.4 14.6-30.7 15.3z"/>
-  </svg>
-  tikssave.com on Discord
-</a>
 
-<style>
-  .discord-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 20px;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 1.15rem;
-    text-decoration: none;
-    background-color: #5865F2;
-    color: white;
-    box-shadow: 0 6px 12px rgba(88, 101, 242, 0.6);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
-    user-select: none;
-    cursor: pointer;
-  }
-  .discord-link:hover,
-  .discord-link:focus {
-    background-color: #4752C4;
-    box-shadow: 0 8px 18px rgba(71, 82, 196, 0.8);
-    outline: none;
-    transform: translateY(-2px);
-  }
-  .discord-link:active {
-    background-color: #3a3f90;
-    box-shadow: inset 0 3px 8px rgba(0,0,0,0.3);
-    transform: translateY(1px);
-  }
-  .discord-icon {
-    width: 28px;
-    height: 28px;
-    fill: currentColor;
-    user-select: none;
-    pointer-events: none;
-  }
-  @media (max-width: 480px) {
-    .discord-link {
-      font-size: 1rem;
-      padding: 10px 16px;
-      gap: 8px;
-    }
-    .discord-icon {
-      width: 22px;
-      height: 22px;
-    }
-  }
 
-</style>
-<!-- Discord Tanıtım Bölümü -->
-<section class="discord-section" aria-label="Join Tikssave Discord Server and Invite Bot">
-  <div class="discord-info">
-    <svg xmlns="http://www.w3.org/2000/svg" class="discord-icon" viewBox="0 0 245 240" fill="currentColor" aria-hidden="true" focusable="false">
-      <path d="M104.4 103.7c-5.7 0-10.3 5-10.3 11.1 0 6.2 4.6 11.1 10.3 11.1 5.7 0 10.3-5 10.3-11.1 0-6.2-4.6-11.1-10.3-11.1zm36.2 0c-5.7 0-10.3 5-10.3 11.1 0 6.2 4.6 11.1 10.3 11.1 5.7 0 10.3-5 10.3-11.1 0-6.2-4.6-11.1-10.3-11.1z"/>
-      <path d="M189.5 20H55.5C38.3 20 24 34.6 24 51.6v137.1c0 17 14.3 31.6 31.5 31.6h107.7l-5-17.6 11.3 10.7 10.7 9.9 19 16V51.6c0-17-14.3-31.6-31.5-31.6zm-39.5 152.4s-3.7-4.4-6.7-8.2c13.3-3.8 18.4-12.2 18.4-12.2-4.2 2.7-8.2 4.5-11.8 5.8-5.1 2.1-10 3.5-14.8 4.3-9.8 1.8-18.7 0-25.9-1.8-5.6-1.3-10.4-3.2-14.7-5.8-.6-.3-1.3-.6-1.9-1-.1 0-.2-.1-.3-.2-0.1 0-.2-.1-.3-.2-2.8-1.5-4.3-2.6-4.3-2.6s4.8 8 17.3 12.2c-3 3.8-6.8 8.3-6.8 8.3-22.3-.7-30.7-15.3-30.7-15.3 0-32.4 14.5-58.8 14.5-58.8 14.5-10.8 28.3-10.5 28.3-10.5l1 1.2c-18.2 5.2-26.6 13-26.6 13l1.5.9c-8.6 4.9-12.6 11.2-12.6 11.2 8.4-5 12.1-6.9 12.1-6.9 5.6-3.6 10.9-4.5 16.3-4.6 6.3-.1 12.3 1.9 17.6 5.5 0 0-3.9-6.1-12-11.1 0 0-4.1-2.3-11.2-5.5l1.6-1.8s13.7-.3 28.3 10.5c0 0 14.5 26.4 14.5 58.8 0 0-8.4 14.6-30.7 15.3z"/>
-    </svg>
-    <div class="discord-texts">
-      <h3>Join Tikssave Discord</h3>
-      <p>Get support, updates, and invite the bot to your server easily.</p>
-    </div>
-  </div>
-  <a href="https://discord.com/oauth2/authorize?client_id=1398955028487864390&permissions=51200&integration_type=0&scope=bot+applications.commands" target="_blank" rel="noopener noreferrer" class="invite-btn" aria-label="Invite Tikssave Bot">
-    Invite
-  </a>
-</section>
-
-<style>
-  .discord-section {
-    max-width: 600px;
-    margin: 50px auto 70px;
-    background-color: #2f3136;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 30px;
-    user-select: none;
-  }
-  .discord-info {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex: 1;
-  }
-  .discord-icon {
-    width: 48px;
-    height: 48px;
-    fill: #5865F2;
-    flex-shrink: 0;
-    user-select: none;
-    pointer-events: none;
-  }
-  .discord-texts h3 {
-    margin: 0 0 6px;
-    font-size: 1.6rem;
-    color: #eee;
-  }
-  .discord-texts p {
-    margin: 0;
-    font-size: 1.1rem;
-    color: #bbb;
-  }
-  .invite-btn {
-    background-color: #5865F2;
-    color: white;
-    font-weight: 700;
-    padding: 16px 28px;
-    font-size: 1.25rem;
-    border-radius: 14px;
-    text-decoration: none;
-    box-shadow: 0 6px 15px rgba(88, 101, 242, 0.7);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
-    user-select: none;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .invite-btn:hover,
-  .invite-btn:focus {
-    background-color: #4752C4;
-    box-shadow: 0 8px 22px rgba(71, 82, 196, 0.9);
-    outline: none;
-    transform: translateY(-2px);
-  }
-  .invite-btn:active {
-    background-color: #3a3f90;
-    box-shadow: inset 0 3px 10px rgba(0,0,0,0.3);
-    transform: translateY(1px);
-  }
-  @media (max-width: 480px) {
-    .discord-section {
-      flex-direction: column;
-      gap: 20px;
-      padding: 20px;
-    }
-    .discord-info {
-      justify-content: center;
-      text-align: center;
-      gap: 12px;
-    }
-    .discord-texts h3 {
-      font-size: 1.4rem;
-    }
-    .discord-texts p {
-      font-size: 1rem;
-    }
-    .invite-btn {
-      width: 100%;
-      font-size: 1.15rem;
-      padding: 14px;
-    }
-  }
-</style>
 
   <section id="about" aria-label="About TikTok Downloader">
     <h2>Unlimited TikTok Downloads</h2>
@@ -593,9 +433,64 @@
       </div>
     </div>
   </section>
+<!-- Tikssave on Discord Butonu (anasayfa altına) -->
+<a href="/discord" class="discord-redirect-btn" aria-label="Tikssave Discord">
+  <svg xmlns="http://www.w3.org/2000/svg" class="discord-icon" viewBox="0 0 245 240" fill="currentColor" aria-hidden="true" focusable="false">
+    <path d="M104.4 103.7c-5.7 0-10.3 5-10.3 11.1 0 6.2 4.6 11.1 10.3 11.1 5.7 0 10.3-5 10.3-11.1 0-6.2-4.6-11.1-10.3-11.1zm36.2 0c-5.7 0-10.3 5-10.3 11.1 0 6.2 4.6 11.1 10.3 11.1 5.7 0 10.3-5 10.3-11.1 0-6.2-4.6-11.1-10.3-11.1z"/>
+    <path d="M189.5 20H55.5C38.3 20 24 34.6 24 51.6v137.1c0 17 14.3 31.6 31.5 31.6h107.7l-5-17.6 11.3 10.7 10.7 9.9 19 16V51.6c0-17-14.3-31.6-31.5-31.6zm-39.5 152.4s-3.7-4.4-6.7-8.2c13.3-3.8 18.4-12.2 18.4-12.2-4.2 2.7-8.2 4.5-11.8 5.8-5.1 2.1-10 3.5-14.8 4.3-9.8 1.8-18.7 0-25.9-1.8-5.6-1.3-10.4-3.2-14.7-5.8-.6-.3-1.3-.6-1.9-1-.1 0-.2-.1-.3-.2-0.1 0-.2-.1-.3-.2-2.8-1.5-4.3-2.6-4.3-2.6s4.8 8 17.3 12.2c-3 3.8-6.8 8.3-6.8 8.3-22.3-.7-30.7-15.3-30.7-15.3 0-32.4 14.5-58.8 14.5-58.8 14.5-10.8 28.3-10.5 28.3-10.5l1 1.2c-18.2 5.2-26.6 13-26.6 13l1.5.9c-8.6 4.9-12.6 11.2-12.6 11.2 8.4-5 12.1-6.9 12.1-6.9 5.6-3.6 10.9-4.5 16.3-4.6 6.3-.1 12.3 1.9 17.6 5.5 0 0-3.9-6.1-12-11.1 0 0-4.1-2.3-11.2-5.5l1.6-1.8s13.7-.3 28.3 10.5c0 0 14.5 26.4 14.5 58.8 0 0-8.4 14.6-30.7 15.3z"/>
+  </svg>
+  <span>Tikssave on Discord</span>
+</a>
 
+<style>
+  .discord-redirect-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 30px auto 0;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-decoration: none;
+    background-color: #5865F2;
+    color: white;
+    box-shadow: 0 6px 12px rgba(88, 101, 242, 0.6);
+    transition: all 0.3s ease;
+  }
+
+  .discord-redirect-btn:hover {
+    background-color: #4752C4;
+    box-shadow: 0 8px 18px rgba(71, 82, 196, 0.8);
+    transform: translateY(-2px);
+  }
+
+  .discord-redirect-btn:active {
+    background-color: #3a3f90;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.3);
+    transform: translateY(1px);
+  }
+
+  .discord-redirect-btn .discord-icon {
+    width: 26px;
+    height: 26px;
+    fill: currentColor;
+  }
+
+  @media (max-width: 480px) {
+    .discord-redirect-btn {
+      font-size: 1rem;
+      padding: 10px 16px;
+    }
+    .discord-redirect-btn .discord-icon {
+      width: 22px;
+      height: 22px;
+    }
+  }
+</style>
   <footer>
-    <p>© 2025 TikTok Downloader. All rights reserved. | <a href="/terms">Terms of Service</a> | <a href="/privacy">Privacy Policy</a> | <a href="/rights">Rights</a></p>
+    <p>© 2025 tikssave.com All rights reserved. | <a href="/terms">Terms of Service</a> | <a href="/privacy">Privacy Policy</a> | <a href="/rights">Rights</a></p>
   </footer>
 
   <script>
