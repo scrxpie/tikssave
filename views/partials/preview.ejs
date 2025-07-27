@@ -1,18 +1,21 @@
-<% if (typeof videoData !== 'undefined' && videoData) { %>
-  <div id="preview-container" style="max-width: 600px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-    <img src="<%= videoData.thumbnail %>" alt="Video thumbnail" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.7);" />
-    <h2 style="color: #3b82f6; text-align: center; margin: 0 0 10px;"><%= videoData.title %></h2>
-
-    <div id="options" style="width: 100%; display: flex; flex-direction: column; gap: 15px;">
-      <% if (videoData.music) { %>
-        <button class="download-btn" onclick="download('music')">🎵 MP3 (Audio Only)</button>
-      <% } %>
-      <% if (videoData.play) { %>
-        <button class="download-btn" onclick="download('play')">📽️ SD Video (Normal Quality)</button>
-      <% } %>
-      <% if (videoData.hdplay) { %>
-        <button class="download-btn" onclick="download('hdplay')">📽️ HD Video (High Quality)</button>
-      <% } %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= videoData.title %> - TikTok Video</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css"> <!-- varsa stil -->
+</head>
+<body>
+  <div class="container">
+    <h1><%= videoData.title %></h1>
+    <p>by @<%= videoData.username %></p>
+    <img src="<%= videoData.cover %>" alt="Thumbnail" style="max-width: 100%; height: auto; border-radius: 10px;">
+    
+    <div style="margin-top: 20px;">
+      <a href="/proxy-download?url=<%= videoData.hdplay || videoData.play %>&type=video&username=<%= videoData.username %>" class="btn">Download MP4</a>
+      <a href="/proxy-download?url=<%= videoData.music %>&type=music&username=<%= videoData.username %>" class="btn">Download MP3</a>
     </div>
   </div>
-<% } %>
+</body>
+</html>
