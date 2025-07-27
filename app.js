@@ -127,7 +127,8 @@ app.post('/tiktok', async (req, res) => {
       title: data.data.title,
       cover: data.data.cover
     });
-
+console.log('Normal:', data.data.play);
+console.log('HD:', data.data.hdplay);
     await newVideoLink.save();
     res.json({ success: true, shortId });
   } catch (err) {
@@ -135,8 +136,6 @@ app.post('/tiktok', async (req, res) => {
     res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
-console.log('Normal:', data.data.play);
-console.log('HD:', data.data.hdplay);
 
 // **Burada asıl değişiklik: videoData ile index.ejs render et**
 // GET /:shortId → Ana sayfada link girilmiş gibi göster
