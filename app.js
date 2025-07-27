@@ -54,6 +54,8 @@ app.post('/get-links', async (req, res) => {
     const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
     const data = await response.json();
 
+    console.log('Tikwm API data:', data); // <-- buraya ekledim
+
     if (!data || data.code !== 0) {
       return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
     }
@@ -65,8 +67,7 @@ app.post('/get-links', async (req, res) => {
       music: data.data.music,
       username: data.data.author?.unique_id || 'unknown',
       title: data.data.title,
-      cover: data.data.cover,
-      sourceUrl: url // video linki frontend’e otomatik eklenmesi için
+      cover: data.data.cover
     });
   } catch (err) {
     console.error(err);
