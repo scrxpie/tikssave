@@ -135,6 +135,8 @@ app.post('/tiktok', async (req, res) => {
     res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
+console.log('Normal:', data.data.play);
+console.log('HD:', data.data.hdplay);
 
 // **Burada asıl değişiklik: videoData ile index.ejs render et**
 // GET /:shortId → Ana sayfada link girilmiş gibi göster
@@ -181,6 +183,7 @@ app.get('/admin/dashboard', async (req, res) => {
   const today = await Visit.countDocuments({
     createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
   });
+  
 
   const uniqueVisitors = await Visit.distinct('ip');
   const totalDownloads = await Download.countDocuments();
