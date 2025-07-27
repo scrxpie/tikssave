@@ -87,6 +87,8 @@ app.get('/proxy-download', async (req, res) => {
   const extension = (type === 'music') ? 'mp3' : 'mp4';
   const safeUsername = (username || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '');
 const filename = sanitize(`ttdownload_${safeUsername}_${timestamp}.${extension}`);
+ console.log('Filename:', filename);
+  
   https.get(url, fileRes => {
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
