@@ -138,7 +138,19 @@ console.log('HD:', data.data.hdplay);
     res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
+app.get('/privacy', (req, res) => {
+  res.render('privacy');
+});
 
+app.get('/contact', (req, res) => {
+  res.render('contact');
+});
+app.get('/terms', (req, res) => {
+  res.render('terms');
+});
+app.get('/rights', (req, res) => {
+  res.render('rights');
+});
 // **Burada asıl değişiklik: videoData ile index.ejs render et**
 // GET /:shortId → Ana sayfada link girilmiş gibi göster
 // GET /:shortId → Kısa bağlantı yönlendirme veya embed oynatma
