@@ -1,0 +1,49 @@
+{
+  "site": {
+    "title": "TikTok İndirici",
+    "buttons": {
+      "paste": "Yapıştır",
+      "download": "İndir"
+    }
+  },
+  "features": {
+    "unlimited": {
+      "title": "Limitsiz TikTok İndirme",
+      "desc": "TikTok videolarını istediğiniz kadar, tamamen ücretsiz ve kolayca indirin. İstediğiniz zaman favori videolarınızı kaydedin."
+    },
+    "noWatermark": {
+      "title": "Filigran Yok",
+      "desc": "TikTok videolarını filigran veya TikTok logosu olmadan MP4 formatında kaydedin — paylaşmak veya kişisel kullanım için temiz videolar."
+    },
+    "formats": {
+      "title": "MP4 ve MP3 Formatları",
+      "desc": "Videoları yüksek kaliteli MP4 olarak indirin veya sadece sesini MP3 formatına dönüştürün. İster video ister sadece ses olsun, aracımız kolaylık sağlar."
+    }
+  },
+  "howTo": {
+    "title": "TikTok Videoları Nasıl İndirilir?",
+    "desc": "Yukarıdaki TikTok video linkini yapıştırın, “İndir”e tıklayın ve ardından istediğiniz format ve kaliteyi seçerek anında indirin. Kayıt veya yazılım gerekmez."
+  },
+  "faq": {
+    "howGetLink": {
+      "question": "TikTok video linkini nasıl alırım?",
+      "answer": "TikTok uygulamasını veya sitesini açın, videoda “Paylaş”a dokunun, ardından “Linki Kopyala”yı seçin."
+    },
+    "howPaste": {
+      "question": "Linki nasıl yapıştırır ve indiririm?",
+      "answer": "Kopyaladığınız URL'yi yukarıdaki kutuya yapıştırın, “İndir”e tıklayın ve indirme seçeneklerini alın, ardından indirmeye başlayın."
+    },
+    "qualityOptions": {
+      "question": "Hangi indirme kalite seçenekleri var?",
+      "answer": "Sadece ses (MP3), standart video kalitesi (SD) veya mevcutsa yüksek kaliteli video (HD) indirebilirsiniz."
+    },
+    "isFree": {
+      "question": "Bu hizmet ücretsiz ve güvenli mi?",
+      "answer": "Evet! Downloader tamamen ücretsizdir ve gizliliğinize saygı duyar. İndirmelerinizi saklamıyoruz."
+    }
+  },
+  "discordBot": {
+    "title": "Tikssave Discord Botu",
+    "desc": "Tikssave, TikTok videolarını sunucunuzdan kolayca indirmenizi sağlayan güçlü bir Discord botudur. Botu davet edin, TikTok linkinizi yapıştırın ve hızlıca indirme bağlantısı alın."
+  }
+}
