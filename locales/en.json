@@ -1,0 +1,49 @@
+{
+  "site": {
+    "title": "TikTok Downloader",
+    "buttons": {
+      "paste": "Paste",
+      "download": "Download"
+    }
+  },
+  "features": {
+    "unlimited": {
+      "title": "Unlimited TikTok Downloads",
+      "desc": "Download TikTok videos as much as you want without any limits — totally free and easy to use. Our downloader lets you save your favorite videos anytime, anywhere."
+    },
+    "noWatermark": {
+      "title": "No Watermarks",
+      "desc": "Save TikTok videos in MP4 format without any watermarks or TikTok logos — clean videos ready for sharing or personal use."
+    },
+    "formats": {
+      "title": "MP4 and MP3 Formats",
+      "desc": "Choose to download videos in high-quality MP4 or convert to MP3 audio. Whether you want the video or just the sound, our tool makes it easy."
+    }
+  },
+  "howTo": {
+    "title": "How to Download TikTok Videos",
+    "desc": "Simply paste the TikTok video link above, click “Download”, and then choose your preferred format and quality to download instantly. No registration or software needed."
+  },
+  "faq": {
+    "howGetLink": {
+      "question": "How do I get the TikTok video link?",
+      "answer": "Open the TikTok app or website, tap “Share” on the video, then select “Copy Link” to get the video URL."
+    },
+    "howPaste": {
+      "question": "How do I paste the link and download?",
+      "answer": "Paste the copied URL into the input box above, click “Download” to get download options, then click a button to start downloading."
+    },
+    "qualityOptions": {
+      "question": "What download quality options are available?",
+      "answer": "You can download audio only (MP3), standard video quality (SD), or high-quality video (HD) if available."
+    },
+    "isFree": {
+      "question": "Is this service free and safe?",
+      "answer": "Yes! Our downloader is completely free and respects your privacy. We do not store your downloads."
+    }
+  },
+  "discordBot": {
+    "title": "Tikssave Bot on Discord",
+    "desc": "Tikssave is a powerful Discord bot that allows you to download TikTok videos directly from your server using simple slash commands. Invite the bot, paste your TikTok link, and receive a direct download link for fast and easy access."
+  }
+}
