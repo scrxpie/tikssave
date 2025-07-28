@@ -1,0 +1,49 @@
+{
+  "site": {
+    "title": "Téléchargeur TikTok",
+    "buttons": {
+      "paste": "Coller",
+      "download": "Télécharger"
+    }
+  },
+  "features": {
+    "unlimited": {
+      "title": "Téléchargements TikTok illimités",
+      "desc": "Téléchargez des vidéos TikTok autant que vous le souhaitez, totalement gratuit et facile à utiliser. Sauvegardez vos vidéos préférées à tout moment et n'importe où."
+    },
+    "noWatermark": {
+      "title": "Sans filigranes",
+      "desc": "Enregistrez les vidéos TikTok au format MP4 sans filigrane ni logo TikTok — vidéos propres prêtes à être partagées ou utilisées personnellement."
+    },
+    "formats": {
+      "title": "Formats MP4 et MP3",
+      "desc": "Choisissez de télécharger les vidéos en haute qualité MP4 ou de les convertir en audio MP3. Que vous souhaitiez la vidéo ou seulement le son, notre outil facilite tout."
+    }
+  },
+  "howTo": {
+    "title": "Comment télécharger des vidéos TikTok",
+    "desc": "Collez simplement le lien de la vidéo TikTok ci-dessus, cliquez sur « Télécharger » et choisissez le format et la qualité souhaités pour télécharger instantanément. Aucune inscription ou logiciel requis."
+  },
+  "faq": {
+    "howGetLink": {
+      "question": "Comment obtenir le lien de la vidéo TikTok ?",
+      "answer": "Ouvrez l'application ou le site TikTok, appuyez sur « Partager » sur la vidéo, puis sélectionnez « Copier le lien » pour obtenir l'URL."
+    },
+    "howPaste": {
+      "question": "Comment coller le lien et télécharger ?",
+      "answer": "Collez l'URL copiée dans la boîte ci-dessus, cliquez sur « Télécharger » pour obtenir les options, puis cliquez sur un bouton pour démarrer le téléchargement."
+    },
+    "qualityOptions": {
+      "question": "Quelles options de qualité de téléchargement sont disponibles ?",
+      "answer": "Vous pouvez télécharger uniquement l'audio (MP3), la qualité vidéo standard (SD) ou une vidéo de haute qualité (HD) si disponible."
+    },
+    "isFree": {
+      "question": "Ce service est-il gratuit et sécurisé ?",
+      "answer": "Oui ! Notre téléchargeur est totalement gratuit et respecte votre vie privée. Nous ne stockons pas vos téléchargements."
+    }
+  },
+  "discordBot": {
+    "title": "Tikssave Bot sur Discord",
+    "desc": "Tikssave est un puissant bot Discord qui vous permet de télécharger des vidéos TikTok directement depuis votre serveur en utilisant des commandes slash simples. Invitez le bot, collez votre lien TikTok et recevez un lien de téléchargement direct rapidement et facilement."
+  }
+}
