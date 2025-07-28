@@ -167,9 +167,12 @@ app.get('/:shortId', async (req, res) => {
     );
 
     if (isBot) {
-      // Eğer botsa direkt MP4 linkine yönlendir
-      return res.redirect(videoData.play);
-    }
+  return res.render('embed', {
+    videoUrl: videoData.play,
+    title: videoData.title || 'TikTok Video',
+    thumbnail: videoData.cover || null
+  });
+}
 
     const count = await Visit.countDocuments(); // index.ejs için ziyaretçi sayısı
     res.render('index', {
