@@ -1,0 +1,49 @@
+{
+  "site": {
+    "title": "TikTok下载器",
+    "buttons": {
+      "paste": "粘贴",
+      "download": "下载"
+    }
+  },
+  "features": {
+    "unlimited": {
+      "title": "无限TikTok下载",
+      "desc": "您可以无限次下载TikTok视频，完全免费，使用简单。随时随地保存喜爱的视频。"
+    },
+    "noWatermark": {
+      "title": "无水印",
+      "desc": "以MP4格式保存无水印的TikTok视频，无任何标志，清晰干净，便于分享或个人收藏。"
+    },
+    "formats": {
+      "title": "MP4和MP3格式",
+      "desc": "选择高质量视频（MP4）或音频（MP3）格式下载。"
+    }
+  },
+  "howTo": {
+    "title": "如何下载TikTok视频",
+    "desc": "将视频链接粘贴在上方，点击“下载”，选择想要的格式和质量即可。无需注册或安装软件。"
+  },
+  "faq": {
+    "howGetLink": {
+      "question": "如何获取TikTok视频链接？",
+      "answer": "打开TikTok应用或网站，点击“分享”，然后选择“复制链接”。"
+    },
+    "howPaste": {
+      "question": "如何粘贴链接并下载？",
+      "answer": "将复制的链接粘贴到输入框中，点击“下载”，然后选择下载选项。"
+    },
+    "qualityOptions": {
+      "question": "有哪些下载质量可选？",
+      "answer": "您可以下载音频（MP3）、标清视频（SD）或高清（HD）视频（如果有）。"
+    },
+    "isFree": {
+      "question": "服务是免费和安全的吗？",
+      "answer": "是的，我们的下载工具完全免费，且不会存储您的下载内容。"
+    }
+  },
+  "discordBot": {
+    "title": "Tikssave Discord机器人",
+    "desc": "Tikssave是一个功能强大的Discord机器人，可以在服务器中通过指令下载TikTok视频。"
+  }
+}
