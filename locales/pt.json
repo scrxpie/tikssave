@@ -1,0 +1,49 @@
+{
+  "site": {
+    "title": "Baixador TikTok",
+    "buttons": {
+      "paste": "Colar",
+      "download": "Baixar"
+    }
+  },
+  "features": {
+    "unlimited": {
+      "title": "Downloads Ilimitados do TikTok",
+      "desc": "Baixe vídeos do TikTok quantas vezes quiser — totalmente grátis e fácil de usar. Salve seus vídeos favoritos a qualquer momento, em qualquer lugar."
+    },
+    "noWatermark": {
+      "title": "Sem Marcas D'água",
+      "desc": "Salve vídeos do TikTok em formato MP4 sem marcas d’água ou logotipos — vídeos limpos para compartilhar ou usar pessoalmente."
+    },
+    "formats": {
+      "title": "Formatos MP4 e MP3",
+      "desc": "Baixe vídeos em alta qualidade MP4 ou converta para áudio MP3. Quer o vídeo ou apenas o som? Nosso site facilita."
+    }
+  },
+  "howTo": {
+    "title": "Como baixar vídeos do TikTok",
+    "desc": "Cole o link do vídeo do TikTok acima, clique em “Baixar” e escolha o formato e a qualidade desejados para baixar instantaneamente. Sem registro necessário."
+  },
+  "faq": {
+    "howGetLink": {
+      "question": "Como obter o link do vídeo do TikTok?",
+      "answer": "Abra o app ou site do TikTok, toque em “Compartilhar” no vídeo e selecione “Copiar link”."
+    },
+    "howPaste": {
+      "question": "Como colar o link e baixar?",
+      "answer": "Cole o link copiado na caixa acima, clique em “Baixar” e selecione a opção desejada para começar o download."
+    },
+    "qualityOptions": {
+      "question": "Quais opções de qualidade estão disponíveis?",
+      "answer": "Você pode baixar apenas áudio (MP3), vídeo padrão (SD) ou vídeo de alta qualidade (HD), se disponível."
+    },
+    "isFree": {
+      "question": "Este serviço é gratuito e seguro?",
+      "answer": "Sim! Nosso site é totalmente gratuito e não armazena seus downloads."
+    }
+  },
+  "discordBot": {
+    "title": "Bot Tikssave no Discord",
+    "desc": "Tikssave é um poderoso bot do Discord que permite baixar vídeos do TikTok diretamente no servidor. Basta convidar o bot, colar o link e baixar."
+  }
+}
