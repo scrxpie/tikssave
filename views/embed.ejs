@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+
+  <!-- Embed için Open Graph meta -->
+  <meta property="og:title" content="<%= title %>" />
+  <meta property="og:type" content="video.other" />
+  <meta property="og:video" content="<%= videoUrl %>" />
+  <meta property="og:video:type" content="video/mp4" />
+  <meta property="og:video:width" content="720" />
+  <meta property="og:video:height" content="1280" />
+  <% if (thumbnail) { %>
+    <meta property="og:image" content="<%= thumbnail %>" />
+  <% } %>
+
+  <!-- Twitter card (optional) -->
+  <meta name="twitter:card" content="player">
+  <meta name="twitter:title" content="<%= title %>">
+  <meta name="twitter:player" content="<%= videoUrl %>">
+
+  <style>
+    body {
+      background-color: #000;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    video {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <video controls autoplay>
+    <source src="<%= videoUrl %>" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</body>
+</html>
