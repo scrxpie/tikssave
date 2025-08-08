@@ -1,0 +1,19 @@
+<% if (videoData) { %>
+  <div class="video-preview">
+    <h2><%= videoData.title %></h2>
+
+    <video width="100%" height="auto" controls poster="<%= videoData.thumbnail %>">
+      <source src="<%= videoData.hdplay || videoData.play %>" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <p><strong>Kullanıcı:</strong> <%= videoData.nickname %> (@<%= videoData.username %>)</p>
+
+    <div class="download-buttons">
+      <a href="<%= videoData.play %>" class="btn">SD Download</a>
+      <% if (videoData.hdplay) { %>
+        <a href="<%= videoData.hdplay %>" class="btn">HD Download</a>
+      <% } %>
+    </div>
+  </div>
+<% } %>
