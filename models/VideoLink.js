@@ -8,6 +8,7 @@ const videoLinkSchema = new mongoose.Schema({
   username: String,
   title: String,
   cover: String,
+  originalUrl: String,
   createdAt: { type: Date, default: Date.now } // 7 gün sonra otomatik silinsin
 });
 
