@@ -165,21 +165,24 @@ app.get('/:shortId', async (req, res) => {
   try {
     const videoData = await VideoLink.findOne({ shortId });
     if (!videoData) {
-      console.log('Video bulunamadı:', shortId);
-      return res.status(404).send('Video could not be found');
+      return res.status(404).render('partials/404'); // isteğe bağlı
     }
 
-    const videoUrl = videoData.hdplay || videoData.play;
-
-    // EJS sayfasını render et
-    return res.render('video', {
-      videoUrl,
-      username: videoData.author?.unique_id || 'unknown'
+    // index.ejs içine video bilgilerini gönderiyoruz
+    res.render('index', {
+      videoData: {
+        title: videoData.title,
+        thumbnail: videoData.thumbnail,
+        play: videoData.play,
+        hdplay: videoData.hdplay,
+        username: videoData.author?.unique_id || "Undefined",
+        nickname: videoData.author?.nickname || "Undefined"
+      }
     });
 
   } catch (err) {
     console.error(err);
-    res.status(500).send('Sunucu hatası.');
+    res.status(500).send('Error');
   }
 });
 
