@@ -50,6 +50,7 @@ app.get('/', async (req, res) => {
 // TikTok API bilgisi (bu endpoint artık sadece veriyi döner, kaydetmez)
 app.post('/tiktok', async (req, res) => {
   const { url } = req.body;
+  const isBot = req.headers['x-source'] === 'bot';
 
   if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
 
@@ -61,19 +62,42 @@ app.post('/tiktok', async (req, res) => {
       return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
     }
 
-    // Kaydetme işlemi yok, direkt video verisini dönüyoruz
-    res.json({
-      success: true,
-      video: {
+    if (isBot) {
+      // BOT isteği ise shortId oluştur, kaydet, döndür
+      let shortId;
+      let exists;
+      do {
+        shortId = generateShortId();
+        exists = await VideoLink.findOne({ shortId });
+      } while (exists);
+
+      const newVideoLink = new VideoLink({
+        shortId,
         play: data.data.play,
         hdplay: data.data.hdplay,
         music: data.data.music,
         username: data.data.author?.unique_id || 'unknown',
         title: data.data.title,
         cover: data.data.cover
-      }
-    });
+      });
 
+      await newVideoLink.save();
+
+      return res.json({ success: true, shortId });
+    } else {
+      // Normal kullanıcı isteği ise direkt video linklerini döndür
+      return res.json({
+        success: true,
+        video: {
+          play: data.data.play,
+          hdplay: data.data.hdplay,
+          music: data.data.music,
+          username: data.data.author?.unique_id || 'unknown',
+          title: data.data.title,
+          cover: data.data.cover
+        }
+      });
+    }
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: 'Sunucu hatası.' });
