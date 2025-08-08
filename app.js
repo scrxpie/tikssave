@@ -11,14 +11,15 @@ const Download = require('./models/Download');
 const VideoLink = require('./models/VideoLink');
 const { customAlphabet } = require('nanoid');
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
-const axios = require('axios')
+const axios = require('axios');
+
 const app = express();
 
 function generateShortId() {
   return nanoid();
 }
 
-// Middleware
+// Middleware ayarları
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -36,7 +37,7 @@ mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+  .catch(err => console.error(err));
 
 // Ana sayfa
 app.get('/', async (req, res) => {
@@ -44,10 +45,36 @@ app.get('/', async (req, res) => {
   const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
   await visit.save();
   const count = await Visit.countDocuments();
-  res.render('index', { count, videoData: null }); // videoData null çünkü ana sayfa
+  res.render('index', { count, videoData: null });
 });
 
-// TikTok API bilgisi
+// Sabit rotalar (admin, privacy, discord, vb.)
+app.get('/discord', (req, res) => {
+  res.render('discord');
+});
+
+app.get('/admin/login', (req, res) => {
+  res.render('admin/login');
+});
+
+app.get('/admin/dashboard', (req, res) => {
+  // Giriş kontrolü buraya eklenmeli
+  res.render('admin/dashboard');
+});
+
+app.get('/privacy', (req, res) => {
+  res.render('privacy');
+});
+
+app.get('/terms', (req, res) => {
+  res.render('terms');
+});
+
+app.get('/rights', (req, res) => {
+  res.render('rights');
+});
+
+// API: TikTok video bilgisi alma
 app.post('/get-links', async (req, res) => {
   const { url } = req.body;
   try {
@@ -126,7 +153,7 @@ app.post('/tiktok', async (req, res) => {
       });
     }
 
-    // BOT'tan geldiyse kaydet (depolama işlemi)
+    // BOT'tan geldiyse kaydet
     let shortId;
     let exists;
     do {
@@ -156,59 +183,27 @@ app.post('/tiktok', async (req, res) => {
   }
 });
 
-// GET /:shortId → Ana sayfada link girilmiş gibi göster
-// GET /:shortId → Ana sayfada link girilmiş gibi göster
-// GET /:shortId → Ana sayfada link girilmiş gibi göster
-app.get('/:shortId', async (req, res) => {
+// Kısa link yönlendirme (GET /s/:shortId)
+app.get('/s/:shortId', async (req, res) => {
   const videoData = await VideoLink.findOne({ shortId: req.params.shortId });
   if (!videoData) return res.status(404).send('Video bulunamadı');
 
   const accept = req.headers['accept'] || '';
   const userAgent = (req.headers['user-agent'] || '').toLowerCase();
 
-  // Eğer istek video/mp4 gibi içerik kabul ediyorsa veya user-agent Discord/Telegram gibi video önizlemesi yapıyorsa
+  // Eğer istek video/mp4 veya Discord/Telegram preview isteği ise direkt videoya yönlendir
   if (accept.includes('video/mp4') || userAgent.includes('discord') || userAgent.includes('telegram')) {
-    // Video dosyasına redirect et veya stream olarak gönder
     return res.redirect(videoData.hdplay || videoData.play);
   }
 
-  // Normal tarayıcı isteği ise frontend render et
+  // Normal istekse frontend render et
   res.render('index', { videoData });
-});
-
-// Admin panel ve diğer rotalar buraya gelir...
-app.get('/admin/login', (req, res) => {
-  res.render('admin/login');
-});
-
-// Admin dashboard
-app.get('/admin/dashboard', (req, res) => {
-  // Giriş kontrolü yapılmalı (oturum vs.)
-  res.render('admin/dashboard');
-});
-
-// Gizlilik politikası
-app.get('/privacy', (req, res) => {
-  res.render('privacy');
-});
-
-// Kullanım şartları
-app.get('/terms', (req, res) => {
-  res.render('terms');
-});
-
-// Haklar (rights) sayfası
-app.get('/rights', (req, res) => {
-  res.render('rights');
-});
-app.get('/discord', (req, res) => {
-  res.render('discord');
 });
 
 // 404 fallback
 app.use((req, res) => {
   res.status(404).render('404');
-})
+});
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
