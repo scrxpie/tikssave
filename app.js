@@ -160,25 +160,31 @@ app.post('/tiktok', async (req, res) => {
 // GET /:shortId → Ana sayfada link girilmiş gibi göster
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
-  console.log('Kısa link isteği geldi:', shortId);
 
   try {
     const videoData = await VideoLink.findOne({ shortId });
     if (!videoData) {
-      return res.status(404).render('partials/404'); // isteğe bağlı
+      return res.status(404).render('partials/error', {
+        message: 'Video bulunamadı veya kaldırılmış.'
+      });
     }
 
-    // index.ejs içine video bilgilerini gönderiyoruz
+    // View'a gönderilecek veriler
     res.render('index', {
-      videoData: {
-        title: videoData.title,
-        thumbnail: videoData.thumbnail,
-        play: videoData.play,
-        hdplay: videoData.hdplay,
-        username: videoData.author?.unique_id || "Undefined",
-        nickname: videoData.author?.nickname || "Undefined"
-      }
+      shortId,
+      videoUrl: videoData.hdplay || videoData.play,
+      title: videoData.title,
+      thumbnail: videoData.cover,
+      username: videoData.author?.nickname || 'Bilinmiyor',
     });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('partials/error', {
+      message: 'Sunucu hatası oluştu.'
+    });
+  }
+});
 
   } catch (err) {
     console.error(err);
