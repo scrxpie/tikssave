@@ -103,6 +103,8 @@ app.get('/proxy-download', async (req, res) => {
 // Kısa bağlantı oluştur (POST /tiktok)
 app.post('/tiktok', async (req, res) => {
   const { url } = req.body;
+  const isBot = req.headers['x-source'] === 'bot';
+
   if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
 
   try {
@@ -113,6 +115,22 @@ app.post('/tiktok', async (req, res) => {
       return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
     }
 
+    // Eğer bot değilse sadece bilgileri döndür
+    if (!isBot) {
+      return res.json({
+        success: true,
+        video: {
+          play: data.data.play,
+          hdplay: data.data.hdplay,
+          music: data.data.music,
+          username: data.data.author?.unique_id || 'unknown',
+          title: data.data.title,
+          cover: data.data.cover
+        }
+      });
+    }
+
+    // BOT'tan geldiyse kaydet (depolama işlemi)
     let shortId;
     let exists;
     do {
@@ -129,10 +147,13 @@ app.post('/tiktok', async (req, res) => {
       title: data.data.title,
       cover: data.data.cover
     });
-console.log('Normal:', data.data.play);
-console.log('HD:', data.data.hdplay);
+
     await newVideoLink.save();
+
+    console.log('Depolanan video:', data.data.play);
+
     res.json({ success: true, shortId });
+
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: 'Sunucu hatası.' });
