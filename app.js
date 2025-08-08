@@ -155,22 +155,21 @@ app.post('/tiktok', async (req, res) => {
   }
 });
 
+// GET /:shortId → Ana sayfada link girilmiş gibi göster
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
-  console.log('Kısa link isteği geldi:', shortId);
 
   try {
     const videoData = await VideoLink.findOne({ shortId });
-    if (!videoData) {
-      console.log('Video bulunamadı:', shortId);
-      return res.status(404).send('Video bulunamadı veya kaydedilmemiş.');
-    }
+    if (!videoData) return res.status(404).send('Video could not be found.');
 
-    // HD varsa onu, yoksa normal play linkini kullan
-    const videoUrl = videoData.hdplay || videoData.play;
+    const count = await Visit.countDocuments(); // index.ejs için lazım
 
-    // Direkt MP4'e yönlendir
-    return res.redirect(videoUrl);
+    res.render('index', {
+      count,
+      prefill: true, // video önizlemesini tetiklemek için flag
+      videoData
+    });
 
   } catch (err) {
     console.error(err);
