@@ -157,6 +157,7 @@ app.post('/tiktok', async (req, res) => {
 });
 
 // GET /:shortId → Ana sayfada link girilmiş gibi göster
+// GET /:shortId → Ana sayfada link girilmiş gibi göster
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
 
@@ -164,29 +165,17 @@ app.get('/:shortId', async (req, res) => {
     const videoData = await VideoLink.findOne({ shortId });
     if (!videoData) return res.status(404).send('Video bulunamadı.');
 
-    // Yeniden veri çek
-    const response = await axios.get(`https://tikwm.com/api/?url=${videoData.originalUrl}`);
-    const data = response.data;
-
-    if (!data || !data.data || !data.data.play) {
-      return res.status(500).send('Video alınamadı.');
+    // Eğer video verisi eksikse veya belirli bir süreden sonra erişilemezse
+    if (!videoData.videoUrl || !videoData.originalUrl) {
+      return res.status(410).send('Video süresi dolmuş veya silinmiş olabilir.');
     }
 
-    // Yeni mp4 URL'si
-    const updatedVideo = {
-      ...videoData.toObject(),
-      videoUrl: data.data.play,
-      title: data.data.title,
-      thumbnail: data.data.cover,
-      username: data.data.author.nickname
-    };
-
-    const count = await Visit.countDocuments();
+    const count = await Visit.countDocuments(); // index.ejs için toplam ziyaret sayısı
 
     res.render('index', {
       count,
       prefill: true,
-      videoData: updatedVideo
+      videoData
     });
 
   } catch (err) {
