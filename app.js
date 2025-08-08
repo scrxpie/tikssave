@@ -187,6 +187,38 @@ app.get('/:shortId', async (req, res) => {
 });
 
 // Admin panel ve diğer rotalar buraya gelir...
+app.get('/admin/login', (req, res) => {
+  res.render('admin/login');
+});
+
+// Admin dashboard
+app.get('/admin/dashboard', (req, res) => {
+  // Giriş kontrolü yapılmalı (oturum vs.)
+  res.render('admin/dashboard');
+});
+
+// Gizlilik politikası
+app.get('/privacy', (req, res) => {
+  res.render('privacy');
+});
+
+// Kullanım şartları
+app.get('/terms', (req, res) => {
+  res.render('terms');
+});
+
+// Haklar (rights) sayfası
+app.get('/rights', (req, res) => {
+  res.render('rights');
+});
+app.get('/discord', (req, res) => {
+  res.render('discord');
+});
+
+// 404 fallback
+app.use((req, res) => {
+  res.status(404).render('404');
+})
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Running on port ${PORT}`));
