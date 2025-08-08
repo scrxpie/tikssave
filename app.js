@@ -8,7 +8,7 @@ const sanitize = require('sanitize-filename');
 const session = require('express-session');
 const Visit = require('./models/Visit');
 const Download = require('./models/Download');
-const VideoLink = require('./models/VideoLink'); // Kullanılıyor ama save yok artık
+const VideoLink = require('./models/VideoLink');
 const { customAlphabet } = require('nanoid');
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
 
@@ -47,63 +47,7 @@ app.get('/', async (req, res) => {
   res.render('index', { count, videoData: null }); // videoData null çünkü ana sayfa
 });
 
-// TikTok API bilgisi (bu endpoint artık sadece veriyi döner, kaydetmez)
-app.post('/tiktok', async (req, res) => {
-  const { url } = req.body;
-  const isBot = req.headers['x-source'] === 'bot';
-
-  if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
-
-  try {
-    const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
-    const data = await response.json();
-
-    if (!data || data.code !== 0) {
-      return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
-    }
-
-    if (isBot) {
-      // BOT isteği ise shortId oluştur, kaydet, döndür
-      let shortId;
-      let exists;
-      do {
-        shortId = generateShortId();
-        exists = await VideoLink.findOne({ shortId });
-      } while (exists);
-
-      const newVideoLink = new VideoLink({
-        shortId,
-        play: data.data.play,
-        hdplay: data.data.hdplay,
-        music: data.data.music,
-        username: data.data.author?.unique_id || 'unknown',
-        title: data.data.title,
-        cover: data.data.cover
-      });
-
-      await newVideoLink.save();
-
-      return res.json({ success: true, shortId });
-    } else {
-      // Normal kullanıcı isteği ise direkt video linklerini döndür
-      return res.json({
-        success: true,
-        video: {
-          play: data.data.play,
-          hdplay: data.data.hdplay,
-          music: data.data.music,
-          username: data.data.author?.unique_id || 'unknown',
-          title: data.data.title,
-          cover: data.data.cover
-        }
-      });
-    }
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, message: 'Sunucu hatası.' });
-  }
-});
-
+// TikTok API bilgisi
 app.post('/get-links', async (req, res) => {
   const { url } = req.body;
   try {
@@ -129,10 +73,6 @@ app.post('/get-links', async (req, res) => {
   }
 });
 
-app.get('/discord', (req, res) => {
-  res.render('discord'); // views/discord.ejs dosyasını açacak
-});
-
 // Proxy indir
 app.get('/proxy-download', async (req, res) => {
   const { url, username, type } = req.query;
@@ -144,6 +84,7 @@ app.get('/proxy-download', async (req, res) => {
   const extension = type === 'music' ? 'mp3' : 'mp4';
   const safeUsername = sanitize((username || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
   const filename = `ttdownload_${safeUsername}_${Date.now()}.${extension}`;
+  console.log('Filename:', filename);
 
   https.get(url, fileRes => {
     res.setHeader('Content-Type', 'application/octet-stream');
@@ -155,64 +96,102 @@ app.get('/proxy-download', async (req, res) => {
   });
 });
 
-app.get('/privacy', (req, res) => {
-  res.render('privacy');
-});
+// Kısa bağlantı oluştur (POST /tiktok)
+app.post('/tiktok', async (req, res) => {
+  const { url } = req.body;
+  const isBot = req.headers['x-source'] === 'bot';
 
-app.get('/contact', (req, res) => {
-  res.render('contact');
-});
+  if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
 
-app.get('/terms', (req, res) => {
-  res.render('terms');
-});
+  try {
+    const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
+    const data = await response.json();
 
-app.get('/rights', (req, res) => {
-  res.render('rights');
-});
+    if (!data || data.code !== 0) {
+      return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
+    }
 
-// GET /:shortId → embed veya önizleme göster (artık db'den bir şey gelmeyecek, VideoLink kaydı yok)
-app.get('/:shortId', async (req, res) => {
-  // artık db'de kayıt olmadığı için videoData çekilmiyor
-  // dilersen bu route'u iptal edebilirsin ya da sadece hata dönersin
-  res.status(404).send('Video bulunamadı veya kayıt edilmemiş.');
-});
+    // Eğer bot değilse sadece bilgileri döndür
+    if (!isBot) {
+      return res.json({
+        success: true,
+        video: {
+          play: data.data.play,
+          hdplay: data.data.hdplay,
+          music: data.data.music,
+          username: data.data.author?.unique_id || 'unknown',
+          title: data.data.title,
+          cover: data.data.cover
+        }
+      });
+    }
 
-// Admin panel
-app.get('/admin/login', (req, res) => {
-  res.render('admin/login', { error: null });
-});
+    // BOT'tan geldiyse kaydet (depolama işlemi)
+    let shortId;
+    let exists;
+    do {
+      shortId = generateShortId();
+      exists = await VideoLink.findOne({ shortId });
+    } while (exists);
 
-app.post('/admin/login', (req, res) => {
-  const { password } = req.body;
-  if (password === process.env.ADMIN_PASSWORD) {
-    req.session.authenticated = true;
-    res.redirect('/admin/dashboard');
-  } else {
-    res.render('admin/login', { error: 'Wrong password' });
+    const newVideoLink = new VideoLink({
+      shortId,
+      play: data.data.play,
+      hdplay: data.data.hdplay,
+      music: data.data.music,
+      username: data.data.author?.unique_id || 'unknown',
+      title: data.data.title,
+      cover: data.data.cover
+    });
+
+    await newVideoLink.save();
+    console.log('Depolanan video:', newVideoLink);
+
+    res.json({ success: true, shortId });
+
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
 
-app.get('/admin/dashboard', async (req, res) => {
-  if (!req.session.authenticated) return res.redirect('/admin/login');
+app.get('/:shortId', async (req, res) => {
+  const { shortId } = req.params;
+  console.log('Kısa link isteği geldi:', shortId);
 
-  const total = await Visit.countDocuments();
-  const today = await Visit.countDocuments({
-    createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
-  });
+  try {
+    const videoData = await VideoLink.findOne({ shortId });
+    if (!videoData) {
+      console.log('Video bulunamadı:', shortId);
+      return res.status(404).send('Video bulunamadı veya kaydedilmemiş.');
+    }
 
-  const uniqueVisitors = await Visit.distinct('ip');
-  const totalDownloads = await Download.countDocuments();
-  const visits = await Visit.find().sort({ createdAt: -1 }).limit(20);
+    const ua = req.headers['user-agent']?.toLowerCase() || '';
+    const isBot = ['telegram', 'discord', 'twitter', 'whatsapp', 'facebook', 'linkedin', 'bot'].some(agent =>
+      ua.includes(agent)
+    );
 
-  res.render('admin/dashboard', {
-    total,
-    today,
-    totalUnique: uniqueVisitors.length,
-    totalDownloads,
-    visits
-  });
+    if (isBot) {
+      return res.render('embed', {
+        videoUrl: videoData.play,
+        title: videoData.title || 'TikTok Video',
+        thumbnail: videoData.cover || null
+      });
+    }
+
+    const count = await Visit.countDocuments();
+    res.render('index', {
+      count,
+      prefill: true,
+      videoData
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Sunucu hatası.');
+  }
 });
+
+// Admin panel ve diğer rotalar buraya gelir...
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Running on port ${PORT}`));
