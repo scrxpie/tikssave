@@ -160,24 +160,20 @@ app.post('/tiktok', async (req, res) => {
 // GET /:shortId → Ana sayfada link girilmiş gibi göster
 // GET /:shortId → Ana sayfada link girilmiş gibi göster
 app.get('/:shortId', async (req, res) => {
-  const { shortId } = req.params;
+  const videoData = await VideoLink.findOne({ shortId: req.params.shortId });
+  if (!videoData) return res.status(404).send('Video bulunamadı');
 
-  try {
-    const videoData = await VideoLink.findOne({ shortId });
-    if (!videoData) {
-      return res.status(404).render('404', { message: 'Video bulunamadı.' });
-    }
+  const accept = req.headers['accept'] || '';
+  const userAgent = (req.headers['user-agent'] || '').toLowerCase();
 
-    res.render('index', {
-      videoData: videoData,
-      // Burada videoData içinde discordcdn linki olsun
-      // Örneğin: videoData.play veya videoData.hdplay
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).render('500', { message: 'Sunucu hatası.' });
+  // Eğer istek video/mp4 gibi içerik kabul ediyorsa veya user-agent Discord/Telegram gibi video önizlemesi yapıyorsa
+  if (accept.includes('video/mp4') || userAgent.includes('discord') || userAgent.includes('telegram')) {
+    // Video dosyasına redirect et veya stream olarak gönder
+    return res.redirect(videoData.hdplay || videoData.play);
   }
+
+  // Normal tarayıcı isteği ise frontend render et
+  res.render('index', { videoData });
 });
 
 // Admin panel ve diğer rotalar buraya gelir...
