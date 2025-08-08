@@ -6,12 +6,15 @@ const fetch = require('node-fetch');
 const https = require('https');
 const sanitize = require('sanitize-filename');
 const session = require('express-session');
+const fs = require('fs');
+const axios = require('axios');
+const { customAlphabet } = require('nanoid');
+
 const Visit = require('./models/Visit');
 const Download = require('./models/Download');
 const VideoLink = require('./models/VideoLink');
-const { customAlphabet } = require('nanoid');
-const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
 
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
 const app = express();
 
 function generateShortId() {
@@ -44,7 +47,7 @@ app.get('/', async (req, res) => {
   const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
   await visit.save();
   const count = await Visit.countDocuments();
-  res.render('index', { count, videoData: null }); // videoData null çünkü ana sayfa
+  res.render('index', { count, videoData: null });
 });
 
 // TikTok API bilgisi
@@ -53,8 +56,6 @@ app.post('/get-links', async (req, res) => {
   try {
     const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
     const data = await response.json();
-
-    console.log('Tikwm API data:', data); // <-- buraya ekledim
 
     if (!data || data.code !== 0) {
       return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
@@ -74,31 +75,30 @@ app.post('/get-links', async (req, res) => {
     res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
-app.get('/discord', (req, res) => {
-  res.render('discord'); // views/discord.ejs dosyasını açacak
-});
-// Proxy indir
-app.get('/proxy-download', async (req, res) => {
-  const { url, username, type } = req.query;
-  if (!url) return res.status(400).send('Video linki yok');
 
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  await new Download({ url, ip }).save();
+// BunnyCDN'e upload eden fonksiyon
+async function uploadToBunnyCDN(filePath, fileName) {
+  const storageZone = process.env.BUNNY_STORAGE_ZONE;
+  const apiKey = process.env.BUNNY_API_KEY;
 
-  const extension = type === 'music' ? 'mp3' : 'mp4';
-  const safeUsername = sanitize((username || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
-  const filename = `ttdownload_${safeUsername}_${Date.now()}.${extension}`;
-  console.log('Filename:', filename);
+  const fileStream = fs.createReadStream(filePath);
+  const url = `https://storage.bunnycdn.com/${storageZone}/${fileName}`;
 
-  https.get(url, fileRes => {
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    fileRes.pipe(res);
-  }).on('error', err => {
-    console.error(err);
-    res.status(500).send('İndirme hatası.');
-  });
-});
+  try {
+    const response = await axios.put(url, fileStream, {
+      headers: {
+        AccessKey: apiKey,
+        'Content-Type': 'application/octet-stream'
+      },
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity
+    });
+    return response.status === 201 || response.status === 200;
+  } catch (error) {
+    console.error('BunnyCDN upload error:', error.response?.data || error.message);
+    return false;
+  }
+}
 
 // Kısa bağlantı oluştur (POST /tiktok)
 app.post('/tiktok', async (req, res) => {
@@ -115,22 +115,25 @@ app.post('/tiktok', async (req, res) => {
       return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
     }
 
-    // Eğer bot değilse sadece bilgileri döndür
-    if (!isBot) {
-      return res.json({
-        success: true,
-        video: {
-          play: data.data.play,
-          hdplay: data.data.hdplay,
-          music: data.data.music,
-          username: data.data.author?.unique_id || 'unknown',
-          title: data.data.title,
-          cover: data.data.cover
-        }
-      });
-    }
+    const videoUrl = data.data.play;
+    const videoFile = path.join(__dirname, 'tmp', `${Date.now()}.mp4`);
+    const fileStream = fs.createWriteStream(videoFile);
 
-    // BOT'tan geldiyse kaydet (depolama işlemi)
+    const download = await new Promise((resolve, reject) => {
+      https.get(videoUrl, response => {
+        response.pipe(fileStream);
+        fileStream.on('finish', () => {
+          fileStream.close(resolve);
+        });
+        fileStream.on('error', reject);
+      });
+    });
+
+    const safeFileName = sanitize(`${data.data.author?.unique_id}_${Date.now()}.mp4`);
+    const uploaded = await uploadToBunnyCDN(videoFile, safeFileName);
+
+    fs.unlinkSync(videoFile); // temp dosyayı sil
+
     let shortId;
     let exists;
     do {
@@ -140,7 +143,7 @@ app.post('/tiktok', async (req, res) => {
 
     const newVideoLink = new VideoLink({
       shortId,
-      play: data.data.play,
+      play: uploaded ? `https://${process.env.BUNNY_PULL_ZONE}/${safeFileName}` : videoUrl,
       hdplay: data.data.hdplay,
       music: data.data.music,
       username: data.data.author?.unique_id || 'unknown',
@@ -150,8 +153,6 @@ app.post('/tiktok', async (req, res) => {
 
     await newVideoLink.save();
 
-    console.log('Depolanan video:', data.data.play);
-
     res.json({ success: true, shortId });
 
   } catch (err) {
@@ -159,22 +160,15 @@ app.post('/tiktok', async (req, res) => {
     res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
-app.get('/privacy', (req, res) => {
-  res.render('privacy');
-});
 
-app.get('/contact', (req, res) => {
-  res.render('contact');
-});
-app.get('/terms', (req, res) => {
-  res.render('terms');
-});
-app.get('/rights', (req, res) => {
-  res.render('rights');
-});
-// **Burada asıl değişiklik: videoData ile index.ejs render et**
-// GET /:shortId → Ana sayfada link girilmiş gibi göster
-// GET /:shortId → Kısa bağlantı yönlendirme veya embed oynatma
+// Diğer sabit rotalar
+app.get('/privacy', (req, res) => res.render('privacy'));
+app.get('/contact', (req, res) => res.render('contact'));
+app.get('/terms', (req, res) => res.render('terms'));
+app.get('/rights', (req, res) => res.render('rights'));
+app.get('/discord', (req, res) => res.render('discord'));
+
+// Kısa bağlantı yönlendirme veya embed
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
 
@@ -188,14 +182,14 @@ app.get('/:shortId', async (req, res) => {
     );
 
     if (isBot) {
-  return res.render('embed', {
-    videoUrl: videoData.play,
-    title: videoData.title || 'TikTok Video',
-    thumbnail: videoData.cover || null
-  });
-}
+      return res.render('embed', {
+        videoUrl: videoData.play,
+        title: videoData.title || 'TikTok Video',
+        thumbnail: videoData.cover || null
+      });
+    }
 
-    const count = await Visit.countDocuments(); // index.ejs için ziyaretçi sayısı
+    const count = await Visit.countDocuments();
     res.render('index', {
       count,
       prefill: true,
@@ -229,7 +223,6 @@ app.get('/admin/dashboard', async (req, res) => {
   const today = await Visit.countDocuments({
     createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
   });
-  
 
   const uniqueVisitors = await Visit.distinct('ip');
   const totalDownloads = await Download.countDocuments();
