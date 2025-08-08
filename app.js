@@ -166,25 +166,12 @@ app.get('/:shortId', async (req, res) => {
       return res.status(404).send('Video bulunamadı veya kaydedilmemiş.');
     }
 
-    const ua = req.headers['user-agent']?.toLowerCase() || '';
-    const isBot = ['telegram', 'discord', 'twitter', 'whatsapp', 'facebook', 'linkedin', 'bot'].some(agent =>
-      ua.includes(agent)
-    );
+    // HD varsa onu, yoksa normal play linkini kullan
+    const videoUrl = videoData.hdplay || videoData.play;
 
-    if (isBot) {
-      return res.render('embed', {
-        videoUrl: videoData.play,
-        title: videoData.title || 'TikTok Video',
-        thumbnail: videoData.cover || null
-      });
-    }
+    // Direkt MP4'e yönlendir
+    return res.redirect(videoUrl);
 
-    const count = await Visit.countDocuments();
-    res.render('index', {
-      count,
-      prefill: true,
-      videoData
-    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Sunucu hatası.');
