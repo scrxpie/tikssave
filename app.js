@@ -161,14 +161,31 @@ app.get('/:shortId', async (req, res) => {
 
   try {
     const videoData = await VideoLink.findOne({ shortId });
-    if (!videoData) return res.status(404).send('Video could not be found.');
+    if (!videoData) return res.status(404).send('Video bulunamadı.');
 
-    const count = await Visit.countDocuments(); // index.ejs için lazım
+    // Yeniden veri çek
+    const response = await axios.get(`https://tikwm.com/api/?url=${videoData.originalUrl}`);
+    const data = response.data;
+
+    if (!data || !data.data || !data.data.play) {
+      return res.status(500).send('Video alınamadı.');
+    }
+
+    // Yeni mp4 URL'si
+    const updatedVideo = {
+      ...videoData.toObject(),
+      videoUrl: data.data.play,
+      title: data.data.title,
+      thumbnail: data.data.cover,
+      username: data.data.author.nickname
+    };
+
+    const count = await Visit.countDocuments();
 
     res.render('index', {
       count,
-      prefill: true, // video önizlemesini tetiklemek için flag
-      videoData
+      prefill: true,
+      videoData: updatedVideo
     });
 
   } catch (err) {
