@@ -381,7 +381,7 @@
       <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.hdplay) %>&username=<%= encodeURIComponent(videoData.username) %>&type=hdplay">📽️ HD Video (High Quality)</a>
     <% } %>
   </div>
-
+<%- include('partials/preview', { videoData }) %>
 
 
   <section id="about" aria-label="About TikTok Downloader">
