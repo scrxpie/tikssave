@@ -166,14 +166,16 @@ app.get('/:shortId', async (req, res) => {
     const videoData = await VideoLink.findOne({ shortId });
     if (!videoData) {
       console.log('Video bulunamadı:', shortId);
-      return res.status(404).send('Video bulunamadı veya kaydedilmemiş.');
+      return res.status(404).send('Video could not be found');
     }
 
-    // HD varsa onu, yoksa normal play linkini kullan
     const videoUrl = videoData.hdplay || videoData.play;
 
-    // Direkt MP4'e yönlendir
-    return res.redirect(videoUrl);
+    // EJS sayfasını render et
+    return res.render('video', {
+      videoUrl,
+      username: videoData.author?.unique_id || 'unknown'
+    });
 
   } catch (err) {
     console.error(err);
