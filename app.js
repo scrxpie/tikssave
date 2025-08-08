@@ -165,30 +165,18 @@ app.get('/:shortId', async (req, res) => {
   try {
     const videoData = await VideoLink.findOne({ shortId });
     if (!videoData) {
-      return res.status(404).render('partials/error', {
-        message: 'Video bulunamadı veya kaldırılmış.'
-      });
+      return res.status(404).render('404', { message: 'Video bulunamadı.' });
     }
 
-    const count = await Visit.countDocuments();
-
-    // View'a gönderilecek veriler
     res.render('index', {
-      count,
-      prefill: true,
-      videoData: {
-        videoUrl: videoData.hdplay || videoData.play,
-        title: videoData.title,
-        thumbnail: videoData.cover,
-        username: videoData.username || 'Bilinmiyor',
-      }
+      videoData: videoData,
+      // Burada videoData içinde discordcdn linki olsun
+      // Örneğin: videoData.play veya videoData.hdplay
     });
 
   } catch (err) {
     console.error(err);
-    res.status(500).render('partials/error', {
-      message: 'Sunucu hatası oluştu.'
-    });
+    res.status(500).render('500', { message: 'Sunucu hatası.' });
   }
 });
 
