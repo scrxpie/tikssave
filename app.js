@@ -141,7 +141,8 @@ app.post('/tiktok', async (req, res) => {
       music: data.data.music,
       username: data.data.author?.unique_id || 'unknown',
       title: data.data.title,
-      cover: data.data.cover
+      cover: data.data.cover,
+      originalUrl: url
     });
 
     await newVideoLink.save();
