@@ -8,7 +8,7 @@ const videoLinkSchema = new mongoose.Schema({
   username: String,
   title: String,
   cover: String,
-  createdAt: { type: Date, default: Date.now, expires: 60 * 60 * 24 * 7 } // 7 gün sonra otomatik silinsin
+  createdAt: { type: Date, default: Date.now } // 7 gün sonra otomatik silinsin
 });
 
 module.exports = mongoose.model('VideoLink', videoLinkSchema);
