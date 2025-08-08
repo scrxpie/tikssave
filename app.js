@@ -158,6 +158,7 @@ app.post('/tiktok', async (req, res) => {
 
 // GET /:shortId → Ana sayfada link girilmiş gibi göster
 // GET /:shortId → Ana sayfada link girilmiş gibi göster
+// GET /:shortId → Ana sayfada link girilmiş gibi göster
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
 
@@ -169,13 +170,18 @@ app.get('/:shortId', async (req, res) => {
       });
     }
 
+    const count = await Visit.countDocuments();
+
     // View'a gönderilecek veriler
     res.render('index', {
-      shortId,
-      videoUrl: videoData.hdplay || videoData.play,
-      title: videoData.title,
-      thumbnail: videoData.cover,
-      username: videoData.author?.nickname || 'Bilinmiyor',
+      count,
+      prefill: true,
+      videoData: {
+        videoUrl: videoData.hdplay || videoData.play,
+        title: videoData.title,
+        thumbnail: videoData.cover,
+        username: videoData.username || 'Bilinmiyor',
+      }
     });
 
   } catch (err) {
@@ -183,12 +189,6 @@ app.get('/:shortId', async (req, res) => {
     res.status(500).render('partials/error', {
       message: 'Sunucu hatası oluştu.'
     });
-  }
-});
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error');
   }
 });
 
