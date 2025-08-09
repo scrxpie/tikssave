@@ -4,17 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="google-site-verification" content="A-osCnksN_PbAHpZ4wRNw1jsBp4uCZmst-6XQcTC4dI" />
-
-</body>
-
-  <title>TikTok Downloader</title>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5298191242036107"
+  <title>TikTok Downloader - Download MP4 & MP3 without Watermarks</title>
+  <meta name="description" content="Download TikTok videos without watermarks for free. Our fast, safe, and easy-to-use downloader offers unlimited MP4 (HD) and MP3 downloads."/>
+  
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5298191242036107"
      crossorigin="anonymous"></script>
   <style>
     /* Reset ve temel ayarlar */
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #181a1f;
@@ -89,7 +86,7 @@
     button.paste-btn {
       background-color: #4b4f5a;
       color: #ccc;
-      order: 2; /* Sağda */
+      order: 2;
       box-shadow: inset 0 2px 6px #3a3d45;
     }
     button.paste-btn:hover {
@@ -120,7 +117,6 @@
       background-color: #3a6ee8;
       box-shadow: 0 0 28px #3a6ee8cc;
     }
-
     #options {
       flex-direction: column;
       gap: 18px;
@@ -159,7 +155,6 @@
       transform: translateY(1px);
       box-shadow: inset 0 2px 8px #3a6ee8aa;
     }
-
     #preview-container {
       max-width: 600px;
       margin-bottom: 50px;
@@ -190,7 +185,6 @@
       font-size: 1.4rem;
       text-shadow: 0 1px 3px rgba(79,142,247,0.7);
     }
-
     .accordion {
       width: 100%;
       max-width: 600px;
@@ -265,7 +259,6 @@
       transform: rotate(90deg);
       color: #f0f6ff;
     }
-
     #about {
       max-width: 600px;
       margin: 0 auto 60px;
@@ -286,7 +279,19 @@
     #about p {
       margin-bottom: 34px;
     }
-
+    #about ul {
+      list-style-type: '⚡ ';
+      padding-left: 20px;
+      margin-bottom: 34px;
+      color: #ddd;
+    }
+    #about li {
+      margin-bottom: 12px;
+    }
+    #about li span {
+      color: #fff;
+      font-weight: 700;
+    }
     footer {
       max-width: 600px;
       color: #666;
@@ -307,56 +312,33 @@
       color: #75a7ff;
       text-decoration: underline;
     }
-
     @media (max-width: 480px) {
-      h1 {
-        font-size: 2.2rem;
-      }
+      h1 { font-size: 2.2rem; }
       input[type="text"], button, .download-btn, .accordion-header {
         font-size: 1.15rem;
         padding: 14px 18px;
       }
-      #options {
-        max-width: 100%;
-      }
-      form#mainForm {
-        flex-direction: column;
-      }
+      #options { max-width: 100%; }
+      form#mainForm { flex-direction: column; }
       button.paste-btn, button.clear-btn {
-        order: 2;
-        width: 100%;
-        margin-top: 10px;
+        order: 2; width: 100%; margin-top: 10px;
       }
       button.fetch-btn {
-        order: 3;
-        width: 100%;
-        margin-top: 10px;
+        order: 3; width: 100%; margin-top: 10px;
       }
-      button {
-        width: 100%;
-        margin-top: 10px;
-      }
-      #about {
-        font-size: 1rem;
-        line-height: 1.5;
-        padding: 0 15px;
-      }
-      .accordion {
-        max-width: 100%;
-      }
-      #preview-container {
-        max-width: 100%;
-        padding: 14px;
-      }
-      .download-btn {
-        max-width: 100%;
-      }
+      button { width: 100%; margin-top: 10px; }
+      #about { font-size: 1rem; line-height: 1.5; padding: 0 15px; }
+      .accordion { max-width: 100%; }
+      #preview-container { max-width: 100%; padding: 14px; }
+      .download-btn { max-width: 100%; }
     }
   </style>
-
 </head>
 <body>
   <h1>TikTok Downloader</h1>
+  <p style="text-align: center; max-width: 600px; margin: -20px auto 40px; color: #aaa; line-height: 1.6; font-size: 1.1rem; font-weight: 500;">
+    Paste a TikTok video link below to download it without watermarks instantly in MP4 or MP3 format.
+  </p>
 
   <form id="mainForm" onsubmit="return false;">
     <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." autocomplete="off" required value="<%= videoData?.sourceUrl || '' %>" />
@@ -368,19 +350,13 @@
   <div id="preview-container" style="<%= videoData ? 'display:flex;' : 'display:none;' %>">
     <img id="preview-thumbnail" src="<%= videoData?.cover || '' %>" alt="Video thumbnail" />
     <h2 id="preview-title"><%= videoData?.title || '' %></h2>
-<% if (videoData?.hdplay || videoData?.play) { %>
-      <video
-        controls
-        preload="metadata"
-        poster="<%= videoData?.cover || '' %>"
-        style="width: 100%; max-width: 600px; border-radius: 16px; margin-top: 15px;"
-      >
+    <% if (videoData?.hdplay || videoData?.play) { %>
+      <video controls preload="metadata" poster="<%= videoData?.cover || '' %>" style="width: 100%; max-width: 600px; border-radius: 16px; margin-top: 15px;">
         <source src="<%= videoData?.hdplay || videoData?.play %>" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     <% } %>
   </div>
-
 
   <div id="options" style="<%= videoData ? 'display:flex; flex-direction: column; align-items:center; gap:16px;' : 'display:none;' %>">
     <% if (videoData?.music) { %>
@@ -393,117 +369,109 @@
       <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.hdplay) %>&username=<%= encodeURIComponent(videoData.username) %>&type=hdplay">📽️ HD Video (High Quality)</a>
     <% } %>
   </div>
-<%- include('partials/preview', { videoData }) %>
-
 
   <section id="about" aria-label="About TikTok Downloader">
-    <h2>Unlimited TikTok Downloads</h2>
-    <p>Download TikTok videos as much as you want without any limits — totally free and easy to use. Our downloader lets you save your favorite videos anytime, anywhere.</p>
+    <h2>Why Choose Tikssave.com?</h2>
+    <p>Tikssave.com is the fastest and safest way to download TikTok videos. Our user-friendly tool allows you to save any video in just a few seconds. No extra software or applications are needed.</p>
     
-    <h2>No Watermarks</h2>
-    <p>Save TikTok videos in MP4 format without any watermarks or TikTok logos — clean videos ready for sharing or personal use.</p>
+    <h2>No Watermarks and High Quality</h2>
+    <p>The videos you download will be free of TikTok watermarks or user logos. This means you get clean videos ready for sharing or personal use. Our HD download option ensures you get the best possible video quality.</p>
     
-    <h2>MP4 and MP3 Formats</h2>
-    <p>Choose to download videos in high-quality MP4 or convert to MP3 audio. Whether you want the video or just the sound, our tool makes it easy.</p>
-    
-    <h2>How to Download TikTok Videos</h2>
-    <p>
-      Simply paste the TikTok video link above, click “Download”, and then choose your preferred format and quality to download instantly. No registration or software needed.
-    </p>
+    <h2>Multiple Format Support</h2>
+    <p>With Tikssave.com, you can download not only the video but also the background music. You have the option to save the video as an MP4 or just the sound as an MP3 file.</p>
+
+    <h2>How to Use: Step-by-Step Guide</h2>
+    <ul>
+      <li><span>1.</span> Open the TikTok app and find the video you want to download.</li>
+      <li><span>2.</span> Tap the "Share" icon on the video and select "Copy Link."</li>
+      <li><span>3.</span> Return to Tikssave.com and paste the copied link into the input box above.</li>
+      <li><span>4.</span> Click the "Download" button and choose your preferred format to complete the download.</li>
+    </ul>
   </section>
 
   <section class="accordion" aria-label="Frequently Asked Questions">
     <div class="accordion-item">
       <button class="accordion-header" aria-expanded="false" aria-controls="faq1" id="faq1-button" tabindex="0">
-        How do I get the TikTok video link?
+        How do I find the TikTok video link?
       </button>
       <div id="faq1" class="accordion-content" role="region" aria-labelledby="faq1-button">
         <p>Open the TikTok app or website, tap “Share” on the video, then select “Copy Link” to get the video URL.</p>
       </div>
     </div>
-
+    
     <div class="accordion-item">
       <button class="accordion-header" aria-expanded="false" aria-controls="faq2" id="faq2-button" tabindex="0">
-        How do I paste the link and download?
+        Is this service completely free?
       </button>
       <div id="faq2" class="accordion-content" role="region" aria-labelledby="faq2-button">
-        <p>Paste the copied URL into the input box above, click “Download” to get download options, then click a button to start downloading.</p>
+        <p>Yes, Tikssave.com is a completely free service. You can download as many videos as you like without any charges.</p>
       </div>
     </div>
 
     <div class="accordion-item">
       <button class="accordion-header" aria-expanded="false" aria-controls="faq3" id="faq3-button" tabindex="0">
-        What download quality options are available?
+        Where are my downloaded videos saved on my device?
       </button>
       <div id="faq3" class="accordion-content" role="region" aria-labelledby="faq3-button">
-        <p>You can download audio only (MP3), standard video quality (SD), or high-quality video (HD) if available.</p>
+        <p>Your downloaded files are usually saved in your device's default "Downloads" folder or video gallery.</p>
       </div>
     </div>
 
     <div class="accordion-item">
-      <button class="accordion-header" aria-expanded="false" aria-controls="faq5" id="faq5-button" tabindex="0">
-        Is this service free and safe?
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq4" id="faq4-button" tabindex="0">
+        How do I choose the download quality?
       </button>
-      <div id="faq5" class="accordion-content" role="region" aria-labelledby="faq5-button">
-        <p>Yes! Our downloader is completely free and respects your privacy. We do not store your downloads.</p>
+      <div id="faq4" class="accordion-content" role="region" aria-labelledby="faq4-button">
+        <p>After you paste your link and click "Download," you will be presented with options to download the HD video, SD video, or MP3 (audio only).</p>
       </div>
     </div>
   </section>
-<!-- Tikssave on Discord Butonu (anasayfa altına) -->
-<a href="/discord" class="discord-redirect-btn" aria-label="Tikssave Bot on Discord">
-  <svg xmlns="http://www.w3.org/2000/svg" class="discord-icon" viewBox="0 0 256 199" fill="currentColor">
-    <path d="M216.856 16.597C198.36 8.298 179.215 3.068 159.877 0c-2.07 3.639-4.38 8.385-6.014 12.252-17.48-2.633-34.793-2.633-51.772 0-1.635-3.867-4.065-8.613-6.135-12.252-19.338 3.068-38.483 8.298-56.979 16.597C5.818 58.707-3.884 99.622.785 140.043c22.56 16.597 44.476 26.61 66.148 33.93 5.414-7.525 10.197-15.504 14.34-23.905-7.867-2.987-15.379-6.794-22.319-11.511 1.87-1.398 3.74-2.916 5.609-4.314 42.547 19.339 88.897 19.339 131.324 0 1.87 1.398 3.739 2.916 5.609 4.314-6.94 4.837-14.452 8.524-22.319 11.511 4.143 8.401 8.926 16.38 14.22 23.905 21.672-7.32 43.589-17.333 66.149-33.93 5.115-47.232-8.922-87.58-38.606-123.446l-.001-.001ZM85.207 124.838c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Zm85.586 0c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Z"/>
-  </svg>
-  Tikssave Bot on Discord
-</a>
-
-<style>
-.discord-redirect-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 40px auto;
-  padding: 14px 22px;
-  border-radius: 14px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  text-decoration: none;
-  background-color: #5865F2;
-  color: white;
-  box-shadow: 0 6px 12px rgba(88, 101, 242, 0.6);
-  transition: all 0.3s ease;
-}
-
-.discord-redirect-btn:hover {
-  background-color: #4752C4;
-  box-shadow: 0 8px 18px rgba(71, 82, 196, 0.8);
-  transform: translateY(-2px);
-}
-
-.discord-redirect-btn:active {
-  background-color: #3a3f90;
-  box-shadow: inset 0 3px 8px rgba(0,0,0,0.3);
-  transform: translateY(1px);
-}
-
-.discord-icon {
-  width: 26px;
-  height: 26px;
-  fill: currentColor;
-}
-
-  @media (max-width: 480px) {
-    .discord-redirect-btn {
-      font-size: 1rem;
-      padding: 10px 16px;
-    }
-    .discord-redirect-btn .discord-icon {
-      width: 22px;
-      height: 22px;
-    }
+  
+  <a href="/discord" class="discord-redirect-btn" aria-label="Tikssave Bot on Discord">
+    <svg xmlns="http://www.w3.org/2000/svg" class="discord-icon" viewBox="0 0 256 199" fill="currentColor">
+      <path d="M216.856 16.597C198.36 8.298 179.215 3.068 159.877 0c-2.07 3.639-4.38 8.385-6.014 12.252-17.48-2.633-34.793-2.633-51.772 0-1.635-3.867-4.065-8.613-6.135-12.252-19.338 3.068-38.483 8.298-56.979 16.597C5.818 58.707-3.884 99.622.785 140.043c22.56 16.597 44.476 26.61 66.148 33.93 5.414-7.525 10.197-15.504 14.34-23.905-7.867-2.987-15.379-6.794-22.319-11.511 1.87-1.398 3.74-2.916 5.609-4.314 42.547 19.339 88.897 19.339 131.324 0 1.87 1.398 3.739 2.916 5.609 4.314-6.94 4.837-14.452 8.524-22.319 11.511 4.143 8.401 8.926 16.38 14.22 23.905 21.672-7.32 43.589-17.333 66.149-33.93 5.115-47.232-8.922-87.58-38.606-123.446l-.001-.001ZM85.207 124.838c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Zm85.586 0c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Z"/>
+    </svg>
+    Tikssave Bot on Discord
+  </a>
+  <style>
+  /* Discord butonu CSS'i */
+  .discord-redirect-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 40px auto;
+    padding: 14px 22px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-decoration: none;
+    background-color: #5865F2;
+    color: white;
+    box-shadow: 0 6px 12px rgba(88, 101, 242, 0.6);
+    transition: all 0.3s ease;
   }
-</style>
+  .discord-redirect-btn:hover {
+    background-color: #4752C4;
+    box-shadow: 0 8px 18px rgba(71, 82, 196, 0.8);
+    transform: translateY(-2px);
+  }
+  .discord-redirect-btn:active {
+    background-color: #3a3f90;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.3);
+    transform: translateY(1px);
+  }
+  .discord-icon {
+    width: 26px;
+    height: 26px;
+    fill: currentColor;
+  }
+  @media (max-width: 480px) {
+    .discord-redirect-btn { font-size: 1rem; padding: 10px 16px; }
+    .discord-redirect-btn .discord-icon { width: 22px; height: 22px; }
+  }
+  </style>
+
   <footer>
     <p>© 2025 tikssave.com All rights reserved. | <a href="/terms">Terms of Service</a> | <a href="/privacy">Privacy Policy</a> | <a href="/rights">Rights</a></p>
   </footer>
@@ -555,7 +523,7 @@
     async function fetchLinks() {
       const url = videoUrlInput.value.trim();
       if (!url) {
-        alert("Please enter a TikTok URL.");
+        alert("Please enter a valid TikTok URL.");
         return;
       }
 
@@ -569,7 +537,7 @@
         const data = await res.json();
 
         if (!data.success) {
-          alert(data.message || "Failed to fetch download links.");
+          alert(data.message || "Failed to fetch download links. Please ensure the link is correct.");
           return;
         }
 
@@ -588,13 +556,13 @@
 
         optionsContainer.innerHTML = '';
         if (data.music) {
-          optionsContainer.innerHTML += `<button class="download-btn" onclick="download('music')">🎵 MP3 (Audio Only)</button>`;
+          optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.music)}&username=${encodeURIComponent(data.username)}&type=music">🎵 MP3 (Audio Only)</a>`;
         }
         if (data.play) {
-          optionsContainer.innerHTML += `<button class="download-btn" onclick="download('play')">📽️ SD Video (Normal Quality)</button>`;
+          optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.play)}&username=${encodeURIComponent(data.username)}&type=play">📽️ SD Video (Normal Quality)</a>`;
         }
         if (data.hdplay) {
-          optionsContainer.innerHTML += `<button class="download-btn" onclick="download('hdplay')">📽️ HD Video (High Quality)</button>`;
+          optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.hdplay)}&username=${encodeURIComponent(data.username)}&type=hdplay">📽️ HD Video (High Quality)</a>`;
         }
         optionsContainer.style.display = 'flex';
 
@@ -604,22 +572,6 @@
       }
     }
 
-    function download(type) {
-      if (!window.downloadData || !window.downloadData[type]) {
-        alert("Download link not available.");
-        return;
-      }
-      const urlEncoded = encodeURIComponent(window.downloadData[type]);
-      const username = encodeURIComponent(window.downloadData.username || '');
-      const link = document.createElement('a');
-      link.href = `/proxy-download?url=${urlEncoded}&username=${username}&type=${type}`;
-      link.setAttribute('download', '');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    }
-
-    // Accordion
     const accordions = document.querySelectorAll('.accordion-header');
     accordions.forEach(acc => {
       acc.addEventListener('click', () => {
@@ -627,15 +579,22 @@
 
         accordions.forEach(a => {
           a.setAttribute('aria-expanded', 'false');
-          document.getElementById(a.getAttribute('aria-controls')).classList.remove('open');
+          const content = document.getElementById(a.getAttribute('aria-controls'));
+          if (content) {
+            content.classList.remove('open');
+          }
         });
 
         if (!expanded) {
           acc.setAttribute('aria-expanded', 'true');
-          document.getElementById(acc.getAttribute('aria-controls')).classList.add('open');
+          const content = document.getElementById(acc.getAttribute('aria-controls'));
+          if (content) {
+            content.classList.add('open');
+          }
         }
       });
     });
   </script>
 </body>
 </html>
+
