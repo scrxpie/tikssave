@@ -371,19 +371,20 @@
   
 <!-- Add this block right below your thumbnail image and above the download buttons -->
 
-<% if (videoData && (videoData.hdplay || videoData.play)) { %>
-  <video controls style="max-width: 100%; border-radius: 14px; margin-bottom: 20px;" poster="<%= videoData.cover %>">
-    <% if (videoData.hdplay) { %>
-      <source src="<%= videoData.hdplay %>" type="video/mp4" />
+ <% if (videoData?.hdplay || videoData?.play) { %>
+      <video
+        controls
+        preload="metadata"
+        poster="<%= videoData?.cover || '' %>"
+        style="width: 100%; max-width: 600px; border-radius: 16px; margin-top: 15px;"
+      >
+        <source src="<%= videoData?.hdplay || videoData?.play %>" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
     <% } %>
-    <% if (videoData.play) { %>
-      <source src="<%= videoData.play %>" type="video/mp4" />
-    <% } %>
-    Your browser does not support the video tag.
-  </video>
-<% } %>
+  </div>
 
-</div>
+
 
   <div id="options" style="<%= videoData ? 'display:flex; flex-direction: column; align-items:center; gap:16px;' : 'display:none;' %>">
     <% if (videoData?.music) { %>
