@@ -100,6 +100,16 @@ app.post('/get-links', async (req, res) => {
   }
 });
 
+
+// ... diğer app.use kodların (router, body-parser vb.)
+
+app.use(express.static(path.join(__dirname, 'public')));
+// Eger sitemap.xml dosyaniz ana dizinde (proje kök klasöründe) ise
+// bu satırı ekleyebilirsiniz.
+app.use(express.static(__dirname)); 
+
+// ... diğer kodlar (router tanımlamaları, listen fonksiyonu vb.)
+
 // Proxy indir
 app.get('/proxy-download', async (req, res) => {
   const { url, username, type } = req.query;
