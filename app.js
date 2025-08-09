@@ -183,26 +183,21 @@ app.post('/tiktok', async (req, res) => {
   }
 });
 
-// Kısa link yönlendirme (GET /s/:shortId)
-app.get('/s/:shortId', async (req, res) => {
+app.get('/:shortId', async (req, res) => {
   const videoData = await VideoLink.findOne({ shortId: req.params.shortId });
   if (!videoData) return res.status(404).send('Video bulunamadı');
 
   const accept = req.headers['accept'] || '';
   const userAgent = (req.headers['user-agent'] || '').toLowerCase();
 
-  // Eğer istek video/mp4 veya Discord/Telegram preview isteği ise direkt videoya yönlendir
+  // Eğer istek video/mp4 gibi içerik kabul ediyorsa veya user-agent Discord/Telegram gibi video önizlemesi yapıyorsa
   if (accept.includes('video/mp4') || userAgent.includes('discord') || userAgent.includes('telegram')) {
+    // Video dosyasına redirect et veya stream olarak gönder
     return res.redirect(videoData.hdplay || videoData.play);
   }
 
-  // Normal istekse frontend render et
+  // Normal tarayıcı isteği ise frontend render et
   res.render('index', { videoData });
-});
-
-// 404 fallback
-app.use((req, res) => {
-  res.status(404).render('404');
 });
 
 const PORT = process.env.PORT || 3000;
