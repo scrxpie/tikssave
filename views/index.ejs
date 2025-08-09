@@ -369,12 +369,19 @@
     <img id="preview-thumbnail" src="<%= videoData?.cover || '' %>" alt="Video thumbnail" />
     <h2 id="preview-title"><%= videoData?.title || '' %></h2>
   
-<% if (videoData?.play) { %>
-    <video id="preview-video" controls preload="metadata" style="max-width: 100%; border-radius: 12px; margin-top: 12px;">
+<!-- Add this block right below your thumbnail image and above the download buttons -->
+
+<% if (videoData.hdplay || videoData.play) { %>
+  <video controls style="max-width: 100%; border-radius: 14px; margin-bottom: 20px;" poster="<%= videoData.cover %>">
+    <% if (videoData.hdplay) { %>
+      <source src="<%= videoData.hdplay %>" type="video/mp4" />
+    <% } %>
+    <% if (videoData.play) { %>
       <source src="<%= videoData.play %>" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-  <% } %>
+    <% } %>
+    Your browser does not support the video tag.
+  </video>
+<% } %>
 
 </div>
 
