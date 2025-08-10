@@ -89,8 +89,8 @@ app.post('/get-links', async (req, res) => {
       cover: data.data.cover
     });
   } catch (err) {
-      console.error(err);
-      res.json({ success: false, message: 'Sunucu hatası.' });
+    console.error(err);
+    res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
 
@@ -176,7 +176,7 @@ app.post('/tiktok', async (req, res) => {
   }
 });
 
-// Düzeltme burada!
+// BURADA GÜNCELLEME YAPILDI
 app.get('/:shortId', async (req, res) => {
   const videoData = await VideoLink.findOne({ shortId: req.params.shortId });
 
@@ -187,14 +187,13 @@ app.get('/:shortId', async (req, res) => {
   const userAgent = (req.headers['user-agent'] || '').toLowerCase();
   
   // Bilinen Discord veya Telegram user-agent'larını kontrol et
-  const isDiscordBot = userAgent.includes('discordbot');
-  const isTelegramBot = userAgent.includes('telegrambot');
+  const isDiscordOrTelegram = userAgent.includes('discordbot') || userAgent.includes('telegrambot');
 
-  // Veya eğer istek doğrudan bir video dosyası istiyorsa
+  // Veya eğer accept header'ı video istiyorsa (ki bu genellikle botlar için geçerlidir)
   const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
 
-  // Eğer istek bir bot'tan geliyorsa VEYA video önizlemesi istiyorsa
-  if (isDiscordBot || isTelegramBot || acceptsVideo) {
+  // Eğer istek bir bot'tan geliyorsa VEYA doğrudan video dosyası istiyorsa, yönlendir
+  if (isDiscordOrTelegram || acceptsVideo) {
     if (videoData.hdplay || videoData.play) {
       return res.redirect(307, videoData.hdplay || videoData.play);
     }
