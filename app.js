@@ -69,6 +69,7 @@ app.get('/rights', (req, res) => {
   res.render('rights');
 });
 
+// Artık bu rota, bot veya tarayıcıdan gelen isteğe göre direkt video linkini döndürüyor
 app.post('/get-links', async (req, res) => {
   const { url } = req.body;
   try {
@@ -126,42 +127,17 @@ app.post('/tiktok', async (req, res) => {
   if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
 
   try {
-    const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
-    const data = await response.json();
-
-    if (!data || data.code !== 0) {
-      return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
-    }
-
-    if (!isBot) {
-      return res.json({
-        success: true,
-        video: {
-          play: data.data.play,
-          hdplay: data.data.hdplay,
-          music: data.data.music,
-          username: data.data.author?.unique_id || 'unknown',
-          title: data.data.title,
-          cover: data.data.cover
-        }
-      });
-    }
-
+    // Burada artık veritabanına kaydetme işlemi yok, sadece shortId oluşturuluyor
     let shortId;
     let exists;
     do {
       shortId = generateShortId();
       exists = await VideoLink.findOne({ shortId });
     } while (exists);
-
+    
+    // Sadece kısa ID ve orijinal URL'yi kaydediyoruz
     const newVideoLink = new VideoLink({
       shortId,
-      play: data.data.play,
-      hdplay: data.data.hdplay,
-      music: data.data.music,
-      username: data.data.author?.unique_id || 'unknown',
-      title: data.data.title,
-      cover: data.data.cover,
       originalUrl: url
     });
 
@@ -176,31 +152,46 @@ app.post('/tiktok', async (req, res) => {
   }
 });
 
-// BURADA GÜNCELLEME YAPILDI
 app.get('/:shortId', async (req, res) => {
-  const videoData = await VideoLink.findOne({ shortId: req.params.shortId });
+  const videoLink = await VideoLink.findOne({ shortId: req.params.shortId });
 
-  if (!videoData) {
+  if (!videoLink) {
     return res.status(404).send('Video bulunamadı');
   }
-
-  const userAgent = (req.headers['user-agent'] || '').toLowerCase();
   
-  // Bilinen Discord veya Telegram user-agent'larını kontrol et
-  const isDiscordOrTelegram = userAgent.includes('discordbot') || userAgent.includes('telegrambot');
+  // Orijinal URL'den video bilgilerini her defasında yeniden çek
+  try {
+    const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(videoLink.originalUrl)}`);
+    const data = await response.json();
 
-  // Veya eğer accept header'ı video istiyorsa (ki bu genellikle botlar için geçerlidir)
-  const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
-
-  // Eğer istek bir bot'tan geliyorsa VEYA doğrudan video dosyası istiyorsa, yönlendir
-  if (isDiscordOrTelegram || acceptsVideo) {
-    if (videoData.hdplay || videoData.play) {
-      return res.redirect(307, videoData.hdplay || videoData.play);
+    if (!data || data.code !== 0) {
+      return res.status(404).send('Video bilgisi alınamadı.');
     }
-  }
 
-  // Aksi takdirde, sitenin ön yüzünü (frontend) render et
-  res.render('index', { videoData });
+    const videoData = {
+      play: data.data.play,
+      hdplay: data.data.hdplay,
+      music: data.data.music,
+      username: data.data.author?.unique_id || 'unknown',
+      title: data.data.title,
+      cover: data.data.cover
+    };
+
+    const userAgent = (req.headers['user-agent'] || '').toLowerCase();
+    const isDiscordOrTelegram = userAgent.includes('discordbot') || userAgent.includes('telegrambot');
+    const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
+
+    if (isDiscordOrTelegram || acceptsVideo) {
+      if (videoData.hdplay || videoData.play) {
+        return res.redirect(307, videoData.hdplay || videoData.play);
+      }
+    }
+    
+    res.render('index', { videoData });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Sunucu hatası.');
+  }
 });
 
 const PORT = process.env.PORT || 3000;
