@@ -19,7 +19,6 @@ function generateShortId() {
   return nanoid();
 }
 
-// Middleware ayarları
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -32,14 +31,12 @@ app.use(session({
   saveUninitialized: true
 }));
 
-// MongoDB bağlantısı
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.error(err));
 
-// Ana sayfa
 app.get('/', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
@@ -48,7 +45,6 @@ app.get('/', async (req, res) => {
   res.render('index', { count, videoData: null });
 });
 
-// Sabit rotalar (admin, privacy, discord, vb.)
 app.get('/discord', (req, res) => {
   res.render('discord');
 });
@@ -58,7 +54,6 @@ app.get('/admin/login', (req, res) => {
 });
 
 app.get('/admin/dashboard', (req, res) => {
-  // Giriş kontrolü buraya eklenmeli
   res.render('admin/dashboard');
 });
 
@@ -74,7 +69,6 @@ app.get('/rights', (req, res) => {
   res.render('rights');
 });
 
-// API: TikTok video bilgisi alma
 app.post('/get-links', async (req, res) => {
   const { url } = req.body;
   try {
@@ -95,22 +89,14 @@ app.post('/get-links', async (req, res) => {
       cover: data.data.cover
     });
   } catch (err) {
-    console.error(err);
-    res.json({ success: false, message: 'Sunucu hatası.' });
+      console.error(err);
+      res.json({ success: false, message: 'Sunucu hatası.' });
   }
 });
 
-
-// ... diğer app.use kodların (router, body-parser vb.)
-
 app.use(express.static(path.join(__dirname, 'public')));
-// Eger sitemap.xml dosyaniz ana dizinde (proje kök klasöründe) ise
-// bu satırı ekleyebilirsiniz.
 app.use(express.static(__dirname)); 
 
-// ... diğer kodlar (router tanımlamaları, listen fonksiyonu vb.)
-
-// Proxy indir
 app.get('/proxy-download', async (req, res) => {
   const { url, username, type } = req.query;
   if (!url) return res.status(400).send('Video linki yok');
@@ -133,7 +119,6 @@ app.get('/proxy-download', async (req, res) => {
   });
 });
 
-// Kısa bağlantı oluştur (POST /tiktok)
 app.post('/tiktok', async (req, res) => {
   const { url } = req.body;
   const isBot = req.headers['x-source'] === 'bot';
@@ -148,7 +133,6 @@ app.post('/tiktok', async (req, res) => {
       return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
     }
 
-    // Eğer bot değilse sadece bilgileri döndür
     if (!isBot) {
       return res.json({
         success: true,
@@ -163,7 +147,6 @@ app.post('/tiktok', async (req, res) => {
       });
     }
 
-    // BOT'tan geldiyse kaydet
     let shortId;
     let exists;
     do {
@@ -193,20 +176,31 @@ app.post('/tiktok', async (req, res) => {
   }
 });
 
+// Düzeltme burada!
 app.get('/:shortId', async (req, res) => {
   const videoData = await VideoLink.findOne({ shortId: req.params.shortId });
-  if (!videoData) return res.status(404).send('Video bulunamadı');
 
-  const accept = req.headers['accept'] || '';
-  const userAgent = (req.headers['user-agent'] || '').toLowerCase();
-
-  // Eğer istek video/mp4 gibi içerik kabul ediyorsa veya user-agent Discord/Telegram gibi video önizlemesi yapıyorsa
-  if (accept.includes('video/mp4') || userAgent.includes('discord') || userAgent.includes('telegram')) {
-    // Video dosyasına redirect et veya stream olarak gönder
-    return res.redirect(videoData.hdplay || videoData.play);
+  if (!videoData) {
+    return res.status(404).send('Video bulunamadı');
   }
 
-  // Normal tarayıcı isteği ise frontend render et
+  const userAgent = (req.headers['user-agent'] || '').toLowerCase();
+  
+  // Bilinen Discord veya Telegram user-agent'larını kontrol et
+  const isDiscordBot = userAgent.includes('discordbot');
+  const isTelegramBot = userAgent.includes('telegrambot');
+
+  // Veya eğer istek doğrudan bir video dosyası istiyorsa
+  const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
+
+  // Eğer istek bir bot'tan geliyorsa VEYA video önizlemesi istiyorsa
+  if (isDiscordBot || isTelegramBot || acceptsVideo) {
+    if (videoData.hdplay || videoData.play) {
+      return res.redirect(307, videoData.hdplay || videoData.play);
+    }
+  }
+
+  // Aksi takdirde, sitenin ön yüzünü (frontend) render et
   res.render('index', { videoData });
 });
 
