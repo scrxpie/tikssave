@@ -22,6 +22,7 @@ const port = process.env.PORT || 3000;
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const CALLBACK_URL = process.env.DISCORD_CALLBACK_URL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 // Yardımcı fonksiyonlar
 function generateShortId() {
@@ -37,7 +38,7 @@ app.use(express.json());
 
 // Session ve Passport ayarları
 app.use(session({
-  secret: process.env.SESSION_SECRET, // .env'den gelen gizli anahtar
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false
 }));
@@ -69,15 +70,30 @@ mongoose.connect(process.env.MONGO_URI, {
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.error(err));
 
-// Middleware: Kullanıcının giriş yapıp yapmadığını kontrol etmek için
-const isAuthenticated = (req, res, next) => {
+
+// --- MIDDLEWARE'LER ---
+
+// Discord ile giriş yapmış kullanıcının bilgilerini kontrol etmek için
+const discordAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
+    return next();
+  }
+  // Giriş yapılmamışsa dashboard sayfasına yönlendir, EJS içinde login butonu görünecek
+  res.redirect('/dashboard');
+};
+
+// Admin şifresiyle giriş yapmış kullanıcının session'ını kontrol etmek için
+const adminAuthenticated = (req, res, next) => {
+  if (req.session.isAdmin) {
     return next();
   }
   res.redirect('/admin/login');
 };
 
-// Rotalar
+
+// --- ROTLAR ---
+
+// Ana sayfa
 app.get('/', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
@@ -86,39 +102,12 @@ app.get('/', async (req, res) => {
   res.render('index', { count, videoData: null });
 });
 
+// Discord sayfası
 app.get('/discord', (req, res) => {
   res.render('discord');
 });
 
-// Admin giriş ve dashboard rotaları
-app.get('/admin/login', (req, res) => {
-  res.render('admin/login');
-});
-
-// OAuth akışını başlatan rota
-app.get('/auth/discord', passport.authenticate('discord'));
-
-// OAuth callback rotası
-app.get('/auth/discord/callback',
-  passport.authenticate('discord', { failureRedirect: '/admin/login' }),
-  (req, res) => {
-    res.redirect('/admin/dashboard');
-  }
-);
-
-// Admin Dashboard sayfası. Yalnızca giriş yapmış kullanıcılar erişebilir.
-app.get('/admin/dashboard', isAuthenticated, (req, res) => {
-  const user = req.user;
-  const guilds = user.guilds;
-
-  // Botu davet etme yetkisi olan sunucuları filtrele (MANAGE_GUILD yetkisi)
-  const manageableGuilds = guilds.filter(guild => {
-    return (guild.permissions & 0x20) === 0x20 || (guild.permissions & 0x8) === 0x8; // ADMINISTRATOR (0x8) veya MANAGE_GUILD (0x20)
-  });
-
-  res.render('admin/dashboard', { user: user, guilds: manageableGuilds });
-});
-
+// Privacy, Terms ve Rights sayfaları
 app.get('/privacy', (req, res) => {
   res.render('privacy');
 });
@@ -131,17 +120,83 @@ app.get('/rights', (req, res) => {
   res.render('rights');
 });
 
-// Diğer rotalar (get-links, proxy-download, tiktok, shortId) aynı kalabilir.
+
+// --- DİSCORD DASHBOARD ROTLARI ---
+
+// OAuth akışını başlatan rota
+app.get('/auth/discord', passport.authenticate('discord'));
+
+// OAuth callback rotası
+app.get('/auth/discord/callback',
+  passport.authenticate('discord', { failureRedirect: '/dashboard' }),
+  (req, res) => {
+    // Giriş başarılıysa, kullanıcıyı dashboard sayfasına yönlendir
+    res.redirect('/dashboard');
+  }
+);
+
+// Ana Discord Dashboard sayfası
+app.get('/dashboard', (req, res) => {
+  // Giriş yapılıp yapılmadığını kontrol et
+  if (!req.isAuthenticated()) {
+    // Giriş yapılmamışsa, user ve guilds null olarak gönderilir
+    return res.render('dashboard', { user: null, guilds: null });
+  }
+
+  // Kullanıcı Discord ile giriş yapmışsa
+  const user = req.user;
+  const guilds = user.guilds;
+
+  // Botu davet etme yetkisi olan sunucuları filtrele (MANAGE_GUILD yetkisi)
+  const manageableGuilds = guilds.filter(guild => {
+    // ADMINISTRATOR (0x8) veya MANAGE_GUILD (0x20) yetkisine sahip sunucuları al
+    return (guild.permissions & 0x20) === 0x20 || (guild.permissions & 0x8) === 0x8;
+  });
+
+  // Dashboard sayfasını, kullanıcı ve yetkili sunucu listesi ile render et
+  res.render('dashboard', { user: user, guilds: manageableGuilds });
+});
+
+
+// --- GENEL ADMIN ROTLARI ---
+
+// Admin giriş sayfası
+app.get('/admin/login', (req, res) => {
+  res.render('admin/login', { error: null });
+});
+
+// Admin giriş formunu işleyen rota
+app.post('/admin/login', (req, res) => {
+  const { password } = req.body;
+  if (password === ADMIN_PASSWORD) {
+    req.session.isAdmin = true;
+    res.redirect('/admin/dashboard');
+  } else {
+    res.render('admin/login', { error: 'Incorrect password.' });
+  }
+});
+
+// Admin Dashboard sayfası
+app.get('/admin/dashboard', adminAuthenticated, (req, res) => {
+  // Yönetici girişi yapılmışsa, admin dashboard sayfasını render et
+  res.render('admin/dashboard'); // Bu sayfayı ayrıca oluşturman gerekecek
+});
+
+// Diğer admin rotalarını buraya ekleyebilirsin...
+// app.get('/admin/stats', adminAuthenticated, (req, res) => { ... });
+// app.post('/admin/videos', adminAuthenticated, (req, res) => { ... });
+
+
+// --- API ROTLARI ---
+
 app.post('/get-links', async (req, res) => {
   const { url } = req.body;
   try {
     const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
     const data = await response.json();
-
     if (!data || data.code !== 0) {
       return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
     }
-
     res.json({
       success: true,
       play: data.data.play,
@@ -157,21 +212,15 @@ app.post('/get-links', async (req, res) => {
   }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(__dirname));
-
 app.get('/proxy-download', async (req, res) => {
   const { url, username, type } = req.query;
   if (!url) return res.status(400).send('Video linki yok');
-
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   await new Download({ url, ip }).save();
-
   const extension = type === 'music' ? 'mp3' : 'mp4';
   const safeUsername = sanitize((username || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
-  const filename = `tikssave_${safeUsername}_${Date.now()}.${extension}`;
+  const filename = `ttdownload_${safeUsername}_${Date.now()}.${extension}`;
   console.log('Filename:', filename);
-
   https.get(url, fileRes => {
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
@@ -184,9 +233,7 @@ app.get('/proxy-download', async (req, res) => {
 
 app.post('/tiktok', async (req, res) => {
   const { url } = req.body;
-
   if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
-
   try {
     let shortId;
     let exists;
@@ -194,17 +241,13 @@ app.post('/tiktok', async (req, res) => {
       shortId = generateShortId();
       exists = await VideoLink.findOne({ shortId });
     } while (exists);
-
     const newVideoLink = new VideoLink({
       shortId,
       originalUrl: url
     });
-
     await newVideoLink.save();
     console.log('Depolanan video:', newVideoLink);
-
     res.json({ success: true, shortId });
-
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: 'Sunucu hatası.' });
@@ -213,19 +256,15 @@ app.post('/tiktok', async (req, res) => {
 
 app.get('/:shortId', async (req, res) => {
   const videoLink = await VideoLink.findOne({ shortId: req.params.shortId });
-
   if (!videoLink) {
     return res.status(404).send('Video bulunamadı');
   }
-
   try {
     const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(videoLink.originalUrl)}`);
     const data = await response.json();
-
     if (!data || data.code !== 0) {
       return res.status(404).send('Video bilgisi alınamadı.');
     }
-
     const videoData = {
       play: data.data.play,
       hdplay: data.data.hdplay,
@@ -234,17 +273,14 @@ app.get('/:shortId', async (req, res) => {
       title: data.data.title,
       cover: data.data.cover
     };
-
     const userAgent = (req.headers['user-agent'] || '').toLowerCase();
     const isDiscordOrTelegram = userAgent.includes('discordbot') || userAgent.includes('telegrambot');
     const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
-
     if (isDiscordOrTelegram || acceptsVideo) {
       if (videoData.hdplay || videoData.play) {
         return res.redirect(307, videoData.hdplay || videoData.play);
       }
     }
-
     res.render('index', { videoData });
   } catch (err) {
     console.error(err);
