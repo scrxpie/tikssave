@@ -14,9 +14,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #181a1f;
-      color: #ddd;
-      padding-top: 80px; /* Navbar için boşluk bırakıldı */
+      background-color: #12121e; /* Daha koyu bir arkaplan rengi */
+      color: #f0f6ff; /* Daha açık ve canlı metin rengi */
+      padding-top: 80px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -31,37 +31,36 @@
         top: 0;
         left: 0;
         width: 100%;
-        background-color: #2a2e3b;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        background-color: #1a1a2b; /* Koyu navigasyon barı */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         display: flex;
-        justify-content: space-between; /* Menüyü ve logoyu iki yana yaslar */
+        justify-content: space-between;
         align-items: center;
-        padding: 15px 20px;
+        padding: 15px 40px; /* Kenar boşlukları artırıldı */
         z-index: 1000;
         transition: transform 0.3s ease-in-out;
     }
     .navbar.hidden {
         transform: translateY(-100%);
     }
-  .navbar .logo-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none; /* Bu satırı da ekleyin */
-}
-
+    .navbar .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
     .navbar .logo-container .logo-img {
         width: 30px;
         height: 30px;
         border-radius: 6px;
     }
    .navbar .logo-container .logo-text {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.5px;
-  text-decoration: none; /* Bu satırı ekleyin */
-}
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #7289da; /* Parlak mor/mavi renk */
+      letter-spacing: 0.5px;
+      text-decoration: none;
+    }
 
     .navbar .menu-toggle {
         width: 28px;
@@ -91,13 +90,13 @@
     .menu-panel {
         position: fixed;
         top: 60px;
-        right: 0; /* Menü paneli sağdan açılacak */
+        right: 0;
         width: 200px;
         height: calc(100vh - 60px);
-        background-color: #2a2e3b;
-        transform: translateX(100%); /* Başlangıçta gizli */
+        background-color: #1a1a2b; /* Menü paneli için aynı koyu renk */
+        transform: translateX(100%);
         transition: transform 0.3s ease-in-out;
-        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
         z-index: 999;
         display: flex;
         flex-direction: column;
@@ -107,16 +106,16 @@
         transform: translateX(0);
     }
     .menu-panel a {
-        color: #ddd;
+        color: #c9d6ef;
         text-decoration: none;
         font-size: 1rem;
         padding: 12px 10px;
-        border-bottom: 1px solid #2c2f36;
+        border-bottom: 1px solid #33334d;
         transition: background-color 0.2s ease;
     }
     .menu-panel a:hover {
-        background-color: #2c2f36;
-        color: #4f8ef7;
+        background-color: #33334d;
+        color: #7289da;
     }
 
     /* KODUN DİĞER BÖLÜMLERİ */
@@ -124,10 +123,10 @@
       font-size: 2.8rem;
       margin-bottom: 20px;
       text-align: center;
-      color: #4f8ef7;
+      color: #7289da; /* Parlak mor/mavi renk */
       font-weight: 900;
       user-select: none;
-      text-shadow: 0 2px 6px rgba(79,142,247,0.6);
+      text-shadow: 0 2px 8px rgba(114, 137, 218, 0.6);
     }
     form#mainForm {
       display: flex;
@@ -141,53 +140,53 @@
       flex: 1;
       padding: 18px 22px;
       font-size: 1.3rem;
-      border-radius: 14px;
-      border: 2px solid #2c2f36;
+      border-radius: 18px; /* Daha yuvarlak köşeler */
+      border: 2px solid #2a2a3f;
       outline: none;
-      background-color: #252931;
+      background-color: #1f1f33; /* Koyu arkaplan */
       color: #eee;
       transition: border-color 0.3s, box-shadow 0.3s;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
     }
     input[type="text"]::placeholder {
       color: #7a7f8c;
       font-weight: 500;
     }
     input[type="text"]:focus {
-      border-color: #4f8ef7;
-      box-shadow: 0 0 8px #4f8ef7aa;
-      background-color: #2f333d;
+      border-color: #7289da; /* Parlak mor/mavi odak rengi */
+      box-shadow: 0 0 12px #7289daaa;
+      background-color: #2a2a3f;
     }
     button {
       padding: 16px 28px;
       font-size: 1.25rem;
-      border-radius: 14px;
+      border-radius: 18px; /* Butonlara da yuvarlak köşeler */
       border: none;
       cursor: pointer;
       font-weight: 700;
-      transition: background-color 0.3s, box-shadow 0.3s;
+      transition: background-color 0.3s, box-shadow 0.3s, transform 0.1s;
       user-select: none;
       flex-shrink: 0;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
     button:hover {
       filter: brightness(1.1);
-      box-shadow: 0 6px 12px rgba(79,142,247,0.8);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.5);
     }
     button:active {
       filter: brightness(0.9);
       box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
     }
     button.paste-btn {
-      background-color: #4b4f5a;
+      background-color: #3b3d52; /* Daha hafif bir renk */
       color: #ccc;
       order: 2;
-      box-shadow: inset 0 2px 6px #3a3d45;
+      box-shadow: inset 0 2px 6px #2a2c3f;
     }
     button.paste-btn:hover {
-      background-color: #5f6490;
+      background-color: #4b4f6a;
       color: #fff;
-      box-shadow: 0 4px 10px #5f6490aa;
+      box-shadow: 0 4px 10px #4b4f6aaa;
     }
     button.clear-btn {
       background-color: #d9534f;
@@ -201,16 +200,16 @@
       box-shadow: 0 6px 12px #e74c3ccc;
     }
     button.fetch-btn {
-      background-color: #4f8ef7;
+      background-color: #7289da; /* Parlak mor/mavi renk */
       color: #fff;
-      box-shadow: 0 0 18px #4f8ef7bb;
+      box-shadow: 0 0 20px rgba(114, 137, 218, 0.6);
       order: 3;
       font-weight: 800;
       letter-spacing: 0.03em;
     }
     button.fetch-btn:hover {
-      background-color: #3a6ee8;
-      box-shadow: 0 0 28px #3a6ee8cc;
+      background-color: #677bcc;
+      box-shadow: 0 0 30px rgba(114, 137, 218, 0.8);
     }
     #options {
       flex-direction: column;
@@ -222,7 +221,7 @@
       display: none;
     }
     .download-btn {
-      background-color: #3159a5;
+      background-color: #36395b; /* Daha koyu bir renk */
       color: #b0c4f7;
       font-weight: 700;
       font-size: 1.35rem;
@@ -230,7 +229,7 @@
       border-radius: 18px;
       border: none;
       cursor: pointer;
-      box-shadow: 0 0 15px #4f8ef7a0;
+      box-shadow: 0 0 15px #7289daa0;
       transition: background-color 0.3s, box-shadow 0.3s, transform 0.15s ease;
       user-select: none;
       width: 100%;
@@ -241,14 +240,14 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .download-btn:hover {
-      background-color: #4f8ef7;
+      background-color: #7289da;
       color: #fff;
-      box-shadow: 0 0 28px #4f8ef7dd;
+      box-shadow: 0 0 28px #7289dadd;
       transform: translateY(-3px);
     }
     .download-btn:active {
       transform: translateY(1px);
-      box-shadow: inset 0 2px 8px #3a6ee8aa;
+      box-shadow: inset 0 2px 8px #677bcca0;
     }
     #preview-container {
       max-width: 600px;
@@ -258,9 +257,9 @@
       align-items: center;
       gap: 14px;
       border-radius: 18px;
-      background: #2a2e3b;
+      background: #1f1f33; /* Koyu arkaplan */
       padding: 18px 20px;
-      box-shadow: 0 8px 20px rgba(20,30,50,0.7);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.7);
       transition: background-color 0.3s ease;
       user-select: none;
     }
@@ -272,20 +271,20 @@
       pointer-events: none;
     }
     #preview-container h2 {
-      color: #4f8ef7;
+      color: #7289da; /* Parlak mor/mavi renk */
       text-align: center;
       margin: 0 0 10px;
       user-select: text;
       font-weight: 700;
       font-size: 1.4rem;
-      text-shadow: 0 1px 3px rgba(79,142,247,0.7);
+      text-shadow: 0 1px 3px rgba(114, 137, 218, 0.7);
     }
     .accordion {
       width: 100%;
       max-width: 600px;
-      background-color: #313743;
+      background-color: #1f1f33; /* Daha koyu arkaplan */
       border-radius: 18px;
-      box-shadow: 0 8px 24px rgb(0 0 0 / 0.7);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.7);
       overflow: hidden;
       user-select: none;
       margin-bottom: 70px;
@@ -293,18 +292,18 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .accordion-item {
-      border-bottom: 1px solid #4f5690;
+      border-bottom: 1px solid #33334d;
     }
     .accordion-item:last-child {
       border-bottom: none;
     }
     .accordion-header {
-      background-color: #3a3f57;
+      background-color: #2a2a3f; /* Arkaplan rengi */
       cursor: pointer;
       padding: 22px 28px;
       font-weight: 700;
       font-size: 1.25rem;
-      color: #4f8ef7;
+      color: #7289da; /* Parlak mor/mavi renk */
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -313,13 +312,13 @@
       border-left: 6px solid transparent;
     }
     .accordion-header:hover {
-      background-color: #4f8ef7;
+      background-color: #7289da;
       color: #f0f6ff;
       border-left-color: #f0f6ff;
       text-shadow: 0 0 5px rgba(240,246,255,0.8);
     }
     .accordion-header.active {
-      background-color: #4f8ef7;
+      background-color: #7289da;
       color: #f0f6ff;
       border-left-color: #f0f6ff;
       text-shadow: 0 0 8px rgba(240,246,255,1);
@@ -327,7 +326,7 @@
     .accordion-content {
       max-height: 0;
       overflow: hidden;
-      background-color: #232732;
+      background-color: #1a1a2b; /* Koyu arkaplan */
       color: #cfd3e2;
       padding: 0 28px;
       font-size: 1rem;
@@ -339,15 +338,11 @@
       padding: 18px 28px 22px;
       max-height: 800px;
     }
-    .accordion-content p {
-      margin: 0;
-      font-weight: 400;
-    }
     .accordion-header::after {
       content: "▶";
       font-size: 1.1rem;
       transition: transform 0.3s;
-      color: #a5b4fc;
+      color: #7289da;
       user-select: none;
     }
     .accordion-header.active::after {
@@ -365,11 +360,11 @@
       font-weight: 500;
     }
     #about h2 {
-      color: #4f8ef7;
+      color: #7289da; /* Parlak mor/mavi renk */
       font-weight: 800;
       margin-bottom: 20px;
       font-size: 2rem;
-      text-shadow: 0 0 10px rgba(79,142,247,0.8);
+      text-shadow: 0 0 10px rgba(114, 137, 218, 0.8);
     }
     #about p {
       margin-bottom: 34px;
@@ -430,13 +425,13 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     footer a {
-      color: #4f8ef7;
+      color: #7289da; /* Parlak mor/mavi renk */
       text-decoration: none;
       font-weight: 600;
       transition: color 0.3s ease;
     }
     footer a:hover {
-      color: #75a7ff;
+      color: #9baef2;
       text-decoration: underline;
     }
     @media (max-width: 480px) {
