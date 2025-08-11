@@ -425,6 +425,10 @@
       margin: 20px auto 10px;
       user-select: none;
       font-weight: 300;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
     }
     footer a {
       color: var(--highlight-color);
@@ -437,8 +441,9 @@
       text-decoration: underline;
     }
     .discord-link {
-        display: block;
-        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         text-decoration: none;
         color: var(--highlight-color);
         font-weight: 500;
@@ -448,6 +453,7 @@
         width: 18px;
         height: 18px;
         fill: currentColor;
+        vertical-align: middle;
     }
     @media (max-width: 480px) {
       body { padding-top: 50px; }
@@ -688,12 +694,19 @@
       }
     }
 
-    // Akordiyon menüleri için eski, basit JavaScript kodu
     const accordionHeaders = document.querySelectorAll('.accordion-header');
     accordionHeaders.forEach(header => {
       header.addEventListener('click', () => {
         const content = document.getElementById(header.getAttribute('aria-controls'));
         const expanded = header.getAttribute('aria-expanded') === 'true';
+
+        accordionHeaders.forEach(otherHeader => {
+          if (otherHeader !== header) {
+            otherHeader.classList.remove('active');
+            otherHeader.setAttribute('aria-expanded', 'false');
+            document.getElementById(otherHeader.getAttribute('aria-controls')).classList.remove('open');
+          }
+        });
 
         if (!expanded) {
           header.classList.add('active');
@@ -707,13 +720,11 @@
       });
     });
 
-    // Menü açma/kapama
     menuToggle.addEventListener('click', () => {
         menuToggle.classList.toggle('active');
         menuPanel.classList.toggle('open');
     });
 
-    // Menü dışına tıklayınca menüyü kapat
     document.addEventListener('click', (event) => {
         const isClickInside = menuPanel.contains(event.target) || menuToggle.contains(event.target);
         if (!isClickInside && menuPanel.classList.contains('open')) {
@@ -722,7 +733,6 @@
         }
     });
 
-    // Kaydırma ile menüyü gizleme
     window.addEventListener('scroll', () => {
         if (window.scrollY > lastScrollY && window.scrollY > 100) {
             navbar.classList.add('hidden');
