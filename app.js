@@ -6,6 +6,8 @@ const fetch = require('node-fetch');
 const https = require('https');
 const sanitize = require('sanitize-filename');
 const session = require('express-session');
+const passport = require('passport');
+const { Strategy: DiscordStrategy } = require('passport-discord');
 const Visit = require('./models/Visit');
 const Download = require('./models/Download');
 const VideoLink = require('./models/VideoLink');
@@ -14,29 +16,68 @@ const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 const axios = require('axios');
 
 const app = express();
+const port = process.env.PORT || 3000;
 
+// Discord OAuth2 bilgileri .env dosyasından çekiliyor
+const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
+const CALLBACK_URL = process.env.DISCORD_CALLBACK_URL;
+
+// Yardımcı fonksiyonlar
 function generateShortId() {
   return nanoid();
 }
 
+// EJS ve static dosyalar
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Session ve Passport ayarları
 app.use(session({
-  secret: process.env.ADMIN_PASSWORD,
+  secret: process.env.SESSION_SECRET, // .env'den gelen gizli anahtar
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Discord OAuth2 stratejisi
+passport.use(new DiscordStrategy({
+  clientID: CLIENT_ID,
+  clientSecret: CLIENT_SECRET,
+  callbackURL: CALLBACK_URL,
+  scope: ['identify', 'guilds']
+}, (accessToken, refreshToken, profile, done) => {
+  return done(null, profile);
 }));
 
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+// MongoDB bağlantısı
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.error(err));
 
+// Middleware: Kullanıcının giriş yapıp yapmadığını kontrol etmek için
+const isAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/admin/login');
+};
+
+// Rotalar
 app.get('/', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
@@ -49,12 +90,33 @@ app.get('/discord', (req, res) => {
   res.render('discord');
 });
 
+// Admin giriş ve dashboard rotaları
 app.get('/admin/login', (req, res) => {
   res.render('admin/login');
 });
 
-app.get('/admin/dashboard', (req, res) => {
-  res.render('admin/dashboard');
+// OAuth akışını başlatan rota
+app.get('/auth/discord', passport.authenticate('discord'));
+
+// OAuth callback rotası
+app.get('/auth/discord/callback',
+  passport.authenticate('discord', { failureRedirect: '/admin/login' }),
+  (req, res) => {
+    res.redirect('/admin/dashboard');
+  }
+);
+
+// Admin Dashboard sayfası. Yalnızca giriş yapmış kullanıcılar erişebilir.
+app.get('/admin/dashboard', isAuthenticated, (req, res) => {
+  const user = req.user;
+  const guilds = user.guilds;
+
+  // Botu davet etme yetkisi olan sunucuları filtrele (MANAGE_GUILD yetkisi)
+  const manageableGuilds = guilds.filter(guild => {
+    return (guild.permissions & 0x20) === 0x20 || (guild.permissions & 0x8) === 0x8; // ADMINISTRATOR (0x8) veya MANAGE_GUILD (0x20)
+  });
+
+  res.render('admin/dashboard', { user: user, guilds: manageableGuilds });
 });
 
 app.get('/privacy', (req, res) => {
@@ -69,7 +131,7 @@ app.get('/rights', (req, res) => {
   res.render('rights');
 });
 
-// Artık bu rota, bot veya tarayıcıdan gelen isteğe göre direkt video linkini döndürüyor
+// Diğer rotalar (get-links, proxy-download, tiktok, shortId) aynı kalabilir.
 app.post('/get-links', async (req, res) => {
   const { url } = req.body;
   try {
@@ -96,7 +158,7 @@ app.post('/get-links', async (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(__dirname)); 
+app.use(express.static(__dirname));
 
 app.get('/proxy-download', async (req, res) => {
   const { url, username, type } = req.query;
@@ -107,7 +169,7 @@ app.get('/proxy-download', async (req, res) => {
 
   const extension = type === 'music' ? 'mp3' : 'mp4';
   const safeUsername = sanitize((username || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
-  const filename = `ttdownload_${safeUsername}_${Date.now()}.${extension}`;
+  const filename = `tikssave_${safeUsername}_${Date.now()}.${extension}`;
   console.log('Filename:', filename);
 
   https.get(url, fileRes => {
@@ -122,20 +184,17 @@ app.get('/proxy-download', async (req, res) => {
 
 app.post('/tiktok', async (req, res) => {
   const { url } = req.body;
-  const isBot = req.headers['x-source'] === 'bot';
 
   if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
 
   try {
-    // Burada artık veritabanına kaydetme işlemi yok, sadece shortId oluşturuluyor
     let shortId;
     let exists;
     do {
       shortId = generateShortId();
       exists = await VideoLink.findOne({ shortId });
     } while (exists);
-    
-    // Sadece kısa ID ve orijinal URL'yi kaydediyoruz
+
     const newVideoLink = new VideoLink({
       shortId,
       originalUrl: url
@@ -158,8 +217,7 @@ app.get('/:shortId', async (req, res) => {
   if (!videoLink) {
     return res.status(404).send('Video bulunamadı');
   }
-  
-  // Orijinal URL'den video bilgilerini her defasında yeniden çek
+
   try {
     const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(videoLink.originalUrl)}`);
     const data = await response.json();
@@ -186,7 +244,7 @@ app.get('/:shortId', async (req, res) => {
         return res.redirect(307, videoData.hdplay || videoData.play);
       }
     }
-    
+
     res.render('index', { videoData });
   } catch (err) {
     console.error(err);
@@ -194,5 +252,4 @@ app.get('/:shortId', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
