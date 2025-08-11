@@ -25,7 +25,7 @@
       min-height: 100vh;
     }
     
-    /* NAVİGASYON BARI VE MENÜLER - YENİ EKLENEN BÖLÜM */
+    /* NAVİGASYON BARI VE MENÜLER */
     header.navbar {
         position: fixed;
         top: 0;
@@ -47,7 +47,6 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        flex-direction: row-reverse; /* Logoyu sağa taşır */
     }
     .navbar .logo-container .logo-img {
         width: 30px;
@@ -88,13 +87,13 @@
     .menu-panel {
         position: fixed;
         top: 60px;
-        left: 0;
+        right: 0; /* Menü paneli sağdan açılacak */
         width: 200px;
         height: calc(100vh - 60px);
         background-color: #2a2e3b;
-        transform: translateX(-100%);
+        transform: translateX(100%); /* Başlangıçta gizli */
         transition: transform 0.3s ease-in-out;
-        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
         z-index: 999;
         display: flex;
         flex-direction: column;
@@ -469,15 +468,15 @@
 <body>
   
   <header class="navbar">
+      <a href="/" class="logo-container">
+          <img src="https://i.ibb.co/C0f90mJ/tik.png" alt="Tikssave Logo" class="logo-img">
+          <span class="logo-text">Tikssave.com</span>
+      </a>
       <div class="menu-toggle">
           <div class="bar"></div>
           <div class="bar"></div>
           <div class="bar"></div>
       </div>
-      <a href="/" class="logo-container">
-          <img src="https://i.ibb.co/C0f90mJ/tik.png" alt="Tikssave Logo" class="logo-img">
-          <span class="logo-text">Tikssave.com</span>
-      </a>
   </header>
   
   <aside class="menu-panel">
@@ -599,7 +598,7 @@
     const previewTitle = document.getElementById('preview-title');
     const optionsContainer = document.getElementById('options');
     
-    // YENİ EKLENEN JAVASCRIPT BÖLÜMÜ
+    // NAVİGASYON VE MENÜ İŞLEVLERİ
     const menuToggle = document.querySelector('.menu-toggle');
     const menuPanel = document.querySelector('.menu-panel');
     const navbar = document.querySelector('.navbar');
@@ -626,8 +625,8 @@
         }
         lastScrollY = window.scrollY;
     });
-    // YENİ EKLENEN JAVASCRIPT BÖLÜMÜ SONU
 
+    // ANA İŞLEVLER
     videoUrlInput.addEventListener('input', () => {
       if(videoUrlInput.value.trim() !== '') {
         clearBtn.style.display = 'inline-block';
@@ -722,7 +721,6 @@
         const content = document.getElementById(header.getAttribute('aria-controls'));
         const expanded = header.getAttribute('aria-expanded') === 'true';
 
-        // Tüm akordiyonları kapat
         accordionHeaders.forEach(otherHeader => {
           if (otherHeader !== header) {
             otherHeader.classList.remove('active');
@@ -731,7 +729,6 @@
           }
         });
 
-        // Tıklanan akordiyonu aç/kapat
         if (!expanded) {
           header.classList.add('active');
           header.setAttribute('aria-expanded', 'true');
