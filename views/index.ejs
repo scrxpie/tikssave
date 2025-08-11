@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -251,6 +251,7 @@
             padding: 0;
             max-width: 600px;
             margin: 0 auto 50px;
+            counter-reset: step-counter;
         }
 
         .how-to-use-list li {
@@ -263,8 +264,8 @@
         }
 
         .how-to-use-list li::before {
-            content: counter(step);
-            counter-increment: step;
+            content: counter(step-counter);
+            counter-increment: step-counter;
             position: absolute;
             left: 0;
             top: 0;
@@ -447,17 +448,17 @@
     <main class="container" id="downloader">
         <h1>TikTok Video Downloader</h1>
         <p class="subtitle">
-            TikTok videolarını filigransız, yüksek kalitede ve tamamen ücretsiz indirin. 
-            Hızlı, güvenli ve kolay kullanım.
+            Download TikTok videos without watermark, in high quality, and completely free. 
+            Fast, secure, and easy to use.
         </p>
         
         <div class="form-container">
             <form id="mainForm">
-                <input type="text" id="videoUrl" placeholder="TikTok video linkini buraya yapıştırın..." required>
+                <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." required>
                 <div class="form-buttons">
-                    <button type="button" class="paste-btn">Yapıştır</button>
-                    <button type="button" class="clear-btn">Temizle</button>
-                    <button type="submit" class="fetch-btn">İndir</button>
+                    <button type="button" class="paste-btn">Paste</button>
+                    <button type="button" class="clear-btn">Clear</button>
+                    <button type="submit" class="fetch-btn">Download</button>
                 </div>
             </form>
         </div>
@@ -467,64 +468,64 @@
         </div>
     
     <div class="container">
-        <h2 class="section-title" id="how-to-use">Nasıl Kullanılır?</h2>
+        <h2 class="section-title" id="how-to-use">How to Use</h2>
         <ol class="how-to-use-list">
             <li>
-                <strong>TikTok uygulamasını açın</strong> ve indirmek istediğiniz videoyu bulun.
+                <strong>Open the TikTok app</strong> and find the video you want to download.
             </li>
             <li>
-                Video üzerindeki <strong>"Paylaş"</strong> simgesine dokunun ve ardından <strong>"Bağlantıyı Kopyala"</strong> seçeneğini belirleyin.
+                Tap the <strong>"Share"</strong> icon on the video and select <strong>"Copy Link"</strong>.
             </li>
             <li>
-                Tikssave.xyz sitesine geri dönün ve kopyaladığınız bağlantıyı yukarıdaki kutuya <strong>yapıştırın</strong>.
+                Return to Tiks Save and <strong>paste</strong> the copied link into the input box above.
             </li>
             <li>
-                <strong>"İndir"</strong> düğmesine tıklayın ve tercih ettiğiniz formatı (MP4 veya MP3) seçerek indirme işlemini tamamlayın.
+                Click the <strong>"Download"</strong> button and choose your preferred format (MP4 or MP3) to complete the download.
             </li>
         </ol>
     </div>
 
     <div class="container">
-        <h2 class="section-title" id="features">Özellikler</h2>
+        <h2 class="section-title" id="features">Features</h2>
         <div class="feature-item">
             <div class="feature-text">
-                <h3>Filigransız İndirme</h3>
+                <h3>No Watermarks</h3>
                 <p>
-                    Videoları filigransız olarak indirin. Böylece videoyu dilediğiniz yerde temiz ve profesyonel bir şekilde kullanabilirsiniz.
+                    Download videos without watermarks. This allows you to use the video cleanly and professionally anywhere you want.
                 </p>
             </div>
-            <img src="https://i.imgur.com/your-image-url-1.png" alt="Filigransız İndirme" class="feature-img">
+            <img src="https://i.imgur.com/your-image-url-1.png" alt="No Watermark Download" class="feature-img">
         </div>
         
         <div class="feature-item reverse">
             <div class="feature-text">
-                <h3>Yüksek Kalite</h3>
+                <h3>High Quality</h3>
                 <p>
-                    HD (High Definition) video kalitesiyle en iyi görüntü ve ses deneyimini yaşayın. Videoları orijinal kalitesinde kaydedin.
+                    Experience the best image and sound with HD (High Definition) video quality. Save videos in their original quality.
                 </p>
             </div>
-            <img src="https://i.imgur.com/your-image-url-2.png" alt="Yüksek Kalite İndirme" class="feature-img">
+            <img src="https://i.imgur.com/your-image-url-2.png" alt="High Quality Download" class="feature-img">
         </div>
         
         <div class="feature-item">
             <div class="feature-text">
-                <h3>MP3 Desteği</h3>
+                <h3>MP3 Support</h3>
                 <p>
-                    Sadece videonun müziğini mi indirmek istiyorsunuz? Tikssave.xyz ile videoları doğrudan MP3 formatında da indirebilirsiniz.
+                    Do you only want to download the music from the video? With Tiks Save, you can also download videos directly in MP3 format.
                 </p>
             </div>
-            <img src="https://i.imgur.com/your-image-url-3.png" alt="MP3 İndirme Desteği" class="feature-img">
+            <img src="https://i.imgur.com/your-image-url-3.png" alt="MP3 Download Support" class="feature-img">
         </div>
     </div>
     
     <div class="discord-section">
         <h2>Tiks Save Bot</h2>
         <p>
-            TikTok indirme işlemlerini doğrudan Discord sunucunuzda yapmak ister misiniz? 
-            Tiks Save Bot'u sunucunuza ekleyerek filigransız video ve MP3 indirmeyi kolaylaştırın.
+            Want to download TikTok videos directly on your Discord server? 
+            Add the Tiks Save Bot to your server to easily download videos and MP3s without watermarks.
         </p>
         <a href="#" class="discord-redirect-btn">
-            Tiks Save Botu Sunucuna Ekle
+            Add Tiks Save Bot to Your Server
         </a>
     </div>
 
@@ -586,14 +587,14 @@
                 videoUrlInput.value = text;
                 videoUrlInput.dispatchEvent(new Event('input'));
             } catch (err) {
-                alert("Panodan yapıştırma başarısız oldu. Lütfen manuel olarak yapıştırın.");
+                alert("Paste failed. Please paste manually.");
             }
         });
 
         mainForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            // Burada indirme linklerini çekme kodunuz olacak
-            alert('İndirme butonu tıklandı. Link çekme işlemi burada yapılacak.');
+            // Your code to fetch download links will go here
+            alert('Download button clicked. The process of fetching links will be handled here.');
         });
     </script>
 </body>
