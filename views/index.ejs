@@ -394,17 +394,28 @@
       margin-bottom: 20px;
     }
     #about ul {
-      list-style-type: '○ ';
-      padding-left: 15px;
+      list-style-type: none; /* Varsayılan list stilini kaldırıyoruz */
+      padding-left: 0;
       margin-bottom: 20px;
-      color: #ddd;
     }
     #about li {
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+      display: flex; /* Madde işareti ve metni hizalamak için flex kullanıyoruz */
+      align-items: flex-start;
+      color: #ddd;
+    }
+    #about li::before {
+      content: "○"; /* Özel madde işareti */
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-right: 12px;
+      margin-top: -2px; /* Dikey hizalama için */
     }
     #about li span {
       color: #fff;
       font-weight: 600;
+      display: inline;
     }
     footer {
       width: 100%;
@@ -537,10 +548,10 @@
 
         <h2>How to Use: Step-by-Step Guide</h2>
         <ul>
-          <li><span>1.</span> Open the TikTok app and find the video you want to download.</li>
-          <li><span>2.</span> Tap the "Share" icon on the video and select "Copy Link."</li>
-          <li><span>3.</span> Return to Tikssave.xyz and paste the copied link into the input box above.</li>
-          <li><span>4.</span> Click the "Download" button and choose your preferred format to complete the download.</li>
+          <li>Open the TikTok app and find the video you want to download.</li>
+          <li>Tap the "Share" icon on the video and select "Copy Link."</li>
+          <li>Return to Tikssave.xyz and paste the copied link into the input box above.</li>
+          <li>Click the "Download" button and choose your preferred format to complete the download.</li>
         </ul>
       </section>
 
@@ -694,13 +705,16 @@
 
         // Tüm accordionları kapat
         accordions.forEach(a => {
+          const c = document.getElementById(a.getAttribute('aria-controls'));
           a.setAttribute('aria-expanded', 'false');
-          document.getElementById(a.getAttribute('aria-controls')).classList.remove('open');
+          a.classList.remove('active');
+          c.classList.remove('open');
         });
         
         // Sadece tıklananı aç
         if (!expanded) {
           acc.setAttribute('aria-expanded', 'true');
+          acc.classList.add('active');
           content.classList.add('open');
         }
       });
