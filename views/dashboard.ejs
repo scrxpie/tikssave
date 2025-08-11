@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="google-site-verification" content="A-osCnksN_PbAHpZ4wRNw1jsBp4uCZmst-6XQcTC4dI" />
+  <title>Dashboard - Tikssave.com</title>
+  <meta name="description" content="Manage your Discord Bot settings and add it to your servers via Tikssave.com dashboard."/>
+  
+  <style>
+    /* RESET VE TEMEL AYARLAR */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #181a1f;
+      color: #ddd;
+      padding-top: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* NAVİGASYON BARI VE MENÜLER */
+    header.navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #2a2e3b;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        z-index: 1000;
+        transition: transform 0.3s ease-in-out;
+    }
+    .navbar.hidden { transform: translateY(-100%); }
+    .navbar .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+    .navbar .logo-container .logo-img {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+    }
+    .navbar .logo-container .logo-text {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.5px;
+    }
+    .navbar .menu-toggle {
+        width: 28px;
+        height: 22px;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        z-index: 1010;
+    }
+    .menu-toggle .bar {
+        height: 2px;
+        background-color: #ddd;
+        border-radius: 1px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .menu-toggle.active .bar:nth-child(2) { opacity: 0; }
+    .menu-toggle.active .bar:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+    .menu-toggle.active .bar:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+    .menu-panel {
+        position: fixed;
+        top: 60px;
+        right: 0;
+        width: 200px;
+        height: calc(100vh - 60px);
+        background-color: #2a2e3b;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+        z-index: 999;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+    }
+    .menu-panel.open { transform: translateX(0); }
+    .menu-panel a {
+        color: #ddd;
+        text-decoration: none;
+        font-size: 1rem;
+        padding: 12px 10px;
+        border-bottom: 1px solid #2c2f36;
+        transition: background-color 0.2s ease;
+    }
+    .menu-panel a:hover { background-color: #2c2f36; color: #4f8ef7; }
+    .main-content {
+      width: 100%;
+      max-width: 800px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #4f8ef7;
+      font-weight: 900;
+      user-select: none;
+      text-shadow: 0 2px 6px rgba(79,142,247,0.6);
+    }
+    .dashboard-section {
+      background-color: #2a2e3b;
+      border-radius: 18px;
+      padding: 30px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .discord-login-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border-radius: 14px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-decoration: none;
+      color: white;
+      background-color: #5865F2;
+      box-shadow: 0 6px 12px rgba(88, 101, 242, 0.6);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .discord-login-btn:hover {
+      background-color: #4752C4;
+      box-shadow: 0 8px 18px rgba(71, 82, 196, 0.8);
+      transform: translateY(-2px);
+    }
+    .discord-login-btn:active {
+      background-color: #3a3f90;
+      box-shadow: inset 0 3px 8px rgba(0,0,0,0.3);
+      transform: translateY(1px);
+    }
+    .discord-icon {
+      width: 30px;
+      height: 30px;
+      fill: currentColor;
+    }
+    .server-list-container {
+      width: 100%;
+      margin-top: 30px;
+    }
+    .server-list-container h2 {
+      color: #fff;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .server-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .server-item {
+      background-color: #313743;
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: background-color 0.2s ease;
+    }
+    .server-item:hover { background-color: #3a3f57; }
+    .server-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .server-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #4f8ef7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 700;
+      object-fit: cover;
+    }
+    .server-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .invite-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      background-color: #4f8ef7;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    .invite-btn:hover { background-color: #3a6ee8; transform: translateY(-1px); }
+    .invite-btn:active { transform: translateY(1px); }
+    .error-message {
+      color: #ff6b6b;
+      margin-top: 15px;
+      font-weight: 600;
+      display: block;
+    }
+    footer {
+      max-width: 600px;
+      color: #666;
+      font-size: 0.95rem;
+      text-align: center;
+      margin: 30px auto 15px;
+      user-select: none;
+      font-weight: 400;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    footer a {
+      color: #4f8ef7;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+    footer a:hover {
+      color: #75a7ff;
+      text-decoration: underline;
+    }
+    @media (max-width: 480px) {
+      body { padding-top: 60px; }
+      header.navbar { padding: 8px 15px; }
+      .navbar .logo-container .logo-img { width: 24px; height: 24px; }
+      .navbar .logo-container .logo-text { font-size: 1.2rem; }
+      .menu-panel { width: 180px; top: 44px; height: calc(100vh - 44px); }
+      .menu-panel a { font-size: 1rem; padding: 10px 5px; }
+      h1 { font-size: 2.2rem; }
+      .dashboard-section { padding: 20px; }
+      .discord-login-btn { font-size: 1rem; padding: 12px 20px; gap: 8px; }
+      .discord-icon { width: 24px; height: 24px; }
+      .server-info { flex-direction: column; align-items: flex-start; gap: 5px; }
+      .server-icon { width: 40px; height: 40px; font-size: 1.2rem; }
+      .server-name { font-size: 1.1rem; }
+      .invite-btn { font-size: 0.9rem; padding: 8px 15px; }
+      .main-content { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+      <a href="/" class="logo-container">
+          <img src="https://i.ibb.co/C0f90mJ/tik.png" alt="Tikssave Logo" class="logo-img">
+          <span class="logo-text">Tikssave.com</span>
+      </a>
+      <div class="menu-toggle">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+      </div>
+  </header>
+  
+  <aside class="menu-panel">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/discord">Discord Bot</a>
+      <a href="/#about">About</a>
+      <a href="/#faqs">FAQ</a>
+  </aside>
+
+  <div class="main-content">
+    <h1>Discord Dashboard</h1>
+    
+    <% if (!user) { %>
+      <div class="dashboard-section" id="auth-section">
+        <p style="margin-bottom: 20px;">To manage the bot, please log in with your Discord account.</p>
+        <a class="discord-login-btn" href="/auth/discord">
+          <svg xmlns="http://www.w3.org/2000/svg" class="discord-icon" viewBox="0 0 256 199" fill="currentColor">
+            <path d="M216.856 16.597C198.36 8.298 179.215 3.068 159.877 0c-2.07 3.639-4.38 8.385-6.014 12.252-17.48-2.633-34.793-2.633-51.772 0-1.635-3.867-4.065-8.613-6.135-12.252-19.338 3.068-38.483 8.298-56.979 16.597C5.818 58.707-3.884 99.622.785 140.043c22.56 16.597 44.476 26.61 66.148 33.93 5.414-7.525 10.197-15.504 14.34-23.905-7.867-2.987-15.379-6.794-22.319-11.511 1.87-1.398 3.74-2.916 5.609-4.314 42.547 19.339 88.897 19.339 131.324 0 1.87 1.398 3.739 2.916 5.609 4.314-6.94 4.837-14.452 8.524-22.319 11.511 4.143 8.401 8.926 16.38 14.22 23.905 21.672-7.32 43.589-17.333 66.149-33.93 5.115-47.232-8.922-87.58-38.606-123.446l-.001-.001ZM85.207 124.838c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Zm85.586 0c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Z"/>
+          </svg>
+          Log in with Discord
+        </a>
+      </div>
+    <% } else { %>
+      <div class="dashboard-section" id="server-section">
+        <p style="margin-bottom: 20px;">Welcome, **<%= user.username %>**!</p>
+        <div class="server-list-container">
+          <h2>Servers you can add the bot to:</h2>
+          <ul class="server-list">
+            <% if (guilds && guilds.length > 0) { %>
+              <% guilds.forEach(guild => { %>
+                <li class="server-item">
+                  <div class="server-info">
+                    <%
+                      const iconUrl = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=128` : null;
+                      const initials = guild.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    %>
+                    <div class="server-icon" style="<%= iconUrl ? `background-image: url('${iconUrl}'); background-size: cover;` : '' %>">
+                      <%= iconUrl ? '' : initials %>
+                    </div>
+                    <span class="server-name"><%= guild.name %></span>
+                  </div>
+                  <a class="invite-btn" href="https://discord.com/oauth2/authorize?client_id=YOUR_BOT_CLIENT_ID&permissions=8&scope=bot&guild_id=<%= guild.id %>" target="_blank">Invite</a>
+                </li>
+              <% }) %>
+            <% } else { %>
+              <p class="error-message" style="display: block;">You don't have permission to add the bot to any servers or you are not in any servers.</p>
+            <% } %>
+          </ul>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <footer>
+    <p>© 2025 tikssave.com All rights reserved. | <a href="/terms">Terms of Service</a> | <a href="/privacy">Privacy Policy</a> | <a href="/rights">Rights</a></p>
+  </footer>
+
+  <script>
+    // NAVİGASYON VE MENÜ İŞLEVLERİ
+    const menuToggle = document.querySelector('.menu-toggle');
+    const menuPanel = document.querySelector('.menu-panel');
+    const navbar = document.querySelector('.navbar');
+    let lastScrollY = window.scrollY;
+
+    menuToggle.addEventListener('click', () => {
+        menuToggle.classList.toggle('active');
+        menuPanel.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (event) => {
+        const isClickInside = menuPanel.contains(event.target) || menuToggle.contains(event.target);
+        if (!isClickInside && menuPanel.classList.contains('open')) {
+            menuToggle.classList.remove('active');
+            menuPanel.classList.remove('open');
+        }
+    });
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > lastScrollY && window.scrollY > 100) {
+            navbar.classList.add('hidden');
+        } else {
+            navbar.classList.remove('hidden');
+        }
+        lastScrollY = window.scrollY;
+    });
+  </script>
+</body>
+</html>
