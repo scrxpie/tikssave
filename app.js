@@ -78,12 +78,16 @@ const discordAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  // Giriş yapılmamışsa dashboard sayfasına yönlendir, EJS içinde login butonu görünecek
   res.redirect('/dashboard');
 };
 
 // Admin şifresiyle giriş yapmış kullanıcının session'ını kontrol etmek için
-
+const adminAuthenticated = (req, res, next) => {
+  if (req.session.isAdmin) {
+    return next();
+  }
+  res.redirect('/admin/login');
+};
 
 
 // --- ROTLAR ---
@@ -125,30 +129,23 @@ app.get('/auth/discord', passport.authenticate('discord'));
 app.get('/auth/discord/callback',
   passport.authenticate('discord', { failureRedirect: '/dashboard' }),
   (req, res) => {
-    // Giriş başarılıysa, kullanıcıyı dashboard sayfasına yönlendir
     res.redirect('/dashboard');
   }
 );
 
 // Ana Discord Dashboard sayfası
 app.get('/dashboard', (req, res) => {
-  // Giriş yapılıp yapılmadığını kontrol et
   if (!req.isAuthenticated()) {
-    // Giriş yapılmamışsa, user ve guilds null olarak gönderilir
     return res.render('dashboard', { user: null, guilds: null });
   }
 
-  // Kullanıcı Discord ile giriş yapmışsa
   const user = req.user;
   const guilds = user.guilds;
 
-  // Botu davet etme yetkisi olan sunucuları filtrele (MANAGE_GUILD yetkisi)
   const manageableGuilds = guilds.filter(guild => {
-    // ADMINISTRATOR (0x8) veya MANAGE_GUILD (0x20) yetkisine sahip sunucuları al
     return (guild.permissions & 0x20) === 0x20 || (guild.permissions & 0x8) === 0x8;
   });
 
-  // Dashboard sayfasını, kullanıcı ve yetkili sunucu listesi ile render et
   res.render('dashboard', { user: user, guilds: manageableGuilds });
 });
 
@@ -173,8 +170,7 @@ app.post('/admin/login', (req, res) => {
 
 // Admin Dashboard sayfası
 app.get('/admin/dashboard', adminAuthenticated, (req, res) => {
-  // Yönetici girişi yapılmışsa, admin dashboard sayfasını render et
-  res.render('admin/dashboard'); // Bu sayfayı ayrıca oluşturman gerekecek
+  res.render('admin/dashboard');
 });
 
 // Diğer admin rotalarını buraya ekleyebilirsin...
