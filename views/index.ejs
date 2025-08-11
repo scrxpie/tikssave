@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,309 +7,199 @@
   <meta name="google-site-verification" content="A-osCnksN_PbAHpZ4wRNw1jsBp4uCZmst-6XQcTC4dI" />
   <title>TikTok Downloader - Download MP4 & MP3 without Watermarks</title>
   <meta name="description" content="Download TikTok videos without watermarks for free. Our fast, safe, and easy-to-use downloader offers unlimited MP4 (HD) and MP3 downloads."/>
-
+  
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5298191242036107"
      crossorigin="anonymous"></script>
   <style>
-    :root {
-        --bg-color: #181a1f;
-        --card-bg: #2a2e3b;
-        --text-color: #ddd;
-        --highlight-color: #4f8ef7;
-        --dark-highlight: #3a6ee8;
-        --btn-bg: #4f8ef7;
-        --btn-text: #fff;
-        --border-color: #2c2f36;
-        --main-padding: 20px 15px;
-    }
     /* Reset ve temel ayarlar */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      padding-top: 70px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #181a1f;
+      color: #ddd;
+      margin: 0;
+      padding: 20px 15px 60px;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-    /* Navbar ve menü stilleri */
-    header.navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background-color: var(--card-bg);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 20px;
-        z-index: 1000;
-        transition: transform 0.3s ease-in-out;
-    }
-    .navbar.hidden {
-        transform: translateY(-100%);
-    }
-    .navbar .logo-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .navbar .logo-container .logo-img {
-        width: 30px;
-        height: 30px;
-        border-radius: 6px;
-    }
-    .navbar .logo-container .logo-text {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #fff;
-        letter-spacing: 0.5px;
-    }
-    .navbar .menu-toggle {
-        width: 28px;
-        height: 22px;
-        position: relative;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        z-index: 1010;
-    }
-    .menu-toggle .bar {
-        height: 2px;
-        background-color: var(--text-color);
-        border-radius: 1px;
-        transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    .menu-toggle.active .bar:nth-child(2) {
-        opacity: 0;
-    }
-    .menu-toggle.active .bar:nth-child(1) {
-        transform: translateY(9px) rotate(45deg);
-    }
-    .menu-toggle.active .bar:nth-child(3) {
-        transform: translateY(-9px) rotate(-45deg);
-    }
-    .menu-panel {
-        position: fixed;
-        top: 50px;
-        right: 0;
-        width: 200px;
-        height: calc(100vh - 50px);
-        background-color: var(--card-bg);
-        transform: translateX(100%);
-        transition: transform 0.3s ease-in-out;
-        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
-        z-index: 999;
-        display: flex;
-        flex-direction: column;
-        padding: 15px;
-    }
-    .menu-panel.open {
-        transform: translateX(0);
-    }
-    .menu-panel a {
-        color: var(--text-color);
-        text-decoration: none;
-        font-size: 1rem;
-        padding: 10px 8px;
-        border-bottom: 1px solid var(--border-color);
-        transition: background-color 0.2s ease;
-    }
-    .menu-panel a:hover {
-        background-color: var(--border-color);
-        color: var(--highlight-color);
-    }
-    .main-content {
-        max-width: 900px;
-        width: 100%;
-        padding: var(--main-padding);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+/* ARKA PLAN DÜZENLEMESİ */
+
+
     h1 {
-      font-size: 2.4rem;
-      margin-bottom: 15px;
+      font-size: 2.8rem;
+      margin-bottom: 20px;
       text-align: center;
-      color: var(--highlight-color);
-      font-weight: 700;
+      color: #4f8ef7;
+      font-weight: 900;
       user-select: none;
-      text-shadow: 0 1px 4px rgba(79,142,247,0.6);
-    }
-    p.intro-text {
-        text-align: center;
-        max-width: 550px;
-        margin: -15px auto 30px;
-        color: #aaa;
-        line-height: 1.5;
-        font-size: 1rem;
-        font-weight: 400;
+      text-shadow: 0 2px 6px rgba(79,142,247,0.6);
     }
     form#mainForm {
       display: flex;
       width: 100%;
-      max-width: 550px;
-      gap: 8px;
-      margin-bottom: 30px;
+      max-width: 600px;
+      gap: 12px;
+      margin-bottom: 40px;
       position: relative;
     }
-    input.url-input {
+    input[type="text"] {
       flex: 1;
-      padding: 14px 16px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
+      padding: 18px 22px;
+      font-size: 1.3rem;
+      border-radius: 14px;
+      border: 2px solid #2c2f36;
       outline: none;
       background-color: #252931;
       color: #eee;
       transition: border-color 0.3s, box-shadow 0.3s;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
     }
-    input.url-input::placeholder {
+    input[type="text"]::placeholder {
       color: #7a7f8c;
-      font-weight: 400;
+      font-weight: 500;
     }
-    input.url-input:focus {
-      border-color: var(--highlight-color);
-      box-shadow: 0 0 6px var(--highlight-color);
+    input[type="text"]:focus {
+      border-color: #4f8ef7;
+      box-shadow: 0 0 8px #4f8ef7aa;
       background-color: #2f333d;
     }
     button {
-      padding: 12px 20px;
-      font-size: 1rem;
-      border-radius: 8px;
+      padding: 16px 28px;
+      font-size: 1.25rem;
+      border-radius: 14px;
       border: none;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
       transition: background-color 0.3s, box-shadow 0.3s;
       user-select: none;
       flex-shrink: 0;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.25);
     }
     button:hover {
       filter: brightness(1.1);
-      box-shadow: 0 4px 8px rgba(79,142,247,0.6);
+      box-shadow: 0 6px 12px rgba(79,142,247,0.8);
     }
     button:active {
       filter: brightness(0.9);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+      box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
     }
     button.paste-btn {
       background-color: #4b4f5a;
       color: #ccc;
       order: 2;
-      box-shadow: inset 0 1px 3px #3a3d45;
+      box-shadow: inset 0 2px 6px #3a3d45;
     }
     button.paste-btn:hover {
       background-color: #5f6490;
       color: #fff;
-      box-shadow: 0 2px 6px #5f6490aa;
+      box-shadow: 0 4px 10px #5f6490aa;
     }
     button.clear-btn {
       background-color: #d9534f;
       color: #fff;
       order: 1;
       display: none;
-      box-shadow: 0 2px 6px #c9302ccc;
+      box-shadow: 0 4px 10px #c9302ccc;
     }
     button.clear-btn:hover {
       background-color: #e74c3c;
-      box-shadow: 0 4px 8px #e74c3ccc;
+      box-shadow: 0 6px 12px #e74c3ccc;
     }
     button.fetch-btn {
-      background-color: var(--highlight-color);
+      background-color: #4f8ef7;
       color: #fff;
-      box-shadow: 0 0 10px #4f8ef7bb;
+      box-shadow: 0 0 18px #4f8ef7bb;
       order: 3;
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      font-weight: 800;
+      letter-spacing: 0.03em;
     }
     button.fetch-btn:hover {
-      background-color: var(--dark-highlight);
-      box-shadow: 0 0 14px #3a6ee8cc;
+      background-color: #3a6ee8;
+      box-shadow: 0 0 28px #3a6ee8cc;
     }
     #options {
       flex-direction: column;
-      gap: 12px;
+      gap: 18px;
       width: 100%;
-      max-width: 550px;
-      margin-bottom: 40px;
+      max-width: 600px;
+      margin-bottom: 50px;
       align-items: center;
       display: none;
     }
     .download-btn {
       background-color: #3159a5;
       color: #b0c4f7;
-      font-weight: 600;
-      font-size: 1rem;
-      padding: 12px 20px;
-      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.35rem;
+      padding: 18px 26px;
+      border-radius: 18px;
       border: none;
       cursor: pointer;
-      box-shadow: 0 0 8px #4f8ef7a0;
+      box-shadow: 0 0 15px #4f8ef7a0;
       transition: background-color 0.3s, box-shadow 0.3s, transform 0.15s ease;
       user-select: none;
       width: 100%;
-      max-width: 280px;
+      max-width: 320px;
       text-align: center;
       text-decoration: none;
       display: inline-block;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .download-btn:hover {
-      background-color: var(--highlight-color);
+      background-color: #4f8ef7;
       color: #fff;
-      box-shadow: 0 0 14px #4f8ef7dd;
-      transform: translateY(-2px);
+      box-shadow: 0 0 28px #4f8ef7dd;
+      transform: translateY(-3px);
     }
     .download-btn:active {
       transform: translateY(1px);
-      box-shadow: inset 0 1px 4px #3a6ee8aa;
+      box-shadow: inset 0 2px 8px #3a6ee8aa;
     }
     #preview-container {
-      max-width: 550px;
-      margin-bottom: 40px;
+      max-width: 600px;
+      margin-bottom: 50px;
       display: none;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
-      border-radius: 12px;
-      background: var(--card-bg);
-      padding: 15px;
-      box-shadow: 0 4px 10px rgba(20,30,50,0.5);
+      gap: 14px;
+      border-radius: 18px;
+      background: #2a2e3b;
+      padding: 18px 20px;
+      box-shadow: 0 8px 20px rgba(20,30,50,0.7);
       transition: background-color 0.3s ease;
       user-select: none;
     }
     #preview-container img {
       width: 100%;
-      border-radius: 10px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.75);
       user-select: none;
       pointer-events: none;
     }
     #preview-container h2 {
-      color: var(--highlight-color);
+      color: #4f8ef7;
       text-align: center;
-      margin: 5px 0 8px;
+      margin: 0 0 10px;
       user-select: text;
-      font-weight: 600;
-      font-size: 1.1rem;
-      text-shadow: 0 0.5px 2px rgba(79,142,247,0.5);
+      font-weight: 700;
+      font-size: 1.4rem;
+      text-shadow: 0 1px 3px rgba(79,142,247,0.7);
     }
     .accordion {
       width: 100%;
-      max-width: 550px;
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgb(0 0 0 / 0.5);
+      max-width: 600px;
+      background-color: #313743;
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgb(0 0 0 / 0.7);
       overflow: hidden;
       user-select: none;
-      margin-bottom: 50px;
-      font-weight: 500;
+      margin-bottom: 70px;
+      font-weight: 600;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .accordion-item {
       border-bottom: 1px solid #4f5690;
@@ -319,287 +210,274 @@
     .accordion-header {
       background-color: #3a3f57;
       cursor: pointer;
-      padding: 16px 20px;
-      font-weight: 600;
-      font-size: 1rem;
-      color: var(--highlight-color);
+      padding: 22px 28px;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #4f8ef7;
       display: flex;
       justify-content: space-between;
       align-items: center;
       transition: background-color 0.3s;
       user-select: none;
-      border-left: 4px solid transparent;
+      border-left: 6px solid transparent;
     }
     .accordion-header:hover {
-      background-color: var(--highlight-color);
-      color: #f0f6ff;
-      border-left-color: #f0f6ff;
-      text-shadow: 0 0 3px rgba(240,246,255,0.7);
-    }
-    .accordion-header.active {
-      background-color: var(--highlight-color);
+      background-color: #4f8ef7;
       color: #f0f6ff;
       border-left-color: #f0f6ff;
       text-shadow: 0 0 5px rgba(240,246,255,0.8);
+    }
+    .accordion-header.active {
+      background-color: #4f8ef7;
+      color: #f0f6ff;
+      border-left-color: #f0f6ff;
+      text-shadow: 0 0 8px rgba(240,246,255,1);
     }
     .accordion-content {
       max-height: 0;
       overflow: hidden;
       background-color: #232732;
       color: #cfd3e2;
-      padding: 0 20px;
-      font-size: 0.9rem;
-      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 28px;
+      font-size: 1rem;
+      transition: max-height 0.4s ease, padding 0.4s ease;
       user-select: text;
-      line-height: 1.6;
+      line-height: 1.7;
     }
     .accordion-content.open {
-      padding: 12px 20px 15px;
-      max-height: 600px;
+      padding: 18px 28px 22px;
+      max-height: 800px;
     }
     .accordion-content p {
       margin: 0;
       font-weight: 400;
     }
     .accordion-header::after {
-      content: "+";
-      font-size: 1rem;
-      transition: transform 0.2s;
+      content: "▶";
+      font-size: 1.1rem;
+      transition: transform 0.3s;
       color: #a5b4fc;
       user-select: none;
     }
     .accordion-header.active::after {
-      transform: rotate(45deg);
-      content: "−";
+      transform: rotate(90deg);
       color: #f0f6ff;
     }
     #about {
-      max-width: 550px;
-      margin: 0 auto 50px;
+      max-width: 600px;
+      margin: 0 auto 60px;
       color: #bbb;
-      font-size: 1rem;
-      line-height: 1.7;
+      font-size: 1.15rem;
+      line-height: 1.85;
       text-align: left;
       user-select: text;
-      font-weight: 400;
+      font-weight: 500;
     }
     #about h2 {
-      color: var(--highlight-color);
-      font-weight: 700;
-      margin-bottom: 15px;
-      font-size: 1.6rem;
-      text-shadow: 0 0 5px rgba(79,142,247,0.7);
+      color: #4f8ef7;
+      font-weight: 800;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      text-shadow: 0 0 10px rgba(79,142,247,0.8);
     }
     #about p {
-      margin-bottom: 20px;
+      margin-bottom: 34px;
     }
     #about ul {
-      list-style-type: none;
-      padding-left: 0;
-      margin-bottom: 20px;
+      list-style-type: '⚡ ';
+      padding-left: 20px;
+      margin-bottom: 34px;
+      color: #ddd;
     }
     #about li {
       margin-bottom: 12px;
-      display: flex;
-      align-items: flex-start;
-      color: #ddd;
-    }
-    #about li::before {
-      content: "○";
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-right: 12px;
-      margin-top: -2px;
     }
     #about li span {
       color: #fff;
-      font-weight: 600;
-      display: inline;
+      font-weight: 700;
     }
     footer {
-      width: 100%;
-      max-width: 550px;
+      max-width: 600px;
       color: #666;
-      font-size: 0.85rem;
-      margin: 20px auto 10px;
+      font-size: 0.95rem;
+      text-align: center;
+      margin: 30px auto 15px;
       user-select: none;
-      font-weight: 300;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
+      font-weight: 400;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     footer a {
-      color: var(--highlight-color);
+      color: #4f8ef7;
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
       transition: color 0.3s ease;
     }
     footer a:hover {
       color: #75a7ff;
       text-decoration: underline;
     }
-    .discord-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        text-decoration: none;
-        color: var(--highlight-color);
-        font-weight: 500;
-        margin-bottom: 10px;
-    }
-    .discord-icon {
-        width: 18px;
-        height: 18px;
-        fill: currentColor;
-        vertical-align: middle;
-    }
     @media (max-width: 480px) {
-      body { padding-top: 50px; }
-      header.navbar { padding: 8px 15px; }
-      .navbar .logo-container .logo-img { width: 24px; height: 24px; }
-      .navbar .logo-container .logo-text { font-size: 1.2rem; }
-      h1 { font-size: 2rem; }
-      p.intro-text { font-size: 0.9rem; }
-      input.url-input, button, .download-btn, .accordion-header {
-        font-size: 0.9rem;
-        padding: 10px 14px;
+      h1 { font-size: 2.2rem; }
+      input[type="text"], button, .download-btn, .accordion-header {
+        font-size: 1.15rem;
+        padding: 14px 18px;
       }
-      form#mainForm { flex-direction: column; gap: 6px; }
-      button.paste-btn, button.clear-btn, button.fetch-btn {
-        width: 100%; margin-top: 6px;
+      #options { max-width: 100%; }
+      form#mainForm { flex-direction: column; }
+      button.paste-btn, button.clear-btn {
+        order: 2; width: 100%; margin-top: 10px;
       }
-      #about { font-size: 0.9rem; line-height: 1.6; padding: 0 10px; }
+      button.fetch-btn {
+        order: 3; width: 100%; margin-top: 10px;
+      }
+      button { width: 100%; margin-top: 10px; }
+      #about { font-size: 1rem; line-height: 1.5; padding: 0 15px; }
       .accordion { max-width: 100%; }
-      #preview-container { max-width: 100%; padding: 12px; }
+      #preview-container { max-width: 100%; padding: 14px; }
       .download-btn { max-width: 100%; }
-      .menu-panel { width: 180px; }
-      .menu-panel a { font-size: 1rem; padding: 10px 5px; }
     }
   </style>
 </head>
 <body>
+  <h1>TikTok Downloader</h1>
+  <p style="text-align: center; max-width: 600px; margin: -20px auto 40px; color: #aaa; line-height: 1.6; font-size: 1.1rem; font-weight: 500;">
+    Paste a TikTok video link below to download it without watermarks instantly in MP4 or MP3 format.
+  </p>
 
-  <header class="navbar">
-      <a href="/" class="logo-container">
-          <img src="https://i.ibb.co/C0f90mJ/tik.png" alt="Tikssave Logo" class="logo-img">
-          <span class="logo-text">Tikssave.xyz</span>
-      </a>
-      <div class="menu-toggle">
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
+  <form id="mainForm" onsubmit="return false;">
+    <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." autocomplete="off" required value="<%= videoData?.sourceUrl || '' %>" />
+    <button type="button" class="clear-btn" onclick="clearInput()">Clear</button>
+    <button type="button" class="paste-btn" onclick="pasteLink()">Paste</button>
+    <button type="button" class="fetch-btn" onclick="fetchLinks()">Download</button>
+  </form>
+
+  <div id="preview-container" style="<%= videoData ? 'display:flex;' : 'display:none;' %>">
+    <img id="preview-thumbnail" src="<%= videoData?.cover || '' %>" alt="Video thumbnail" />
+    <h2 id="preview-title"><%= videoData?.title || '' %></h2>
+    <% if (videoData?.hdplay || videoData?.play) { %>
+      <video controls preload="metadata" poster="<%= videoData?.cover || '' %>" style="width: 100%; max-width: 600px; border-radius: 16px; margin-top: 15px;">
+        <source src="<%= videoData?.hdplay || videoData?.play %>" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    <% } %>
+  </div>
+
+  <div id="options" style="<%= videoData ? 'display:flex; flex-direction: column; align-items:center; gap:16px;' : 'display:none;' %>">
+    <% if (videoData?.music) { %>
+      <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.music) %>&username=<%= encodeURIComponent(videoData.username) %>&type=music">🎵 MP3 (Audio Only)</a>
+    <% } %>
+    <% if (videoData?.play) { %>
+      <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.play) %>&username=<%= encodeURIComponent(videoData.username) %>&type=play">📽️ SD Video (Normal Quality)</a>
+    <% } %>
+    <% if (videoData?.hdplay) { %>
+      <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.hdplay) %>&username=<%= encodeURIComponent(videoData.username) %>&type=hdplay">📽️ HD Video (High Quality)</a>
+    <% } %>
+  </div>
+
+  <section id="about" aria-label="About TikTok Downloader">
+    <h2>Why Choose Tikssave.com?</h2>
+    <p>Tikssave.com is the fastest and safest way to download TikTok videos. Our user-friendly tool allows you to save any video in just a few seconds. No extra software or applications are needed.</p>
+    
+    <h2>No Watermarks and High Quality</h2>
+    <p>The videos you download will be free of TikTok watermarks or user logos. This means you get clean videos ready for sharing or personal use. Our HD download option ensures you get the best possible video quality.</p>
+    
+    <h2>Multiple Format Support</h2>
+    <p>With Tikssave.com, you can download not only the video but also the background music. You have the option to save the video as an MP4 or just the sound as an MP3 file.</p>
+
+    <h2>How to Use: Step-by-Step Guide</h2>
+    <ul>
+      <li><span>1.</span> Open the TikTok app and find the video you want to download.</li>
+      <li><span>2.</span> Tap the "Share" icon on the video and select "Copy Link."</li>
+      <li><span>3.</span> Return to Tikssave.com and paste the copied link into the input box above.</li>
+      <li><span>4.</span> Click the "Download" button and choose your preferred format to complete the download.</li>
+    </ul>
+  </section>
+
+  <section class="accordion" aria-label="Frequently Asked Questions">
+    <div class="accordion-item">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq1" id="faq1-button" tabindex="0">
+        How do I find the TikTok video link?
+      </button>
+      <div id="faq1" class="accordion-content" role="region" aria-labelledby="faq1-button">
+        <p>Open the TikTok app or website, tap “Share” on the video, then select “Copy Link” to get the video URL.</p>
       </div>
-  </header>
-
-  <aside class="menu-panel">
-      <a href="/admin/dashboard">Dashboard</a>
-      <a href="/discord">Discord Bot</a>
-      <a href="#about">About</a>
-      <a href="#faqs">FAQ</a>
-  </aside>
-
-  <main class="main-content">
-      <h1>TikTok Downloader</h1>
-      <p class="intro-text">
-        Paste a TikTok video link below to download it without watermarks instantly in MP4 or MP3 format.
-      </p>
-
-      <form id="mainForm" onsubmit="return false;">
-        <input type="text" id="videoUrl" class="url-input" placeholder="Paste TikTok video link here..." autocomplete="off" required value="<%= videoData?.sourceUrl || '' %>" />
-        <button type="button" class="clear-btn" onclick="clearInput()">Clear</button>
-        <button type="button" class="paste-btn" onclick="pasteLink()">Paste</button>
-        <button type="button" class="fetch-btn" onclick="fetchLinks()">Download</button>
-      </form>
-
-      <div id="preview-container" style="<%= videoData ? 'display:flex;' : 'display:none;' %>">
-        <img id="preview-thumbnail" src="<%= videoData?.cover || '' %>" alt="Video thumbnail" />
-        <h2 id="preview-title"><%= videoData?.title || '' %></h2>
-        <% if (videoData?.hdplay || videoData?.play) { %>
-          <video controls preload="metadata" poster="<%= videoData?.cover || '' %>" style="width: 100%; max-width: 550px; border-radius: 10px; margin-top: 10px;">
-            <source src="<%= videoData?.hdplay || videoData?.play %>" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        <% } %>
+    </div>
+    
+    <div class="accordion-item">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq2" id="faq2-button" tabindex="0">
+        Is this service completely free?
+      </button>
+      <div id="faq2" class="accordion-content" role="region" aria-labelledby="faq2-button">
+        <p>Yes, Tikssave.com is a completely free service. You can download as many videos as you like without any charges.</p>
       </div>
+    </div>
 
-      <div id="options" style="<%= videoData ? 'display:flex; flex-direction: column; align-items:center; gap:12px;' : 'display:none;' %>">
-        <% if (videoData?.music) { %>
-          <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.music) %>&username=<%= encodeURIComponent(videoData.username) %>&type=music">🎵 MP3 (Audio)</a>
-        <% } %>
-        <% if (videoData?.play) { %>
-          <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.play) %>&username=<%= encodeURIComponent(videoData.username) %>&type=play">🎞️ SD Video</a>
-        <% } %>
-        <% if (videoData?.hdplay) { %>
-          <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.hdplay) %>&username=<%= encodeURIComponent(data.username) %>&type=hdplay">🎬 HD Video</a>
-        <% } %>
+    <div class="accordion-item">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq3" id="faq3-button" tabindex="0">
+        Where are my downloaded videos saved on my device?
+      </button>
+      <div id="faq3" class="accordion-content" role="region" aria-labelledby="faq3-button">
+        <p>Your downloaded files are usually saved in your device's default "Downloads" folder or video gallery.</p>
       </div>
+    </div>
 
-      <section id="about" aria-label="About TikTok Downloader">
-        <h2>Why Choose Tikssave.xyz?</h2>
-        <p>Tikssave.xyz is the fastest and safest way to download TikTok videos. Our user-friendly tool allows you to save any video in just a few seconds. No extra software or applications are needed.</p>
-
-        <h2>No Watermarks and High Quality</h2>
-        <p>The videos you download will be free of TikTok watermarks or user logos. This means you get clean videos ready for sharing or personal use. Our HD download option ensures you get the best possible video quality.</p>
-
-        <h2>How to Use: Step-by-Step Guide</h2>
-        <ul>
-          <li>Open the TikTok app and find the video you want to download.</li>
-          <li>Tap the "Share" icon on the video and select "Copy Link."</li>
-          <li>Return to Tikssave.xyz and paste the copied link into the input box above.</li>
-          <li>Click the "Download" button and choose your preferred format to complete the download.</li>
-        </ul>
-      </section>
-
-      <section class="accordion" aria-label="Frequently Asked Questions" id="faqs">
-        <div class="accordion-item">
-          <button class="accordion-header" aria-expanded="false" aria-controls="faq1" id="faq1-button" tabindex="0">
-            How do I find the TikTok video link?
-          </button>
-          <div id="faq1" class="accordion-content" role="region" aria-labelledby="faq1-button">
-            <p>Open the TikTok app or website, tap “Share” on the video, then select “Copy Link” to get the video URL.</p>
-          </div>
-        </div>
-
-        <div class="accordion-item">
-          <button class="accordion-header" aria-expanded="false" aria-controls="faq2" id="faq2-button" tabindex="0">
-            Is this service completely free?
-          </button>
-          <div id="faq2" class="accordion-content" role="region" aria-labelledby="faq2-button">
-            <p>Yes, Tikssave.xyz is a completely free service. You can download as many videos as you like without any charges.</p>
-          </div>
-        </div>
-
-        <div class="accordion-item">
-          <button class="accordion-header" aria-expanded="false" aria-controls="faq3" id="faq3-button" tabindex="0">
-            Where are my downloaded videos saved on my device?
-          </button>
-          <div id="faq3" class="accordion-content" role="region" aria-labelledby="faq3-button">
-            <p>Your downloaded files are usually saved in your device's default "Downloads" folder or video gallery.</p>
-          </div>
-        </div>
-
-        <div class="accordion-item">
-          <button class="accordion-header" aria-expanded="false" aria-controls="faq4" id="faq4-button" tabindex="0">
-            How do I choose the download quality?
-          </button>
-          <div id="faq4" class="accordion-content" role="region" aria-labelledby="faq4-button">
-            <p>After you paste your link and click "Download," you will be presented with options to download the HD video, SD video, or MP3 (audio only).</p>
-          </div>
-        </div>
-      </section>
-
-      <a href="/discord" class="discord-link" aria-label="Tikssave Bot on Discord">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="discord-icon">
-          <path d="M16.64 2.06C15.27.7 13.77 0 12 0s-3.27.7-4.64 2.06C5.34 7.86 3.79 13.86 3.94 20.06c.21.8.6 1.48 1.1 2.06.17.2.35.4.54.58 4.04 2.34 8.32 2.34 12.36 0 .18-.2.36-.4.53-.6.5-.6 0-1.2-.92-2.06-1.42-2.06-1.47-4.1-2.2-6.16-2.2-2.06 0-4.1.73-6.16 2.2-.87.5-1.7.92-2.54 1.42.18-.2.36-.4.54-.6 4.04 2.34 8.32 2.34 12.36 0 .18-.2.36-.4.53-.6.5-.6 0-1.2-.92-2.06-1.42-2.06-1.47-4.1-2.2-6.16-2.2-2.06 0-4.1.73-6.16 2.2-.87.5-1.7.92-2.54 1.42C18.21 13.86 16.66 7.86 16.64 2.06zM8.6 14.86c-1.1 0-2-.9-2-2 0-1.1.9-2 2-2 1.1 0 2 .9 2 2 0 1.1-.9 2-2 2zm6.8 0c-1.1 0-2-.9-2-2 0-1.1.9-2 2-2 1.1 0 2 .9 2 2 0 1.1-.9 2-2 2z"/>
-        </svg>
-        Tikssave Bot
-      </a>
-  </main>
+    <div class="accordion-item">
+      <button class="accordion-header" aria-expanded="false" aria-controls="faq4" id="faq4-button" tabindex="0">
+        How do I choose the download quality?
+      </button>
+      <div id="faq4" class="accordion-content" role="region" aria-labelledby="faq4-button">
+        <p>After you paste your link and click "Download," you will be presented with options to download the HD video, SD video, or MP3 (audio only).</p>
+      </div>
+    </div>
+  </section>
+  
+  <a href="/discord" class="discord-redirect-btn" aria-label="Tikssave Bot on Discord">
+    <svg xmlns="http://www.w3.org/2000/svg" class="discord-icon" viewBox="0 0 256 199" fill="currentColor">
+      <path d="M216.856 16.597C198.36 8.298 179.215 3.068 159.877 0c-2.07 3.639-4.38 8.385-6.014 12.252-17.48-2.633-34.793-2.633-51.772 0-1.635-3.867-4.065-8.613-6.135-12.252-19.338 3.068-38.483 8.298-56.979 16.597C5.818 58.707-3.884 99.622.785 140.043c22.56 16.597 44.476 26.61 66.148 33.93 5.414-7.525 10.197-15.504 14.34-23.905-7.867-2.987-15.379-6.794-22.319-11.511 1.87-1.398 3.74-2.916 5.609-4.314 42.547 19.339 88.897 19.339 131.324 0 1.87 1.398 3.739 2.916 5.609 4.314-6.94 4.837-14.452 8.524-22.319 11.511 4.143 8.401 8.926 16.38 14.22 23.905 21.672-7.32 43.589-17.333 66.149-33.93 5.115-47.232-8.922-87.58-38.606-123.446l-.001-.001ZM85.207 124.838c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Zm85.586 0c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Z"/>
+    </svg>
+    Tikssave Bot on Discord
+  </a>
+  <style>
+  /* Discord butonu CSS'i */
+  .discord-redirect-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 40px auto;
+    padding: 14px 22px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-decoration: none;
+    background-color: #5865F2;
+    color: white;
+    box-shadow: 0 6px 12px rgba(88, 101, 242, 0.6);
+    transition: all 0.3s ease;
+  }
+  .discord-redirect-btn:hover {
+    background-color: #4752C4;
+    box-shadow: 0 8px 18px rgba(71, 82, 196, 0.8);
+    transform: translateY(-2px);
+  }
+  .discord-redirect-btn:active {
+    background-color: #3a3f90;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.3);
+    transform: translateY(1px);
+  }
+  .discord-icon {
+    width: 26px;
+    height: 26px;
+    fill: currentColor;
+  }
+  @media (max-width: 480px) {
+    .discord-redirect-btn { font-size: 1rem; padding: 10px 16px; }
+    .discord-redirect-btn .discord-icon { width: 22px; height: 22px; }
+  }
+  </style>
 
   <footer>
-    <p>© 2025 tikssave.xyz | <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a></p>
+    <p>© 2025 tikssave.com All rights reserved. | <a href="/terms">Terms of Service</a> | <a href="/privacy">Privacy Policy</a> | <a href="/rights">Rights</a></p>
   </footer>
 
   <script>
@@ -610,12 +488,8 @@
     const previewThumbnail = document.getElementById('preview-thumbnail');
     const previewTitle = document.getElementById('preview-title');
     const optionsContainer = document.getElementById('options');
-    const menuToggle = document.querySelector('.menu-toggle');
-    const menuPanel = document.querySelector('.menu-panel');
-    const navbar = document.querySelector('.navbar');
-    let lastScrollY = window.scrollY;
 
-    function handleInput() {
+    videoUrlInput.addEventListener('input', () => {
       if(videoUrlInput.value.trim() !== '') {
         clearBtn.style.display = 'inline-block';
         pasteBtn.style.display = 'none';
@@ -626,23 +500,28 @@
         optionsContainer.style.display = 'none';
         optionsContainer.innerHTML = '';
       }
-    }
-
-    videoUrlInput.addEventListener('input', handleInput);
+    });
 
     function clearInput() {
       videoUrlInput.value = '';
-      handleInput();
+      clearBtn.style.display = 'none';
+      pasteBtn.style.display = 'inline-block';
+      previewContainer.style.display = 'none';
+      optionsContainer.style.display = 'none';
+      optionsContainer.innerHTML = '';
     }
 
-    async function pasteLink() {
-      try {
-        const text = await navigator.clipboard.readText();
-        videoUrlInput.value = text;
-        handleInput();
-      } catch (err) {
-        alert("Clipboard access denied");
-      }
+    function pasteLink() {
+      navigator.clipboard.readText()
+        .then(text => {
+          videoUrlInput.value = text;
+          clearBtn.style.display = 'inline-block';
+          pasteBtn.style.display = 'none';
+          previewContainer.style.display = 'none';
+          optionsContainer.style.display = 'none';
+          optionsContainer.innerHTML = '';
+        })
+        .catch(() => alert("Clipboard access denied"));
     }
 
     async function fetchLinks() {
@@ -666,6 +545,9 @@
           return;
         }
 
+        console.log("Fetched link (play):", data.play);
+        console.log("Fetched link (hdplay):", data.hdplay);
+
         window.downloadData = data;
 
         if(data.cover && data.title) {
@@ -678,13 +560,13 @@
 
         optionsContainer.innerHTML = '';
         if (data.music) {
-          optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.music)}&username=${encodeURIComponent(data.username)}&type=music">🎵 MP3 (Audio)</a>`;
+          optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.music)}&username=${encodeURIComponent(data.username)}&type=music">🎵 MP3 (Audio Only)</a>`;
         }
         if (data.play) {
-          optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.play)}&username=${encodeURIComponent(data.username)}&type=play">🎞️ SD Video</a>`;
+          optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.play)}&username=${encodeURIComponent(data.username)}&type=play">📽️ SD Video (Normal Quality)</a>`;
         }
         if (data.hdplay) {
-          optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.hdplay)}&username=${encodeURIComponent(data.username)}&type=hdplay">🎬 HD Video</a>`;
+          optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.hdplay)}&username=${encodeURIComponent(data.username)}&type=hdplay">📽️ HD Video (High Quality)</a>`;
         }
         optionsContainer.style.display = 'flex';
 
@@ -694,53 +576,29 @@
       }
     }
 
-    const accordionHeaders = document.querySelectorAll('.accordion-header');
-    accordionHeaders.forEach(header => {
-      header.addEventListener('click', () => {
-        const content = document.getElementById(header.getAttribute('aria-controls'));
-        const expanded = header.getAttribute('aria-expanded') === 'true';
+    const accordions = document.querySelectorAll('.accordion-header');
+    accordions.forEach(acc => {
+      acc.addEventListener('click', () => {
+        const expanded = acc.getAttribute('aria-expanded') === 'true';
 
-        accordionHeaders.forEach(otherHeader => {
-          if (otherHeader !== header) {
-            otherHeader.classList.remove('active');
-            otherHeader.setAttribute('aria-expanded', 'false');
-            document.getElementById(otherHeader.getAttribute('aria-controls')).classList.remove('open');
+        accordions.forEach(a => {
+          a.setAttribute('aria-expanded', 'false');
+          const content = document.getElementById(a.getAttribute('aria-controls'));
+          if (content) {
+            content.classList.remove('open');
           }
         });
 
         if (!expanded) {
-          header.classList.add('active');
-          header.setAttribute('aria-expanded', 'true');
-          content.classList.add('open');
-        } else {
-          header.classList.remove('active');
-          header.setAttribute('aria-expanded', 'false');
-          content.classList.remove('open');
+          acc.setAttribute('aria-expanded', 'true');
+          const content = document.getElementById(acc.getAttribute('aria-controls'));
+          if (content) {
+            content.classList.add('open');
+          }
         }
       });
-    });
-
-    menuToggle.addEventListener('click', () => {
-        menuToggle.classList.toggle('active');
-        menuPanel.classList.toggle('open');
-    });
-
-    document.addEventListener('click', (event) => {
-        const isClickInside = menuPanel.contains(event.target) || menuToggle.contains(event.target);
-        if (!isClickInside && menuPanel.classList.contains('open')) {
-            menuToggle.classList.remove('active');
-            menuPanel.classList.remove('open');
-        }
-    });
-
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > lastScrollY && window.scrollY > 100) {
-            navbar.classList.add('hidden');
-        } else {
-            navbar.classList.remove('hidden');
-        }
-        lastScrollY = window.scrollY;
     });
   </script>
 </body>
 </html>
+
