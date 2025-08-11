@@ -388,6 +388,79 @@
             transform: translateY(-2px);
         }
 
+        /* Download Results Section */
+        #results-container {
+            margin-top: 40px;
+            display: none; /* Varsayılan olarak gizli */
+        }
+        
+        #results-container.visible {
+            display: block; /* Göstermek için */
+        }
+
+        .download-result-card {
+            background-color: var(--background-light);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .thumbnail-img {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .download-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .download-buttons a {
+            padding: 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            color: white;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .download-buttons .no-watermark {
+            background-color: #3b5998;
+        }
+
+        .download-buttons .no-watermark:hover {
+            background-color: #2d4373;
+            transform: translateY(-1px);
+        }
+
+        .download-buttons .with-watermark {
+            background-color: #dd4b39;
+        }
+
+        .download-buttons .with-watermark:hover {
+            background-color: #c23321;
+            transform: translateY(-1px);
+        }
+
+        .download-buttons .mp3 {
+            background-color: #4CAF50;
+        }
+
+        .download-buttons .mp3:hover {
+            background-color: #45a049;
+            transform: translateY(-1px);
+        }
+
         /* FAQ Section */
         .faq-section {
             padding: 40px 20px;
@@ -434,7 +507,7 @@
         }
 
         .accordion.active .accordion-content {
-            max-height: 500px; /* Tahmini maksimum yükseklik */
+            max-height: 500px;
             padding: 15px;
         }
 
@@ -509,6 +582,17 @@
             .how-to-use-list {
                 max-width: 800px;
             }
+            
+            .download-result-card {
+                flex-direction: row;
+                text-align: left;
+                align-items: flex-start;
+            }
+            
+            .download-buttons {
+                flex-direction: row;
+                width: auto;
+            }
         }
     </style>
 </head>
@@ -552,7 +636,15 @@
     </main>
 
     <div class="container" id="results-container">
+        <div class="download-result-card">
+            <img id="thumbnail-preview" class="thumbnail-img" src="https://i.imgur.com/your-thumbnail-placeholder.jpg" alt="Video Thumbnail">
+            <div class="download-buttons">
+                <a href="#" class="no-watermark" download>Download without Watermark</a>
+                <a href="#" class="with-watermark" download>Download with Watermark</a>
+                <a href="#" class="mp3" download>Download as MP3</a>
+            </div>
         </div>
+    </div>
 
     <div class="container">
         <h2 class="section-title" id="how-to-use">How to Use</h2>
@@ -669,6 +761,9 @@
         const pasteBtn = document.querySelector('.paste-btn');
         const clearBtn = document.querySelector('.clear-btn');
         const accordionHeaders = document.querySelectorAll('.accordion-header');
+        const resultsContainer = document.getElementById('results-container');
+        const thumbnailImg = document.getElementById('thumbnail-preview');
+        const downloadButtons = document.querySelectorAll('.download-buttons a');
 
         // Scroll effect for navbar
         window.addEventListener('scroll', () => {
@@ -721,8 +816,20 @@
 
         mainForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            // Your code to fetch download links will go here
-            alert('Download button clicked. The process of fetching links will be handled here.');
+            // Bu kısım, indirme linklerinin ve önizlemenin dinamik olarak yükleneceği yerdir.
+            // Örnek olarak, sabit bir önizleme resmi ve indirme linkleri ile dolduruyorum.
+            const sampleThumbnail = 'https://i.imgur.com/example-thumbnail.jpg'; 
+            const sampleNoWatermarkLink = 'https://example.com/video_no_watermark.mp4';
+            const sampleWithWatermarkLink = 'https://example.com/video_with_watermark.mp4';
+            const sampleMp3Link = 'https://example.com/audio.mp3';
+
+            thumbnailImg.src = sampleThumbnail;
+            downloadButtons[0].href = sampleNoWatermarkLink;
+            downloadButtons[1].href = sampleWithWatermarkLink;
+            downloadButtons[2].href = sampleMp3Link;
+
+            resultsContainer.classList.add('visible');
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
         
         // Accordion functionality
