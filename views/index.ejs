@@ -17,8 +17,8 @@
       background-color: #12121e; /* Düz renk arkaplan */
       background-image: radial-gradient(at 0% 0%, rgba(32, 32, 46, 0.4), transparent 50%),
                         radial-gradient(at 100% 100%, rgba(32, 32, 46, 0.4), transparent 50%);
-      color: #f0f6ff; /* Daha açık ve canlı metin rengi */
-      padding-top: 80px;
+      color: #f0f6ff;
+      padding-top: 100px; /* Barın yüksekliğine göre boşluk bırakıyoruz */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -33,12 +33,12 @@
         top: 0;
         left: 0;
         width: 100%;
-        background-color: transparent; /* Başlangıçta şeffaf */
-        box-shadow: none; /* Başlangıçta gölge yok */
+        background-color: transparent;
+        box-shadow: none;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 15px 40px;
+        padding: 20px 50px; /* Padding'i artırarak barı büyüttük */
         z-index: 1000;
         transition: background-color 0.3s ease, box-shadow 0.3s ease;
     }
@@ -48,35 +48,32 @@
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
     }
-    .navbar.hidden {
-        transform: translateY(-100%);
-    }
     .navbar .logo-container {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px; /* Logo ve yazı arasındaki boşluğu artırdık */
       text-decoration: none;
     }
     .navbar .logo-container .logo-img {
-        width: 30px;
-        height: 30px;
-        border-radius: 6px;
+        width: 38px; /* Logoyu büyüttük */
+        height: 38px;
+        border-radius: 8px;
     }
    .navbar .logo-container .logo-text {
-      font-size: 1.4rem;
+      font-size: 1.8rem; /* Yazıyı büyüttük */
       font-weight: 700;
-      color: #c0c0e0; /* Başlangıçta daha sönük renk */
+      color: #c0c0e0;
       letter-spacing: 0.5px;
       text-decoration: none;
       transition: color 0.3s ease;
     }
     .navbar.scrolled .logo-container .logo-text {
-      color: #7289da; /* Scroll'da parlak renk */
+      color: #7289da;
     }
 
     .navbar .menu-toggle {
-        width: 28px;
-        height: 22px;
+        width: 32px; /* Hamburger menüyü büyüttük */
+        height: 26px;
         position: relative;
         cursor: pointer;
         display: flex;
@@ -85,29 +82,29 @@
         z-index: 1010;
     }
     .menu-toggle .bar {
-        height: 2px;
-        background-color: #c0c0e0; /* Başlangıçta sönük renk */
+        height: 3px;
+        background-color: #c0c0e0;
         border-radius: 1px;
         transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
     }
     .navbar.scrolled .menu-toggle .bar {
-        background-color: #ddd; /* Scroll'da parlak renk */
+        background-color: #ddd;
     }
     .menu-toggle.active .bar:nth-child(2) {
         opacity: 0;
     }
     .menu-toggle.active .bar:nth-child(1) {
-        transform: translateY(9px) rotate(45deg);
+        transform: translateY(11px) rotate(45deg); /* Büyüyen butona göre transform değerini güncelledik */
     }
     .menu-toggle.active .bar:nth-child(3) {
-        transform: translateY(-9px) rotate(-45deg);
+        transform: translateY(-11px) rotate(-45deg); /* Büyüyen butona göre transform değerini güncelledik */
     }
     .menu-panel {
         position: fixed;
-        top: 60px;
+        top: 80px; /* Barın yeni yüksekliğine göre ayarladık */
         right: 0;
-        width: 200px;
-        height: calc(100vh - 60px);
+        width: 250px; /* Menü panelini büyüttük */
+        height: calc(100vh - 80px);
         background-color: #1a1a2b;
         transform: translateX(100%);
         transition: transform 0.3s ease-in-out;
@@ -115,7 +112,7 @@
         z-index: 999;
         display: flex;
         flex-direction: column;
-        padding: 15px;
+        padding: 20px;
     }
     .menu-panel.open {
         transform: translateX(0);
@@ -123,8 +120,8 @@
     .menu-panel a {
         color: #c9d6ef;
         text-decoration: none;
-        font-size: 1rem;
-        padding: 12px 10px;
+        font-size: 1.1rem;
+        padding: 14px 12px;
         border-bottom: 1px solid #33334d;
         transition: background-color 0.2s ease;
     }
@@ -133,7 +130,7 @@
         color: #7289da;
     }
 
-    /* KODUN DİĞER BÖLÜMLERİ */
+    /* Diğer mevcut CSS kodları... */
     h1 {
       font-size: 2.8rem;
       margin-bottom: 20px;
@@ -450,11 +447,15 @@
       text-decoration: underline;
     }
     @media (max-width: 480px) {
-      body { padding-top: 60px; }
-      header.navbar { padding: 8px 15px; }
-      .navbar .logo-container .logo-img { width: 24px; height: 24px; }
-      .navbar .logo-container .logo-text { font-size: 1.2rem; }
-      .menu-panel { width: 180px; top: 44px; height: calc(100vh - 44px); }
+      body { padding-top: 80px; }
+      header.navbar { padding: 12px 20px; }
+      .navbar .logo-container .logo-img { width: 30px; height: 30px; }
+      .navbar .logo-container .logo-text { font-size: 1.4rem; }
+      .menu-toggle { width: 28px; height: 22px; }
+      .menu-toggle .bar { height: 2px; }
+      .menu-toggle.active .bar:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+      .menu-toggle.active .bar:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+      .menu-panel { width: 200px; top: 56px; height: calc(100vh - 56px); }
       .menu-panel a { font-size: 1rem; padding: 10px 5px; }
       h1 { font-size: 2.2rem; }
       input[type="text"], button, .download-btn, .accordion-header {
@@ -632,20 +633,11 @@
     });
     
     window.addEventListener('scroll', () => {
-        // Scroll pozisyonuna göre navbar stilini değiştir
         if (window.scrollY > 50) {
             navbar.classList.add('scrolled');
         } else {
             navbar.classList.remove('scrolled');
         }
-
-        // Scroll'un yukarı veya aşağı yönünü algılayan mevcut kodunuz
-        if (window.scrollY > lastScrollY && window.scrollY > 100) {
-            navbar.classList.add('hidden');
-        } else {
-            navbar.classList.remove('hidden');
-        }
-        lastScrollY = window.scrollY;
     });
 
     // ANA İŞLEVLER
