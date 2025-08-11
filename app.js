@@ -22,7 +22,6 @@ const port = process.env.PORT || 3000;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const CALLBACK_URL = process.env.DISCORD_CALLBACK_URL;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 // Yardımcı fonksiyonlar
 function generateShortId() {
@@ -69,25 +68,6 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.error(err));
-
-
-// --- MIDDLEWARE'LER ---
-
-// Discord ile giriş yapmış kullanıcının bilgilerini kontrol etmek için
-const discordAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect('/dashboard');
-};
-
-// Admin şifresiyle giriş yapmış kullanıcının session'ını kontrol etmek için
-const adminAuthenticated = (req, res, next) => {
-  if (req.session.isAdmin) {
-    return next();
-  }
-  res.redirect('/admin/login');
-};
 
 
 // --- ROTLAR ---
@@ -148,34 +128,6 @@ app.get('/dashboard', (req, res) => {
 
   res.render('dashboard', { user: user, guilds: manageableGuilds });
 });
-
-
-// --- GENEL ADMIN ROTLARI ---
-
-// Admin giriş sayfası
-app.get('/admin/login', (req, res) => {
-  res.render('admin/login', { error: null });
-});
-
-// Admin giriş formunu işleyen rota
-app.post('/admin/login', (req, res) => {
-  const { password } = req.body;
-  if (password === ADMIN_PASSWORD) {
-    req.session.isAdmin = true;
-    res.redirect('/admin/dashboard');
-  } else {
-    res.render('admin/login', { error: 'Incorrect password.' });
-  }
-});
-
-// Admin Dashboard sayfası
-app.get('/admin/dashboard', adminAuthenticated, (req, res) => {
-  res.render('admin/dashboard');
-});
-
-// Diğer admin rotalarını buraya ekleyebilirsin...
-// app.get('/admin/stats', adminAuthenticated, (req, res) => { ... });
-// app.post('/admin/videos', adminAuthenticated, (req, res) => { ... });
 
 
 // --- API ROTLARI ---
