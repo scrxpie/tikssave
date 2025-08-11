@@ -266,6 +266,53 @@
             font-weight: 700;
         }
 
+        /* Download Options Section */
+        #download-options {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px var(--card-shadow);
+            display: none; /* Initially hidden */
+        }
+        
+        .download-btn {
+            background-color: #36395b;
+            color: #b0c4f7;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 15px #8c86fca0;
+            transition: background-color 0.3s, box-shadow 0.3s, transform 0.15s ease;
+            user-select: none;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+
+        .download-btn:hover {
+            background-color: #8c86fc;
+            color: #fff;
+            box-shadow: 0 0 28px #8c86fcdd;
+            transform: translateY(-3px);
+        }
+
+        .download-btn:active {
+            transform: translateY(1px);
+            box-shadow: inset 0 2px 8px #7d77e4a0;
+        }
+        
         /* How to Use Section */
         .how-to-use-list {
             list-style: none;
@@ -573,8 +620,11 @@
         </div>
     </main>
 
-    <div class="container" id="results-container">
-        </div>
+    <div class="container" id="download-options">
+        <a href="#" class="download-btn">🎵 MP3 (Audio Only)</a>
+        <a href="#" class="download-btn">📽️ SD Video (Normal Quality)</a>
+        <a href="#" class="download-btn">📽️ HD Video (High Quality)</a>
+    </div>
 
     <div class="container">
         <h2 class="section-title" id="features">Features</h2>
@@ -697,6 +747,7 @@
         const videoUrlInput = document.getElementById('videoUrl');
         const pasteBtn = document.querySelector('.paste-btn');
         const clearBtn = document.querySelector('.clear-btn');
+        const downloadOptions = document.getElementById('download-options');
         const accordionHeaders = document.querySelectorAll('.accordion-header');
 
         // Scroll effect for navbar
@@ -729,6 +780,7 @@
             } else {
                 pasteBtn.style.display = 'inline-block';
                 clearBtn.style.display = 'none';
+                downloadOptions.style.display = 'none'; // Hide options if input is cleared
             }
         });
 
@@ -736,6 +788,7 @@
             videoUrlInput.value = '';
             pasteBtn.style.display = 'inline-block';
             clearBtn.style.display = 'none';
+            downloadOptions.style.display = 'none'; // Hide options
         });
 
         pasteBtn.addEventListener('click', async () => {
@@ -750,8 +803,25 @@
 
         mainForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            // Your code to fetch download links will go here
-            alert('Download button clicked. The process of fetching links will be handled here.');
+            // This is where your server-side logic would be triggered to fetch the links.
+            // For now, we'll just show the download options section as a demonstration.
+            downloadOptions.style.display = 'flex';
+            
+            // You would replace the placeholder '#' in the anchor tags with your actual download links
+            // Example:
+            // const url = videoUrlInput.value;
+            // fetch(`/api/download-links?url=${encodeURIComponent(url)}`)
+            //   .then(response => response.json())
+            //   .then(data => {
+            //     document.querySelector('.download-btn.mp3').href = data.mp3_link;
+            //     document.querySelector('.download-btn.sd').href = data.sd_link;
+            //     document.querySelector('.download-btn.hd').href = data.hd_link;
+            //     downloadOptions.style.display = 'flex';
+            //   })
+            //   .catch(error => {
+            //     console.error('Error fetching download links:', error);
+            //     alert('An error occurred. Please try again.');
+            //   });
         });
         
         // Accordion functionality
