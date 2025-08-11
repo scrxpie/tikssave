@@ -83,12 +83,7 @@ const discordAuthenticated = (req, res, next) => {
 };
 
 // Admin şifresiyle giriş yapmış kullanıcının session'ını kontrol etmek için
-const adminAuthenticated = (req, res, next) => {
-  if (req.session.isAdmin) {
-    return next();
-  }
-  res.redirect('/admin/login');
-};
+
 
 
 // --- ROTLAR ---
