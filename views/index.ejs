@@ -394,23 +394,23 @@
       margin-bottom: 20px;
     }
     #about ul {
-      list-style-type: none; /* Varsayılan list stilini kaldırıyoruz */
+      list-style-type: none;
       padding-left: 0;
       margin-bottom: 20px;
     }
     #about li {
       margin-bottom: 12px;
-      display: flex; /* Madde işareti ve metni hizalamak için flex kullanıyoruz */
+      display: flex;
       align-items: flex-start;
       color: #ddd;
     }
     #about li::before {
-      content: "○"; /* Özel madde işareti */
+      content: "○";
       color: #fff;
       font-size: 1rem;
       font-weight: 600;
       margin-right: 12px;
-      margin-top: -2px; /* Dikey hizalama için */
+      margin-top: -2px;
     }
     #about li span {
       color: #fff;
@@ -422,13 +422,12 @@
       max-width: 550px;
       color: #666;
       font-size: 0.85rem;
-      text-align: center;
       margin: 20px auto 10px;
       user-select: none;
       font-weight: 300;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: center; /* Footer içeriğini ortalıyor */
       gap: 8px;
     }
     footer a {
@@ -532,7 +531,7 @@
           <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.play) %>&username=<%= encodeURIComponent(videoData.username) %>&type=play">🎞️ SD Video</a>
         <% } %>
         <% if (videoData?.hdplay) { %>
-          <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.hdplay) %>&username=<%= encodeURIComponent(videoData.username) %>&type=hdplay">🎬 HD Video</a>
+          <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.hdplay) %>&username=<%= encodeURIComponent(data.username) %>&type=hdplay">🎬 HD Video</a>
         <% } %>
       </div>
 
@@ -697,25 +696,31 @@
       }
     }
 
-    const accordions = document.querySelectorAll('.accordion-header');
-    accordions.forEach(acc => {
-      acc.addEventListener('click', () => {
-        const content = document.getElementById(acc.getAttribute('aria-controls'));
-        const expanded = acc.getAttribute('aria-expanded') === 'true';
+    // Akordiyon menüleri için düzeltilmiş ve daha sağlam JavaScript kodu
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+    accordionHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const content = document.getElementById(header.getAttribute('aria-controls'));
+        const expanded = header.getAttribute('aria-expanded') === 'true';
 
-        // Tüm accordionları kapat
-        accordions.forEach(a => {
-          const c = document.getElementById(a.getAttribute('aria-controls'));
-          a.setAttribute('aria-expanded', 'false');
-          a.classList.remove('active');
-          c.classList.remove('open');
+        // Tıklanan dışındaki tüm akordiyonları kapat
+        accordionHeaders.forEach(otherHeader => {
+          if (otherHeader !== header) {
+            otherHeader.classList.remove('active');
+            otherHeader.setAttribute('aria-expanded', 'false');
+            document.getElementById(otherHeader.getAttribute('aria-controls')).classList.remove('open');
+          }
         });
-        
-        // Sadece tıklananı aç
+
+        // Tıklananı aç/kapat
         if (!expanded) {
-          acc.setAttribute('aria-expanded', 'true');
-          acc.classList.add('active');
+          header.classList.add('active');
+          header.setAttribute('aria-expanded', 'true');
           content.classList.add('open');
+        } else {
+          header.classList.remove('active');
+          header.setAttribute('aria-expanded', 'false');
+          content.classList.remove('open');
         }
       });
     });
