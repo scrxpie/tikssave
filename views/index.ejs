@@ -344,21 +344,24 @@
     }
 
     /* Güncellenmiş Akordiyon İçeriği Stilleri */
-    .accordion-content {
-      max-height: 0;
-      overflow: hidden;
-      background-color: #232732;
-      color: #cfd3e2;
-      padding: 0 20px;
-      font-size: 0.9rem;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-      user-select: text;
-      line-height: 1.6;
-    }
-    .accordion-content.open {
-      padding: 12px 20px 15px;
-      max-height: 600px;
-    }
+ /* Sadece bu bölümü mevcut CSS kodunla değiştir. */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  background-color: #232732;
+  color: #cfd3e2;
+  padding: 0 20px;
+  font-size: 0.9rem;
+  transition: max-height 0.3s ease, padding 0.3s ease; /* padding-bottom da geçişli olacak */
+  user-select: text;
+  line-height: 1.6;
+}
+.accordion-content.open {
+  padding: 12px 20px 15px; /* İçerik padding'i */
+  max-height: 600px; /* Bu değerin yeterince büyük olduğundan emin ol */
+  padding-bottom: 15px; /* Sadece açıldığında alt boşluk veriyoruz */
+}
+
 
     /* Diğer akordiyon stilleri */
     .accordion-content p {
@@ -453,11 +456,14 @@
         font-weight: 500;
         margin-bottom: 10px;
     }
-    .discord-icon {
-        width: 18px;
-        height: 18px;
-        fill: currentColor;
-    }
+  /* Bu CSS kodunu mevcut koduna ekle. */
+.discord-icon {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    vertical-align: middle; /* Bu satırı ekliyoruz */
+}
+
     @media (max-width: 480px) {
       body { padding-top: 50px; }
       header.navbar { padding: 8px 15px; }
