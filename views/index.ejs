@@ -342,28 +342,21 @@
       border-left-color: #f0f6ff;
       text-shadow: 0 0 5px rgba(240,246,255,0.8);
     }
-
-    /* Güncellenmiş Akordiyon İçeriği Stilleri */
- /* Sadece bu bölümü mevcut CSS kodunla değiştir. */
-.accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  background-color: #232732;
-  color: #cfd3e2;
-  padding: 0 20px;
-  font-size: 0.9rem;
-  transition: max-height 0.3s ease, padding 0.3s ease; /* padding-bottom da geçişli olacak */
-  user-select: text;
-  line-height: 1.6;
-}
-.accordion-content.open {
-  padding: 12px 20px 15px; /* İçerik padding'i */
-  max-height: 600px; /* Bu değerin yeterince büyük olduğundan emin ol */
-  padding-bottom: 15px; /* Sadece açıldığında alt boşluk veriyoruz */
-}
-
-
-    /* Diğer akordiyon stilleri */
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      background-color: #232732;
+      color: #cfd3e2;
+      padding: 0 20px;
+      font-size: 0.9rem;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      user-select: text;
+      line-height: 1.6;
+    }
+    .accordion-content.open {
+      padding: 12px 20px 15px;
+      max-height: 600px;
+    }
     .accordion-content p {
       margin: 0;
       font-weight: 400;
@@ -432,10 +425,6 @@
       margin: 20px auto 10px;
       user-select: none;
       font-weight: 300;
-      display: flex;
-      flex-direction: column;
-      align-items: center; /* Footer içeriğini ortalıyor */
-      gap: 8px;
     }
     footer a {
       color: var(--highlight-color);
@@ -448,22 +437,18 @@
       text-decoration: underline;
     }
     .discord-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+        display: block;
+        text-align: center;
         text-decoration: none;
         color: var(--highlight-color);
         font-weight: 500;
         margin-bottom: 10px;
     }
-  /* Bu CSS kodunu mevcut koduna ekle. */
-.discord-icon {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
-    vertical-align: middle; /* Bu satırı ekliyoruz */
-}
-
+    .discord-icon {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+    }
     @media (max-width: 480px) {
       body { padding-top: 50px; }
       header.navbar { padding: 8px 15px; }
@@ -551,9 +536,6 @@
 
         <h2>No Watermarks and High Quality</h2>
         <p>The videos you download will be free of TikTok watermarks or user logos. This means you get clean videos ready for sharing or personal use. Our HD download option ensures you get the best possible video quality.</p>
-
-        <h2>Multiple Format Support</h2>
-        <p>With Tikssave.xyz, you can download not only the video but also the background music. You have the option to save the video as an MP4 or just the sound as an MP3 file.</p>
 
         <h2>How to Use: Step-by-Step Guide</h2>
         <ul>
@@ -706,23 +688,13 @@
       }
     }
 
-    // Akordiyon menüleri için düzeltilmiş ve daha sağlam JavaScript kodu
+    // Akordiyon menüleri için eski, basit JavaScript kodu
     const accordionHeaders = document.querySelectorAll('.accordion-header');
     accordionHeaders.forEach(header => {
       header.addEventListener('click', () => {
         const content = document.getElementById(header.getAttribute('aria-controls'));
         const expanded = header.getAttribute('aria-expanded') === 'true';
 
-        // Tıklanan dışındaki tüm akordiyonları kapat
-        accordionHeaders.forEach(otherHeader => {
-          if (otherHeader !== header) {
-            otherHeader.classList.remove('active');
-            otherHeader.setAttribute('aria-expanded', 'false');
-            document.getElementById(otherHeader.getAttribute('aria-controls')).classList.remove('open');
-          }
-        });
-
-        // Tıklananı aç/kapat
         if (!expanded) {
           header.classList.add('active');
           header.setAttribute('aria-expanded', 'true');
