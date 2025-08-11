@@ -14,7 +14,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #12121e; /* Daha koyu bir arkaplan rengi */
+      background-color: #12121e; /* Düz renk arkaplan */
+      background-image: radial-gradient(at 0% 0%, rgba(32, 32, 46, 0.4), transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(32, 32, 46, 0.4), transparent 50%);
       color: #f0f6ff; /* Daha açık ve canlı metin rengi */
       padding-top: 80px;
       display: flex;
@@ -31,14 +33,20 @@
         top: 0;
         left: 0;
         width: 100%;
-        background-color: #1a1a2b; /* Koyu navigasyon barı */
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        background-color: transparent; /* Başlangıçta şeffaf */
+        box-shadow: none; /* Başlangıçta gölge yok */
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 15px 40px; /* Kenar boşlukları artırıldı */
+        padding: 15px 40px;
         z-index: 1000;
-        transition: transform 0.3s ease-in-out;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    header.navbar.scrolled {
+        background-color: rgba(26, 26, 43, 0.85); /* Yarı şeffaf arkaplan */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
     }
     .navbar.hidden {
         transform: translateY(-100%);
@@ -57,9 +65,13 @@
    .navbar .logo-container .logo-text {
       font-size: 1.4rem;
       font-weight: 700;
-      color: #7289da; /* Parlak mor/mavi renk */
+      color: #c0c0e0; /* Başlangıçta daha sönük renk */
       letter-spacing: 0.5px;
       text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .navbar.scrolled .logo-container .logo-text {
+      color: #7289da; /* Scroll'da parlak renk */
     }
 
     .navbar .menu-toggle {
@@ -74,9 +86,12 @@
     }
     .menu-toggle .bar {
         height: 2px;
-        background-color: #ddd;
+        background-color: #c0c0e0; /* Başlangıçta sönük renk */
         border-radius: 1px;
-        transition: transform 0.3s ease, opacity 0.3s ease;
+        transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
+    }
+    .navbar.scrolled .menu-toggle .bar {
+        background-color: #ddd; /* Scroll'da parlak renk */
     }
     .menu-toggle.active .bar:nth-child(2) {
         opacity: 0;
@@ -93,7 +108,7 @@
         right: 0;
         width: 200px;
         height: calc(100vh - 60px);
-        background-color: #1a1a2b; /* Menü paneli için aynı koyu renk */
+        background-color: #1a1a2b;
         transform: translateX(100%);
         transition: transform 0.3s ease-in-out;
         box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
@@ -123,7 +138,7 @@
       font-size: 2.8rem;
       margin-bottom: 20px;
       text-align: center;
-      color: #7289da; /* Parlak mor/mavi renk */
+      color: #7289da;
       font-weight: 900;
       user-select: none;
       text-shadow: 0 2px 8px rgba(114, 137, 218, 0.6);
@@ -140,10 +155,10 @@
       flex: 1;
       padding: 18px 22px;
       font-size: 1.3rem;
-      border-radius: 18px; /* Daha yuvarlak köşeler */
+      border-radius: 18px;
       border: 2px solid #2a2a3f;
       outline: none;
-      background-color: #1f1f33; /* Koyu arkaplan */
+      background-color: #1f1f33;
       color: #eee;
       transition: border-color 0.3s, box-shadow 0.3s;
       box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
@@ -153,14 +168,14 @@
       font-weight: 500;
     }
     input[type="text"]:focus {
-      border-color: #7289da; /* Parlak mor/mavi odak rengi */
+      border-color: #7289da;
       box-shadow: 0 0 12px #7289daaa;
       background-color: #2a2a3f;
     }
     button {
       padding: 16px 28px;
       font-size: 1.25rem;
-      border-radius: 18px; /* Butonlara da yuvarlak köşeler */
+      border-radius: 18px;
       border: none;
       cursor: pointer;
       font-weight: 700;
@@ -178,7 +193,7 @@
       box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
     }
     button.paste-btn {
-      background-color: #3b3d52; /* Daha hafif bir renk */
+      background-color: #3b3d52;
       color: #ccc;
       order: 2;
       box-shadow: inset 0 2px 6px #2a2c3f;
@@ -200,7 +215,7 @@
       box-shadow: 0 6px 12px #e74c3ccc;
     }
     button.fetch-btn {
-      background-color: #7289da; /* Parlak mor/mavi renk */
+      background-color: #7289da;
       color: #fff;
       box-shadow: 0 0 20px rgba(114, 137, 218, 0.6);
       order: 3;
@@ -221,7 +236,7 @@
       display: none;
     }
     .download-btn {
-      background-color: #36395b; /* Daha koyu bir renk */
+      background-color: #36395b;
       color: #b0c4f7;
       font-weight: 700;
       font-size: 1.35rem;
@@ -257,7 +272,7 @@
       align-items: center;
       gap: 14px;
       border-radius: 18px;
-      background: #1f1f33; /* Koyu arkaplan */
+      background: #1f1f33;
       padding: 18px 20px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.7);
       transition: background-color 0.3s ease;
@@ -271,7 +286,7 @@
       pointer-events: none;
     }
     #preview-container h2 {
-      color: #7289da; /* Parlak mor/mavi renk */
+      color: #7289da;
       text-align: center;
       margin: 0 0 10px;
       user-select: text;
@@ -282,7 +297,7 @@
     .accordion {
       width: 100%;
       max-width: 600px;
-      background-color: #1f1f33; /* Daha koyu arkaplan */
+      background-color: #1f1f33;
       border-radius: 18px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.7);
       overflow: hidden;
@@ -298,12 +313,12 @@
       border-bottom: none;
     }
     .accordion-header {
-      background-color: #2a2a3f; /* Arkaplan rengi */
+      background-color: #2a2a3f;
       cursor: pointer;
       padding: 22px 28px;
       font-weight: 700;
       font-size: 1.25rem;
-      color: #7289da; /* Parlak mor/mavi renk */
+      color: #7289da;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -326,7 +341,7 @@
     .accordion-content {
       max-height: 0;
       overflow: hidden;
-      background-color: #1a1a2b; /* Koyu arkaplan */
+      background-color: #1a1a2b;
       color: #cfd3e2;
       padding: 0 28px;
       font-size: 1rem;
@@ -360,7 +375,7 @@
       font-weight: 500;
     }
     #about h2 {
-      color: #7289da; /* Parlak mor/mavi renk */
+      color: #7289da;
       font-weight: 800;
       margin-bottom: 20px;
       font-size: 2rem;
@@ -425,7 +440,7 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     footer a {
-      color: #7289da; /* Parlak mor/mavi renk */
+      color: #7289da;
       text-decoration: none;
       font-weight: 600;
       transition: color 0.3s ease;
@@ -521,14 +536,14 @@
   </div>
 
   <section id="about" aria-label="About TikTok Downloader">
-    <h2>Why Choose Tikssave.com?</h2>
+    <h2>Why Choose Tikssave.xyz?</h2>
     <p>Tikssave.xyz is the fastest and safest way to download TikTok videos. Our user-friendly tool allows you to save any video in just a few seconds. No extra software or applications are needed.</p>
     
     <h2>No Watermarks and High Quality</h2>
     <p>The videos you download will be free of TikTok watermarks or user logos. This means you get clean videos ready for sharing or personal use. Our HD download option ensures you get the best possible video quality.</p>
     
     <h2>Multiple Format Support</h2>
-    <p>With Tikssave.com, you can download not only the video but also the background music. You have the option to save the video as an MP4 or just the sound as an MP3 file.</p>
+    <p>With Tikssave.xyz, you can download not only the video but also the background music. You have the option to save the video as an MP4 or just the sound as an MP3 file.</p>
 
     <h2>How to Use: Step-by-Step Guide</h2>
     <ul>
@@ -615,8 +630,16 @@
             menuPanel.classList.remove('open');
         }
     });
-
+    
     window.addEventListener('scroll', () => {
+        // Scroll pozisyonuna göre navbar stilini değiştir
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+
+        // Scroll'un yukarı veya aşağı yönünü algılayan mevcut kodunuz
         if (window.scrollY > lastScrollY && window.scrollY > 100) {
             navbar.classList.add('hidden');
         } else {
