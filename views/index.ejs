@@ -265,23 +265,67 @@
             font-size: 2rem;
             font-weight: 700;
         }
-
-        /* Download Options Section */
-        #download-options {
-            display: flex;
+        
+        /* New styles for preview and options container */
+        #preview-container {
             flex-direction: column;
-            gap: 16px;
             align-items: center;
+            gap: 20px;
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
             margin: 40px auto;
             padding: 20px;
             background-color: var(--card-bg);
             border-radius: 12px;
             box-shadow: 0 4px 10px var(--card-shadow);
-            display: none; /* Initially hidden */
+            display: none; /* Initial state */
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        #preview-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #preview-thumbnail {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        #preview-thumbnail:hover {
+            transform: scale(1.02);
+        }
+
+        #preview-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+            text-align: center;
         }
         
+        #preview-container video {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 16px;
+            margin-top: 15px;
+        }
+        
+        #options {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            display: none; /* Initial state */
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
         .download-btn {
             background-color: #36395b;
             color: #b0c4f7;
@@ -300,7 +344,7 @@
             text-decoration: none;
             display: block;
         }
-
+        
         .download-btn:hover {
             background-color: #8c86fc;
             color: #fff;
@@ -312,7 +356,7 @@
             transform: translateY(1px);
             box-shadow: inset 0 2px 8px #7d77e4a0;
         }
-        
+
         /* How to Use Section */
         .how-to-use-list {
             list-style: none;
@@ -618,13 +662,15 @@
                 </div>
             </form>
         </div>
-    </main>
+        
+        <div id="preview-container">
+            <img id="preview-thumbnail" src="" alt="Video thumbnail" />
+            <h2 id="preview-title"></h2>
+            </div>
 
-    <div class="container" id="download-options">
-        <a href="#" class="download-btn">🎵 MP3 (Audio Only)</a>
-        <a href="#" class="download-btn">📽️ SD Video (Normal Quality)</a>
-        <a href="#" class="download-btn">📽️ HD Video (High Quality)</a>
-    </div>
+        <div id="options">
+            </div>
+    </main>
 
     <div class="container">
         <h2 class="section-title" id="features">Features</h2>
@@ -690,9 +736,17 @@
             Want to download TikTok videos directly on your Discord server?
             Add the Tiks Save Bot to your server to easily download videos and MP3s without watermarks.
         </p>
-        <a href="#" class="discord-redirect-btn">
-            Add Tiks Save Bot to Your Server
-        </a>
+      <a href="/discord" class="discord-redirect-btn" aria-label="Tikssave Bot on Discord">
+
+    <svg xmlns="http://www.w3.org/2000/svg" class="discord-icon" viewBox="0 0 256 199" fill="currentColor">
+
+      <path d="M216.856 16.597C198.36 8.298 179.215 3.068 159.877 0c-2.07 3.639-4.38 8.385-6.014 12.252-17.48-2.633-34.793-2.633-51.772 0-1.635-3.867-4.065-8.613-6.135-12.252-19.338 3.068-38.483 8.298-56.979 16.597C5.818 58.707-3.884 99.622.785 140.043c22.56 16.597 44.476 26.61 66.148 33.93 5.414-7.525 10.197-15.504 14.34-23.905-7.867-2.987-15.379-6.794-22.319-11.511 1.87-1.398 3.74-2.916 5.609-4.314 42.547 19.339 88.897 19.339 131.324 0 1.87 1.398 3.739 2.916 5.609 4.314-6.94 4.837-14.452 8.524-22.319 11.511 4.143 8.401 8.926 16.38 14.22 23.905 21.672-7.32 43.589-17.333 66.149-33.93 5.115-47.232-8.922-87.58-38.606-123.446l-.001-.001ZM85.207 124.838c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Zm85.586 0c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Z"/>
+
+    </svg>
+
+    Tiks Save Bot on Discord
+
+  </a>
     </div>
 
     <section class="faq-section container" id="faq-section">
@@ -747,8 +801,12 @@
         const videoUrlInput = document.getElementById('videoUrl');
         const pasteBtn = document.querySelector('.paste-btn');
         const clearBtn = document.querySelector('.clear-btn');
-        const downloadOptions = document.getElementById('download-options');
+        const previewContainer = document.getElementById('preview-container');
+        const previewThumbnail = document.getElementById('preview-thumbnail');
+        const previewTitle = document.getElementById('preview-title');
+        const optionsContainer = document.getElementById('options');
         const accordionHeaders = document.querySelectorAll('.accordion-header');
+        let isFetching = false;
 
         // Scroll effect for navbar
         window.addEventListener('scroll', () => {
@@ -780,7 +838,9 @@
             } else {
                 pasteBtn.style.display = 'inline-block';
                 clearBtn.style.display = 'none';
-                downloadOptions.style.display = 'none'; // Hide options if input is cleared
+                previewContainer.classList.remove('show');
+                previewContainer.style.display = 'none';
+                optionsContainer.style.display = 'none';
             }
         });
 
@@ -788,7 +848,9 @@
             videoUrlInput.value = '';
             pasteBtn.style.display = 'inline-block';
             clearBtn.style.display = 'none';
-            downloadOptions.style.display = 'none'; // Hide options
+            previewContainer.classList.remove('show');
+            previewContainer.style.display = 'none';
+            optionsContainer.style.display = 'none';
         });
 
         pasteBtn.addEventListener('click', async () => {
@@ -801,27 +863,96 @@
             }
         });
 
-        mainForm.addEventListener('submit', (e) => {
+        mainForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            // This is where your server-side logic would be triggered to fetch the links.
-            // For now, we'll just show the download options section as a demonstration.
-            downloadOptions.style.display = 'flex';
-            
-            // You would replace the placeholder '#' in the anchor tags with your actual download links
-            // Example:
-            // const url = videoUrlInput.value;
-            // fetch(`/api/download-links?url=${encodeURIComponent(url)}`)
-            //   .then(response => response.json())
-            //   .then(data => {
-            //     document.querySelector('.download-btn.mp3').href = data.mp3_link;
-            //     document.querySelector('.download-btn.sd').href = data.sd_link;
-            //     document.querySelector('.download-btn.hd').href = data.hd_link;
-            //     downloadOptions.style.display = 'flex';
-            //   })
-            //   .catch(error => {
-            //     console.error('Error fetching download links:', error);
-            //     alert('An error occurred. Please try again.');
-            //   });
+            if (isFetching) return;
+
+            const url = videoUrlInput.value.trim();
+            if (!url) {
+                alert("Please enter a valid TikTok URL.");
+                return;
+            }
+
+            isFetching = true;
+            const fetchBtn = document.querySelector('.fetch-btn');
+            fetchBtn.textContent = 'Fetching...';
+            fetchBtn.disabled = true;
+
+            try {
+                const res = await fetch('/get-links', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url})
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    alert(data.message || "Failed to fetch download links. Please ensure the link is correct.");
+                    previewContainer.style.display = 'none';
+                    optionsContainer.style.display = 'none';
+                    return;
+                }
+
+                // Show preview container
+                previewContainer.style.display = 'flex';
+                setTimeout(() => previewContainer.classList.add('show'), 10);
+                
+                // Set preview data
+                if(data.cover) {
+                    previewThumbnail.src = data.cover;
+                } else {
+                    previewThumbnail.src = '';
+                }
+                
+                if (data.title) {
+                    previewTitle.textContent = data.title;
+                } else {
+                    previewTitle.textContent = 'No Title Found';
+                }
+
+                // Inject video player dynamically if a video link exists
+                const videoPlayer = previewContainer.querySelector('video');
+                if (videoPlayer) {
+                    videoPlayer.remove();
+                }
+
+                if (data.hdplay || data.play) {
+                    const videoElement = document.createElement('video');
+                    videoElement.setAttribute('controls', '');
+                    videoElement.setAttribute('preload', 'metadata');
+                    videoElement.setAttribute('poster', data.cover || '');
+                    videoElement.style.cssText = 'width: 100%; max-width: 600px; border-radius: 16px; margin-top: 15px;';
+                    const sourceElement = document.createElement('source');
+                    sourceElement.src = data.hdplay || data.play;
+                    sourceElement.type = 'video/mp4';
+                    videoElement.appendChild(sourceElement);
+                    previewContainer.appendChild(videoElement);
+                }
+
+                // Clear old options and inject new ones dynamically
+                optionsContainer.innerHTML = '';
+                if (data.music) {
+                    optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.music)}&username=${encodeURIComponent(data.username)}&type=music">🎵 MP3 (Audio Only)</a>`;
+                }
+                if (data.play) {
+                    optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.play)}&username=${encodeURIComponent(data.username)}&type=play">📽️ SD Video (Normal Quality)</a>`;
+                }
+                if (data.hdplay) {
+                    optionsContainer.innerHTML += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(data.hdplay)}&username=${encodeURIComponent(data.username)}&type=hdplay">📽️ HD Video (High Quality)</a>`;
+                }
+                optionsContainer.style.display = 'flex';
+
+            } catch (err) {
+                alert("Error fetching download links.");
+                console.error(err);
+                previewContainer.style.display = 'none';
+                optionsContainer.style.display = 'none';
+            } finally {
+                isFetching = false;
+                fetchBtn.textContent = 'Download';
+                fetchBtn.disabled = false;
+            }
         });
         
         // Accordion functionality
@@ -829,9 +960,7 @@
             header.addEventListener('click', () => {
                 const accordion = header.parentElement;
                 const content = header.nextElementSibling;
-                const toggleIcon = header.querySelector('.accordion-toggle-icon');
-
-                // Close all other accordions
+                
                 document.querySelectorAll('.accordion.active').forEach(item => {
                     if (item !== accordion) {
                         item.classList.remove('active');
@@ -839,7 +968,6 @@
                     }
                 });
 
-                // Toggle the clicked accordion
                 accordion.classList.toggle('active');
                 if (accordion.classList.contains('active')) {
                     content.style.maxHeight = content.scrollHeight + 'px';
