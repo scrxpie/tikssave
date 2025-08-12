@@ -3,127 +3,302 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Invite Tikssave Bot – Discord</title>
+  <title>Invite Tiks Save Bot – Discord</title>
+  <meta name="description" content="Add the Tiks Save Bot to your Discord server for instant, watermark-free video and MP3 downloads.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
   <style>
+    /* CSS Variables for consistency with index.ejs */
+    :root {
+        --primary-color: #8c86fc;
+        --secondary-color: #5865F2;
+        --background-dark: #12121e;
+        --background-light: #1a1a2b;
+        --text-color: #f0f6ff;
+        --text-secondary: #c9d6ef;
+        --card-bg: #1f1f33;
+        --card-shadow: rgba(0, 0, 0, 0.7);
+    }
+
+    /* Basic Styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
     body {
-      background-color: #1e1f22;
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--background-dark); /* Matched background color */
+        color: var(--text-color);
+        line-height: 1.6;
+        padding-top: 120px; /* Space for the navbar */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
     }
 
     .container {
-      max-width: 720px;
-      text-align: center;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
     }
 
- .discord-icon {
-  width: 80px;
-  height: auto;
-  margin-bottom: 20px;
-  display: block;
-}
-
-    h1 {
-      font-size: 2.4rem;
-      margin-bottom: 12px;
+    /* --- Navbar Styles (Copied from index.ejs) --- */
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: transparent;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+        transition: background-color 0.3s ease, padding 0.3s ease;
     }
 
-    p {
-      font-size: 1.15rem;
-      line-height: 1.8;
-      color: #ccc;
-      margin-bottom: 40px;
+    .navbar.scrolled {
+        background-color: rgba(26, 26, 43, 0.9);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        padding: 8px 20px;
     }
 
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+
+    .logo-img {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+    }
+
+    .logo-text {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-color);
+        letter-spacing: 0.5px;
+        transition: color 0.3s ease;
+    }
+    
+    .navbar.scrolled .logo-text {
+        color: var(--primary-color);
+    }
+
+    .menu-toggle {
+        width: 28px;
+        height: 22px;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        z-index: 1010;
+    }
+
+    .menu-toggle .bar {
+        height: 2px;
+        background-color: var(--text-color);
+        border-radius: 1px;
+        transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
+    }
+
+    .navbar.scrolled .menu-toggle .bar {
+        background-color: var(--text-secondary);
+    }
+
+    .menu-toggle.active .bar:nth-child(2) { opacity: 0; }
+    .menu-toggle.active .bar:nth-child(1) { transform: translateY(10px) rotate(45deg); }
+    .menu-toggle.active .bar:nth-child(3) { transform: translateY(-10px) rotate(-45deg); }
+
+    .menu-panel {
+        position: fixed;
+        top: 56px;
+        right: 0;
+        width: 200px;
+        height: calc(100vh - 56px);
+        background-color: var(--background-light);
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        box-shadow: -2px 0 10px var(--card-shadow);
+        z-index: 999;
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .menu-panel.open { transform: translateX(0); }
+
+    .menu-panel a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 1rem;
+        padding: 12px 10px;
+        border-bottom: 1px solid #33334d;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .menu-panel a:hover {
+        background-color: #33334d;
+        color: var(--primary-color);
+    }
+
+    /* --- Discord Invite Content Styles --- */
+    .invite-wrapper {
+        text-align: center;
+        background-color: var(--card-bg);
+        padding: 40px 20px;
+        border-radius: 20px;
+        max-width: 800px;
+        width: 100%;
+        margin: 20px 0;
+        box-shadow: 0 10px 30px var(--card-shadow);
+    }
+
+    .discord-logo {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+    }
+    
+    .invite-wrapper h1 {
+        font-size: 2.4rem;
+        margin-bottom: 12px;
+        color: var(--primary-color);
+    }
+
+    .invite-wrapper p {
+        font-size: 1.15rem;
+        line-height: 1.7;
+        color: var(--text-secondary);
+        margin-bottom: 40px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
     .invite-btn {
-      background-color: #5865F2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--secondary-color);
       color: white;
       font-weight: 700;
       padding: 16px 30px;
       font-size: 1.25rem;
       border-radius: 12px;
       text-decoration: none;
-      box-shadow: 0 6px 15px rgba(88, 101, 242, 0.7);
-      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 6px 15px rgba(88, 101, 242, 0.6);
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
     }
 
     .invite-btn:hover {
       background-color: #4752C4;
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(88, 101, 242, 0.7);
     }
 
-    .invite-btn:active {
-      background-color: #3a3f90;
-      transform: translateY(1px);
-    }
-
+    /* --- Footer Styles (Copied from index.ejs) --- */
     footer {
-      margin-top: auto;
-      text-align: center;
-      padding: 20px;
-      font-size: 0.95rem;
-      color: #888;
+        text-align: center;
+        padding: 20px;
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: auto; /* Pushes footer to the bottom */
     }
 
     footer a {
-      color: #888;
-      text-decoration: none;
-      margin: 0 8px;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
+        color: var(--primary-color);
+        text-decoration: none;
     }
 
     @media (max-width: 480px) {
-      h1 {
-        font-size: 2rem;
-      }
-      p {
-        font-size: 1rem;
-      }
-      .invite-btn {
-        width: 100%;
-        padding: 14px;
-        font-size: 1.1rem;
-      }
-      .discord-icon {
-        width: 56px;
-        height: 56px;
-      }
+      .invite-wrapper h1 { font-size: 2rem; }
+      .invite-wrapper p { font-size: 1rem; }
+      .invite-btn { width: 90%; padding: 14px; font-size: 1.1rem; }
+      .discord-logo { width: 60px; height: 60px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Discord Logo -->
-<div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
-  <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 256 199" fill="#5865F2">
-    <path d="M216.856 16.597C198.36 8.298 179.215 3.068 159.877 0c-2.07 3.639-4.38 8.385-6.014 12.252-17.48-2.633-34.793-2.633-51.772 0-1.635-3.867-4.065-8.613-6.135-12.252-19.338 3.068-38.483 8.298-56.979 16.597C5.818 58.707-3.884 99.622.785 140.043c22.56 16.597 44.476 26.61 66.148 33.93 5.414-7.525 10.197-15.504 14.34-23.905-7.867-2.987-15.379-6.794-22.319-11.511 1.87-1.398 3.74-2.916 5.609-4.314 42.547 19.339 88.897 19.339 131.324 0 1.87 1.398 3.739 2.916 5.609 4.314-6.94 4.837-14.452 8.524-22.319 11.511 4.143 8.401 8.926 16.38 14.22 23.905 21.672-7.32 43.589-17.333 66.149-33.93 5.115-47.232-8.922-87.58-38.606-123.446l-.001-.001ZM85.207 124.838c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Zm85.586 0c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Z"/>
-  </svg>
-</div>
+  
+  <nav class="navbar">
+      <a href="/" class="logo-container">
+          <img src="https://i.imgur.com/XwYQY99.jpeg" alt="Tiks Save Logo" class="logo-img">
+          <span class="logo-text">Tiks Save</span>
+      </a>
+      <div class="menu-toggle">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+      </div>
+  </nav>
 
-    <h1>Invite Tikssave Bot</h1>
-    <p>
-      Tikssave is a powerful Discord bot that helps you download TikTok videos instantly.<br/>
-      Use the slash command to get the SD video link and share it effortlessly with your friends.
-    </p>
+  <aside class="menu-panel">
+      <a href="/#downloader">Downloader</a>
+      <a href="/#features">Features</a>
+      <a href="/#how-to-use">How to Use</a>
+      <a href="/#faq-section">FAQ</a>
+  </aside>
 
-    <a href="https://discord.com/oauth2/authorize?client_id=1398955028487864390&permissions=51200&integration_type=0&scope=bot+applications.commands" class="invite-btn" target="_blank" rel="noopener noreferrer">
-      Add Bot to Your Server
-    </a>
-  </div>
+  <main class="container">
+    <div class="invite-wrapper">
+      <div>
+        <svg class="discord-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 199" fill="#5865F2">
+          <path d="M216.856 16.597C198.36 8.298 179.215 3.068 159.877 0c-2.07 3.639-4.38 8.385-6.014 12.252-17.48-2.633-34.793-2.633-51.772 0-1.635-3.867-4.065-8.613-6.135-12.252-19.338 3.068-38.483 8.298-56.979 16.597C5.818 58.707-3.884 99.622.785 140.043c22.56 16.597 44.476 26.61 66.148 33.93 5.414-7.525 10.197-15.504 14.34-23.905-7.867-2.987-15.379-6.794-22.319-11.511 1.87-1.398 3.74-2.916 5.609-4.314 42.547 19.339 88.897 19.339 131.324 0 1.87 1.398 3.739 2.916 5.609 4.314-6.94 4.837-14.452 8.524-22.319 11.511 4.143 8.401 8.926 16.38 14.22 23.905 21.672-7.32 43.589-17.333 66.149-33.93 5.115-47.232-8.922-87.58-38.606-123.446l-.001-.001ZM85.207 124.838c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Zm85.586 0c-12.875 0-23.312-11.729-23.312-26.158 0-14.43 10.314-26.159 23.312-26.159 12.998 0 23.435 11.729 23.312 26.159 0 14.429-10.314 26.158-23.312 26.158Z"/>
+        </svg>
+      </div>
+      <h1>Invite the Tiks Save Bot</h1>
+      <p>
+        Add the power of Tiks Save directly to your Discord server. Download TikTok videos and music instantly using a simple slash command.
+      </p>
+      <a href="https://discord.com/oauth2/authorize?client_id=1398955028487864390&permissions=51200&integration_type=0&scope=bot+applications.commands" class="invite-btn" target="_blank" rel="noopener noreferrer">
+        Add to Your Server
+      </a>
+    </div>
+  </main>
 
-  <footer>
-    &copy; 2025 Tikssave.com — All rights reserved. |
-    <a href="/privacy">Privacy Policy</a> |
-    <a href="/terms">Terms of Service</a>
+  <footer class="container">
+    <p>&copy; 2025 Tiks Save. All rights reserved. | <a href="/terms">Terms of Service</a> | <a href="/privacy">Privacy Policy</a></p>
   </footer>
+
+  <script>
+      const navbar = document.querySelector('.navbar');
+      const menuToggle = document.querySelector('.menu-toggle');
+      const menuPanel = document.querySelector('.menu-panel');
+
+      window.addEventListener('scroll', () => {
+          if (window.scrollY > 50) {
+              navbar.classList.add('scrolled');
+          } else {
+              navbar.classList.remove('scrolled');
+          }
+      });
+
+      menuToggle.addEventListener('click', () => {
+          menuToggle.classList.toggle('active');
+          menuPanel.classList.toggle('open');
+      });
+
+      document.addEventListener('click', (e) => {
+          if (!menuToggle.contains(e.target) && !menuPanel.contains(e.target)) {
+              menuToggle.classList.remove('active');
+              menuPanel.classList.remove('open');
+          }
+      });
+  </script>
+
 </body>
 </html>
