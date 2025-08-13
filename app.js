@@ -162,7 +162,7 @@ app.get('/proxy-download', async (req, res) => {
   await new Download({ url, ip }).save();
   const extension = type === 'music' ? 'mp3' : 'mp4';
   const safeUsername = sanitize((username || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
-  const filename = `ttdownload_${safeUsername}_${Date.now()}.${extension}`;
+  const filename = `tikssave_${safeUsername}_${Date.now()}.${extension}`;
   console.log('Filename:', filename);
   https.get(url, fileRes => {
     res.setHeader('Content-Type', 'application/octet-stream');
