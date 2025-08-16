@@ -647,13 +647,49 @@
         <a href="#faq-section">FAQ</a>
     </aside>
 
-    <main class="container" id="downloader">
-        <h1>TikTok Video Downloader</h1>
-        <p class="subtitle">
-            Download TikTok videos without watermark, in high quality, and completely free.
-            Fast, secure, and easy to use.
-        </p>
+   <main class="container" id="downloader">
+    <h1>TikTok Video Downloader</h1>
+    <p class="subtitle">
+        Download TikTok videos without watermark, in high quality, and completely free.
+        Fast, secure, and easy to use.
+    </p>
 
+    <% if (videoData) { %>
+        <div id="preview-container" class="show" style="display: flex;">
+            <% if (videoData.cover) { %>
+                <img id="preview-thumbnail" src="<%= videoData.cover %>" alt="Video thumbnail" />
+            <% } %>
+            
+            <% if (videoData.title) { %>
+                <h2 id="preview-title"><%= videoData.title %></h2>
+            <% } %>
+
+            <% if (videoData.hdplay || videoData.play) { %>
+                <video controls preload="metadata" poster="<%= videoData.cover || '' %>" style="width: 100%; max-width: 600px; border-radius: 16px; margin-top: 15px;">
+                    <source src="<%= videoData.hdplay || videoData.play %>" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            <% } %>
+        </div>
+
+        <div id="options" style="display: flex;">
+            <% if (videoData.music) { %>
+                <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.music) %>&username=<%= encodeURIComponent(videoData.username) %>&type=music">🎵 MP3 (Audio Only)</a>
+            <% } %>
+            <% if (videoData.play) { %>
+                <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.play) %>&username=<%= encodeURIComponent(videoData.username) %>&type=play">📽️ SD Video (Normal Quality)</a>
+            <% } %>
+            <% if (videoData.hdplay) { %>
+                <a class="download-btn" href="/proxy-download?url=<%= encodeURIComponent(videoData.hdplay) %>&username=<%= encodeURIComponent(videoData.username) %>&type=hdplay">📽️ HD Video (High Quality)</a>
+            <% } %>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="/" style="color: var(--primary-color); font-size: 1.1rem; text-decoration: none;">➡️ Download Another Video</a>
+        </div>
+
+
+    <% } else { %>
         <div class="form-container">
             <form id="mainForm">
                 <input type="text" id="videoUrl" placeholder="Paste TikTok video link here..." required>
@@ -668,11 +704,12 @@
         <div id="preview-container">
             <img id="preview-thumbnail" src="" alt="Video thumbnail" />
             <h2 id="preview-title"></h2>
-            </div>
+        </div>
 
-        <div id="options">
-            </div>
-    </main>
+        <div id="options"></div>
+
+    <% } %>
+</main>
 
     <div class="container">
         <h2 class="section-title" id="features">Features</h2>
