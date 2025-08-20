@@ -80,7 +80,9 @@ app.get('/', async (req, res) => {
   const count = await Visit.countDocuments();
   res.render('index', { count, videoData: null });
 });
-
+app.get('/ads.txt', (req, res) => {
+  res.redirect('https://srv.adstxtmanager.com/19390/tikssave.xyz');
+});
 // Discord sayfası
 app.get('/discord', (req, res) => {
   res.render('discord');
