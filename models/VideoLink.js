@@ -1,15 +1,26 @@
+// models/VideoLink.js
+
 const mongoose = require('mongoose');
 
 const videoLinkSchema = new mongoose.Schema({
-  shortId: { type: String, unique: true, required: true },
-  play: String,
-  hdplay: String,
-  music: String,
-  username: String,
-  title: String,
-  cover: String,
-  originalUrl: String,
-  createdAt: { type: Date, default: Date.now } // 7 gün sonra otomatik silinsin
+  shortId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  originalUrl: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  // Yeni eklenen alan
+  videoInfo: {
+    type: Object,
+    default: null,
+  }
 });
 
 module.exports = mongoose.model('VideoLink', videoLinkSchema);
