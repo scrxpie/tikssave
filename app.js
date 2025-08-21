@@ -99,61 +99,48 @@ app.get('/dashboard', (req, res) => {
 // --- API ROTLARI (Kendi Scraper'ınızla) ---
 
 // TikTok İşleme Rotası
+
+const Tiktok = require('@tobyg74/tiktok-api-dl'); // Paketi içeri aktar
+
 app.post('/api/tiktok-process', async (req, res) => {
-  const { url } = req.body;
-  if (!url) {
-    return res.status(400).json({ success: false, message: 'URL yok' });
-  }
+    const { url } = req.body;
 
-  try {
-    const pythonProcess = spawn('python3', ['./scrapers/tiktok_scraper.py', url]);
-    let rawData = '';
-    let errorData = '';
+    if (!url) {
+        return res.status(400).json({ success: false, message: 'URL belirtilmedi.' });
+    }
+    
+    // Yöntem 1: Doğrudan NPM paketini kullan
+    try {
+        const tiktokData = await Tiktok.Downloader(url, { version: 'v3' });
 
-    pythonProcess.stdout.on('data', (data) => rawData += data.toString());
-    pythonProcess.stderr.on('data', (data) => errorData += data.toString());
-
-    pythonProcess.on('close', async (code) => {
-      console.log(`Python process closed with code ${code}`);
-      if (code !== 0) {
-        console.error('Python Hata Çıktısı:', errorData);
-        return res.status(500).json({ success: false, message: 'TikTok verisi işlenirken bir hata oluştu.' });
-      }
-      
-      try {
-        const apiData = JSON.parse(rawData);
-        if (!apiData.success) {
-          return res.status(400).json({ success: false, message: apiData.message || 'Video bilgisi alınamadı.' });
+        if (tiktokData && tiktokData.status === 'success' && tiktokData.result) {
+            const result = tiktokData.result;
+            const formattedData = {
+                id: result.id,
+                author: {
+                    unique_id: result.author.unique_id,
+                    nickname: result.author.nickname,
+                    avatar: result.author.avatar,
+                },
+                title: result.title,
+                cover: result.cover[0],
+                play: result.video_no_watermark,
+                hdplay: result.video_no_watermark_hd,
+                music: result.music,
+                play_count: result.stats.play_count,
+                digg_count: result.stats.digg_count,
+                comment_count: result.stats.comment_count,
+                share_count: result.stats.share_count
+            };
+            return res.status(200).json({ success: true, data: formattedData });
+        } else {
+            return res.status(500).json({ success: false, message: 'NPM paketinden veri alınamadı.' });
         }
-
-        const videoInfo = apiData.data;
-        let shortId;
-        let exists;
-        do {
-          shortId = generateShortId();
-          exists = await VideoLink.findOne({ shortId });
-        } while (exists);
-        
-        const newVideoLink = new VideoLink({
-          shortId,
-          originalUrl: url,
-          videoInfo: videoInfo, // Tüm veriyi doğrudan kaydediyoruz
-        });
-
-        await newVideoLink.save();
-        res.json({ success: true, shortId, videoInfo });
-
-      } catch (parseError) {
-        console.error('JSON parse hatası:', parseError);
-        res.status(500).json({ success: false, message: 'Sunucu hatası: JSON ayrıştırılamadı.' });
-      }
-    });
-  } catch (err) {
-    console.error('Spawn hatası:', err.message);
-    res.status(500).json({ success: false, message: 'Sunucu hatası: İşlem başlatılamadı.' });
-  }
+    } catch (error) {
+        console.error('NPM paketi hatası:', error.message);
+        return res.status(500).json({ success: false, message: 'API hatası.' });
+    }
 });
-
 // Instagram İşleme Rotası
 app.post('/api/instagram-process', async (req, res) => {
   const { url } = req.body;
