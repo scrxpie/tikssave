@@ -110,27 +110,31 @@ app.post('/api/tiktok-process', async (req, res) => {
     }
     
     // Yöntem 1: Doğrudan NPM paketini kullan
+   // ...
     try {
         const tiktokData = await Tiktok.Downloader(url, { version: 'v3' });
 
         if (tiktokData && tiktokData.status === 'success' && tiktokData.result) {
             const result = tiktokData.result;
             const formattedData = {
+                // author objesi yoksa hata vermez
                 id: result.id,
                 author: {
-                    unique_id: result.author.unique_id,
-                    nickname: result.author.nickname,
-                    avatar: result.author.avatar,
+                    unique_id: result.author?.unique_id || 'unknown',
+                    nickname: result.author?.nickname || 'unknown',
+                    avatar: result.author?.avatar || 'unknown'
                 },
-                title: result.title,
-                cover: result.cover[0],
-                play: result.video_no_watermark,
-                hdplay: result.video_no_watermark_hd,
-                music: result.music,
-                play_count: result.stats.play_count,
-                digg_count: result.stats.digg_count,
-                comment_count: result.stats.comment_count,
-                share_count: result.stats.share_count
+                title: result.title || '',
+                // video linkleri eksikse hata vermez
+                cover: result.cover?.[0] || '',
+                play: result.video_no_watermark || '',
+                hdplay: result.video_no_watermark_hd || '',
+                music: result.music || '',
+                // stats objesi yoksa hata vermez
+                play_count: result.stats?.play_count || 0,
+                digg_count: result.stats?.digg_count || 0,
+                comment_count: result.stats?.comment_count || 0,
+                share_count: result.stats?.share_count || 0
             };
             return res.status(200).json({ success: true, data: formattedData });
         } else {
@@ -140,6 +144,8 @@ app.post('/api/tiktok-process', async (req, res) => {
         console.error('NPM paketi hatası:', error.message);
         return res.status(500).json({ success: false, message: 'API hatası.' });
     }
+// ...
+    
 });
 // Instagram İşleme Rotası
 app.post('/api/instagram-process', async (req, res) => {
