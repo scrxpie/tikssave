@@ -2,23 +2,22 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const fetch = require('node-fetch');
 const https = require('https');
 const sanitize = require('sanitize-filename');
 const session = require('express-session');
 const passport = require('passport');
 const { Strategy: DiscordStrategy } = require('passport-discord');
+const { spawn } = require('child_process');
+const axios = require('axios');
 const Visit = require('./models/Visit');
 const Download = require('./models/Download');
-const VideoLink = require('./models/VideoLink');
+const VideoLink = require('./models/VideoLink'); // TikTok modeli
+const InstagramVideoLink = require('./models/InstagramVideoLink'); // Instagram modeli
 const { customAlphabet } = require('nanoid');
-const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
-const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 3000;
-
-// Discord OAuth2 bilgileri .env dosyasından çekiliyor
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const CALLBACK_URL = process.env.DISCORD_CALLBACK_URL;
@@ -67,12 +66,10 @@ mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => console.log('MongoDB connected'))
-  .catch(err => console.error(err));
+  .catch(err => console.error('MongoDB connection error:', err));
 
 
 // --- ROTLAR ---
-
-// Ana sayfa
 app.get('/', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
@@ -80,68 +77,28 @@ app.get('/', async (req, res) => {
   const count = await Visit.countDocuments();
   res.render('index', { count, videoData: null });
 });
-app.get('/ads.txt', (req, res) => {
-  res.redirect('https://srv.adstxtmanager.com/19390/tikssave.xyz');
-});
-// Discord sayfası
-app.get('/discord', (req, res) => {
-  res.render('discord');
-});
-
-// Privacy, Terms ve Rights sayfaları
-app.get('/privacy', (req, res) => {
-  res.render('privacy');
-});
-
-app.get('/terms', (req, res) => {
-  res.render('terms');
-});
-
-app.get('/rights', (req, res) => {
-  res.render('rights');
-});
-
-
-// --- DİSCORD DASHBOARD ROTLARI ---
-
-// OAuth akışını başlatan rota
+app.get('/discord', (req, res) => res.render('discord'));
+app.get('/privacy', (req, res) => res.render('privacy'));
+app.get('/terms', (req, res) => res.render('terms'));
+app.get('/rights', (req, res) => res.render('rights'));
 app.get('/auth/discord', passport.authenticate('discord'));
-
-// OAuth callback rotası
 app.get('/auth/discord/callback',
   passport.authenticate('discord', { failureRedirect: '/dashboard' }),
-  (req, res) => {
-    res.redirect('/dashboard');
-  }
+  (req, res) => res.redirect('/dashboard')
 );
-
-// Ana Discord Dashboard sayfası
 app.get('/dashboard', (req, res) => {
   if (!req.isAuthenticated()) {
     return res.render('dashboard', { user: null, guilds: null });
   }
-
   const user = req.user;
   const guilds = user.guilds;
-
-  const manageableGuilds = guilds.filter(guild => {
-    return (guild.permissions & 0x20) === 0x20 || (guild.permissions & 0x8) === 0x8;
-  });
-
+  const manageableGuilds = guilds.filter(guild => (guild.permissions & 0x20) === 0x20 || (guild.permissions & 0x8) === 0x8);
   res.render('dashboard', { user: user, guilds: manageableGuilds });
 });
 
+// --- API ROTLARI (Kendi Scraper'ınızla) ---
 
-// --- YENİ VE GÜNCELLENMİŞ API ROTLARI ---
-
-// Bu rota, discord botundan gelen isteği işleyecek ve bilgileri veritabanına kaydedecek.
-// app.js dosyanızda
-// api-service/server.js dosyanızda
-const { spawn } = require('child_process');
-
-// ... (Diğer require'lar ve ana sunucu kurulumu) ...
-
-// TikTok API Rotası (Kendi Scraper'ınızla)
+// TikTok İşleme Rotası
 app.post('/api/tiktok-process', async (req, res) => {
   const { url } = req.body;
   if (!url) {
@@ -151,136 +108,153 @@ app.post('/api/tiktok-process', async (req, res) => {
   try {
     const pythonProcess = spawn('python3', ['./scrapers/tiktok_scraper.py', url]);
     let rawData = '';
+    let errorData = '';
 
-    pythonProcess.stdout.on('data', (data) => {
-        rawData += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-        console.error(`Python Hata Çıktısı: ${data}`);
-    });
+    pythonProcess.stdout.on('data', (data) => rawData += data.toString());
+    pythonProcess.stderr.on('data', (data) => errorData += data.toString());
 
     pythonProcess.on('close', async (code) => {
-        if (code !== 0) {
-            return res.status(500).json({ success: false, message: 'TikTok verisi işlenirken bir hata oluştu.' });
+      console.log(`Python process closed with code ${code}`);
+      if (code !== 0) {
+        console.error('Python Hata Çıktısı:', errorData);
+        return res.status(500).json({ success: false, message: 'TikTok verisi işlenirken bir hata oluştu.' });
+      }
+      
+      try {
+        const apiData = JSON.parse(rawData);
+        if (!apiData.success) {
+          return res.status(400).json({ success: false, message: apiData.message || 'Video bilgisi alınamadı.' });
         }
+
+        const videoInfo = apiData.data;
+        let shortId;
+        let exists;
+        do {
+          shortId = generateShortId();
+          exists = await VideoLink.findOne({ shortId });
+        } while (exists);
         
-        try {
-            const apiData = JSON.parse(rawData);
-            if (!apiData.success) {
-                return res.status(400).json({ success: false, message: apiData.message || 'Video bilgisi alınamadı.' });
-            }
+        const newVideoLink = new VideoLink({
+          shortId,
+          originalUrl: url,
+          videoInfo: videoInfo, // Tüm veriyi doğrudan kaydediyoruz
+        });
 
-            const videoInfo = apiData.data;
-            
-            let shortId;
-            let exists;
-            do {
-              shortId = generateShortId();
-              exists = await VideoLink.findOne({ shortId });
-            } while (exists);
-            
-            const newVideoLink = new VideoLink({
-              shortId,
-              originalUrl: url,
-              videoInfo: { 
-                id: videoInfo.id,
-                author: videoInfo.author,
-                title: videoInfo.title,
-                cover: videoInfo.cover,
-                play: videoInfo.play,
-                hdplay: videoInfo.hdplay,
-                music: videoInfo.music,
-                play_count: videoInfo.play_count,
-                digg_count: videoInfo.digg_count,
-                comment_count: videoInfo.comment_count,
-                share_count: videoInfo.share_count,
-                create_time: videoInfo.create_time,
-              }
-            });
+        await newVideoLink.save();
+        res.json({ success: true, shortId, videoInfo });
 
-            await newVideoLink.save();
-            res.json({ success: true, shortId, videoInfo });
-
-        } catch (parseError) {
-            console.error('JSON parse hatası:', parseError);
-            res.status(500).json({ success: false, message: 'Sunucu hatası.' });
-        }
+      } catch (parseError) {
+        console.error('JSON parse hatası:', parseError);
+        res.status(500).json({ success: false, message: 'Sunucu hatası: JSON ayrıştırılamadı.' });
+      }
     });
-
   } catch (err) {
     console.error('Spawn hatası:', err.message);
-    res.status(500).json({ success: false, message: 'Sunucu hatası.' });
+    res.status(500).json({ success: false, message: 'Sunucu hatası: İşlem başlatılamadı.' });
   }
 });
 
-// ... (Geri kalan Instagram API ve bilgi çekme rotalarınız) ...
-
-
-
-// Bu rota, Discord botunun shortId ile video bilgilerini çekmesini sağlar.
-app.get('/api/info/:shortId', async (req, res) => {
-  const { shortId } = req.params;
+// Instagram İşleme Rotası
+app.post('/api/instagram-process', async (req, res) => {
+  const { url } = req.body;
+  if (!url) {
+    return res.status(400).json({ success: false, message: 'URL yok' });
+  }
 
   try {
+    const pythonProcess = spawn('python3', ['./scrapers/insta_scraper.py', url]);
+    let rawData = '';
+    let errorData = '';
+
+    pythonProcess.stdout.on('data', (data) => rawData += data.toString());
+    pythonProcess.stderr.on('data', (data) => errorData += data.toString());
+
+    pythonProcess.on('close', async (code) => {
+      if (code !== 0) {
+        console.error('Python Hata Çıktısı:', errorData);
+        return res.status(500).json({ success: false, message: 'Instagram verisi işlenirken bir hata oluştu.' });
+      }
+      
+      try {
+        const apiData = JSON.parse(rawData);
+        if (!apiData.success) {
+          return res.status(400).json({ success: false, message: apiData.message || 'Video bilgisi alınamadı.' });
+        }
+        
+        const videoInfo = apiData.data;
+        let shortId;
+        let exists;
+        do {
+          shortId = generateShortId();
+          exists = await InstagramVideoLink.findOne({ shortId });
+        } while (exists);
+        
+        const newVideoLink = new InstagramVideoLink({
+          shortId,
+          originalUrl: url,
+          videoInfo: videoInfo,
+        });
+
+        await newVideoLink.save();
+        res.json({ success: true, shortId, videoInfo });
+
+      } catch (parseError) {
+        console.error('JSON parse hatası:', parseError);
+        res.status(500).json({ success: false, message: 'Sunucu hatası: JSON ayrıştırılamadı.' });
+      }
+    });
+  } catch (err) {
+    console.error('Spawn hatası:', err.message);
+    res.status(500).json({ success: false, message: 'Sunucu hatası: İşlem başlatılamadı.' });
+  }
+});
+
+// Bilgi Çekme Rotası (TikTok)
+app.get('/api/info/:shortId', async (req, res) => {
+  const { shortId } = req.params;
+  try {
     const videoLink = await VideoLink.findOne({ shortId });
-
-    if (!videoLink) {
-      return res.status(404).json({ success: false, message: 'Video bulunamadı.' });
-    }
-
-    if (!videoLink.videoInfo) {
-      return res.status(404).json({ success: false, message: 'Video bilgileri eksik.' });
-    }
-
+    if (!videoLink) return res.status(404).json({ success: false, message: 'Video bulunamadı.' });
+    if (!videoLink.videoInfo) return res.status(404).json({ success: false, message: 'Video bilgileri eksik.' });
     res.json({ success: true, videoInfo: videoLink.videoInfo });
-
   } catch (err) {
     console.error('API bilgi çekme hatası:', err);
     res.status(500).json({ success: false, message: 'Sunucu hatası.' });
   }
 });
 
-// Mevcut /get-links rotasını kaldırın veya güncelleyin
-// (Discord botunuz artık bunu kullanmayacağı için)
-app.post('/get-links', async (req, res) => {
-  // Bu rotayı isterseniz kaldırabilir veya diğer kullanımlar için tutabilirsiniz.
-  // Şu an için Discord botunuz bu rotayı kullanmayacak.
-  // Geriye dönük uyumluluk için burada bırakılabilir.
+// Bilgi Çekme Rotası (Instagram)
+app.get('/api/instagram/info/:shortId', async (req, res) => {
+    const { shortId } = req.params;
+    try {
+      const videoLink = await InstagramVideoLink.findOne({ shortId });
+      if (!videoLink) return res.status(404).json({ success: false, message: 'Video bulunamadı.' });
+      if (!videoLink.videoInfo) return res.status(404).json({ success: false, message: 'Video bilgileri eksik.' });
+      res.json({ success: true, videoInfo: videoLink.videoInfo });
+    } catch (err) {
+      console.error('API bilgi çekme hatası:', err);
+      res.status(500).json({ success: false, message: 'Sunucu hatası.' });
+    }
 });
 
 
-// In your `app.js` server file
-
-// Find the existing '/proxy-download' route
+// Proxy İndirme Rotası
 app.get('/proxy-download', async (req, res) => {
-  const { url, username, type, shortId } = req.query; // Add 'shortId' to the destructured query
-
-  // Check if a shortId was provided
-  let videoUrl = url;
-  if (shortId) {
-    try {
-      const videoLink = await VideoLink.findOne({ shortId });
-      if (videoLink && videoLink.videoInfo) {
-        // Use the URL from your database
-        videoUrl = videoLink.videoInfo.hdplay || videoLink.videoInfo.play;
-        // You can also get the username from the database
-        const videoUsername = videoLink.videoInfo.author?.unique_id || 'unknown';
-        
-        // Optional: Update username and type for filename from DB
-        // (if you passed them to the DB originally)
-        // If not, you might need to find a way to get them from the original request
-        
-      } else {
-        return res.status(404).send('Video not found or info is missing.');
-      }
-    } catch (dbErr) {
-      console.error('Database lookup error:', dbErr);
-      return res.status(500).send('Database error.');
+  const { shortId, username, type } = req.query;
+  let videoUrl, videoUsername;
+  
+  try {
+    const videoLink = await VideoLink.findOne({ shortId });
+    if (!videoLink || !videoLink.videoInfo) {
+      return res.status(404).send('Video not found or info is missing.');
     }
+    videoUrl = videoLink.videoInfo.hdplay || videoLink.videoInfo.play;
+    videoUsername = videoLink.videoInfo.author?.unique_id || 'unknown';
+  } catch (dbErr) {
+    console.error('Database lookup error:', dbErr);
+    return res.status(500).send('Database error.');
   }
 
-  // If there's no URL, return an error
   if (!videoUrl) {
     return res.status(400).send('Video link is missing.');
   }
@@ -288,9 +262,8 @@ app.get('/proxy-download', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   await new Download({ url: videoUrl, ip }).save();
   const extension = (type === 'music') ? 'mp3' : 'mp4';
-  const safeUsername = sanitize((username || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
+  const safeUsername = sanitize((videoUsername || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
   const filename = `tikssave_${safeUsername}_${Date.now()}.${extension}`;
-  console.log('Filename:', filename);
 
   https.get(videoUrl, fileRes => {
     res.setHeader('Content-Type', 'application/octet-stream');
@@ -302,49 +275,20 @@ app.get('/proxy-download', async (req, res) => {
   });
 });
 
-
-app.post('/tiktok', async (req, res) => {
-  // Bu rotayı /api/tiktok-process rotası ile değiştirdim. 
-  // Eski botlar hala bu rotayı kullanıyorsa, uyumluluk için bu rotayı da güncelleyebilirsiniz.
-  // Veya yukarıdaki yeni rotaya yönlendirebilirsiniz.
+// Eski rotalar
+app.post('/get-links', (req, res) => {
+    res.status(404).send('Bu rota kaldırılmıştır, lütfen yeni API rotasını kullanın.');
 });
 
-
+// Video Görüntüleme Rotası
 app.get('/:shortId', async (req, res) => {
   const videoLink = await VideoLink.findOne({ shortId: req.params.shortId });
   if (!videoLink) {
     return res.status(404).send('Video bulunamadı');
   }
 
-  // Eğer veritabanında video bilgileri zaten varsa, TikWM'e gitmeye gerek yok.
-  let videoData;
-  if (videoLink.videoInfo) {
-      videoData = videoLink.videoInfo;
-  } else {
-      // Eğer veritabanında bilgi yoksa, TikWM'den çek ve kaydet (opsiyonel)
-      try {
-        const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(videoLink.originalUrl)}`);
-        const data = await response.json();
-        if (!data || data.code !== 0) {
-          return res.status(404).send('Video bilgisi alınamadı.');
-        }
-        videoData = {
-          play: data.data.play,
-          hdplay: data.data.hdplay,
-          music: data.data.music,
-          username: data.data.author?.unique_id || 'unknown',
-          title: data.data.title,
-          cover: data.data.cover
-        };
-        // Veritabanını güncelle
-        videoLink.videoInfo = data.data;
-        await videoLink.save();
-      } catch (err) {
-        console.error(err);
-        return res.status(500).send('Sunucu hatası.');
-      }
-  }
-
+  let videoData = videoLink.videoInfo;
+  
   const userAgent = (req.headers['user-agent'] || '').toLowerCase();
   const isDiscordOrTelegram = userAgent.includes('discordbot') || userAgent.includes('telegrambot');
   const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
@@ -358,4 +302,3 @@ app.get('/:shortId', async (req, res) => {
 
 
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
-
