@@ -136,35 +136,54 @@ app.get('/dashboard', (req, res) => {
 
 // Bu rota, discord botundan gelen isteği işleyecek ve bilgileri veritabanına kaydedecek.
 // app.js dosyanızda
+// api-service/server.js dosyanızda
+const { spawn } = require('child_process');
+
+// ... (Diğer require'lar ve ana sunucu kurulumu) ...
+
+// TikTok API Rotası (Kendi Scraper'ınızla)
 app.post('/api/tiktok-process', async (req, res) => {
-    const { url } = req.body;
-    if (!url) {
-        return res.status(400).json({ success: false, message: 'URL yok' });
-    }
+  const { url } = req.body;
+  if (!url) {
+    return res.status(400).json({ success: false, message: 'URL yok' });
+  }
 
-    try {
-        const tikwmRes = await axios.post('https://www.tikwm.com/api/', { url });
-        const tikwmData = tikwmRes.data;
+  try {
+    const pythonProcess = spawn('python3', ['./scrapers/tiktok_scraper.py', url]);
+    let rawData = '';
 
-        if (tikwmData.code !== 0 || !tikwmData.data) {
-            console.error('TikWM API hatası:', tikwmData.msg);
-            // TikWM'den gelen asıl hata mesajını kullanıcıya gönder
-            return res.status(400).json({ success: false, message: tikwmData.msg || 'Video bilgisi alınamadı.' });
+    pythonProcess.stdout.on('data', (data) => {
+        rawData += data.toString();
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+        console.error(`Python Hata Çıktısı: ${data}`);
+    });
+
+    pythonProcess.on('close', async (code) => {
+        if (code !== 0) {
+            return res.status(500).json({ success: false, message: 'TikTok verisi işlenirken bir hata oluştu.' });
         }
+        
+        try {
+            const apiData = JSON.parse(rawData);
+            if (!apiData.success) {
+                return res.status(400).json({ success: false, message: apiData.message || 'Video bilgisi alınamadı.' });
+            }
 
-        const videoInfo = tikwmData.data;
-        let shortId;
-        let exists;
-        
-        do {
-          shortId = generateShortId();
-          exists = await VideoLink.findOne({ shortId });
-        } while (exists);
-        
-        const newVideoLink = new VideoLink({
-            shortId,
-            originalUrl: url,
-            videoInfo: {
+            const videoInfo = apiData.data;
+            
+            let shortId;
+            let exists;
+            do {
+              shortId = generateShortId();
+              exists = await VideoLink.findOne({ shortId });
+            } while (exists);
+            
+            const newVideoLink = new VideoLink({
+              shortId,
+              originalUrl: url,
+              videoInfo: { 
                 id: videoInfo.id,
                 author: videoInfo.author,
                 title: videoInfo.title,
@@ -177,23 +196,26 @@ app.post('/api/tiktok-process', async (req, res) => {
                 comment_count: videoInfo.comment_count,
                 share_count: videoInfo.share_count,
                 create_time: videoInfo.create_time,
-            }
-        });
+              }
+            });
 
-        await newVideoLink.save();
-        console.log(`Yeni video bağlantısı kaydedildi: ${shortId}`);
+            await newVideoLink.save();
+            res.json({ success: true, shortId, videoInfo });
 
-        res.json({ success: true, shortId, videoInfo });
-    } catch (err) {
-        console.error('API işleme hatası:', err.message);
-        // Axios'tan dönen hatayı yakala ve mesajını gönder
-        if (err.response && err.response.data) {
-             console.error('TikWM hata yanıtı:', err.response.data);
-             return res.status(400).json({ success: false, message: err.response.data.msg || 'TikWM API ile bağlantı hatası.' });
+        } catch (parseError) {
+            console.error('JSON parse hatası:', parseError);
+            res.status(500).json({ success: false, message: 'Sunucu hatası.' });
         }
-        res.status(500).json({ success: false, message: 'Sunucu hatası.' });
-    }
+    });
+
+  } catch (err) {
+    console.error('Spawn hatası:', err.message);
+    res.status(500).json({ success: false, message: 'Sunucu hatası.' });
+  }
 });
+
+// ... (Geri kalan Instagram API ve bilgi çekme rotalarınız) ...
+
 
 
 // Bu rota, Discord botunun shortId ile video bilgilerini çekmesini sağlar.
