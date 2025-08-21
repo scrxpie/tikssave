@@ -1,7 +1,7 @@
 import sys
 import json
 import asyncio
-from TikTokApi import TikTokApi
+from TikTokApi import TikTokapi
 
 async def get_tiktok_info(url):
     try:
