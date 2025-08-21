@@ -10,7 +10,7 @@ async def get_tiktok_info(url):
         # Bu değeri .env dosyanızdan almak daha güvenlidir.
         session_id = "verify_melwt3v2_TEIBvLEy_Fr9p_4y7a_A2nI_elNoJ1WIFxR4" 
         
-        async with TikTokApi(custom_verifyFp="verify_fp_string_buraya_gelecek", session_id=session_id) as api:
+       async with TikTokApi(session_id=session_id) as api:
             # video_id'yi URL'den doğru şekilde ayıklayın
             video_id = url.split('/')[-1].split('?')[0]
             video = await api.video(id=video_id).info()
