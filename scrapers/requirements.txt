@@ -1,2 +1,3 @@
+# scrapers/requirements.txt dosyasını açın ve şu şekilde değiştirin:
+TikTokApi==2.1.4  # Veya o anda PyPI'daki en son sürüm neyse onu yazın
 instaloader
-TikTokApi
