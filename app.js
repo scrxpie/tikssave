@@ -135,61 +135,66 @@ app.get('/dashboard', (req, res) => {
 // --- YENİ VE GÜNCELLENMİŞ API ROTLARI ---
 
 // Bu rota, discord botundan gelen isteği işleyecek ve bilgileri veritabanına kaydedecek.
+// app.js dosyanızda
 app.post('/api/tiktok-process', async (req, res) => {
-  const { url } = req.body;
-  if (!url) {
-    return res.status(400).json({ success: false, message: 'URL yok' });
-  }
-
-  try {
-    // TikWM API'sinden video bilgilerini çek
-    const tikwmRes = await axios.post('https://www.tikwm.com/api/', { url });
-    const tikwmData = tikwmRes.data;
-
-    if (tikwmData.code !== 0 || !tikwmData.data) {
-        console.error('TikWM API hatası:', tikwmData.msg);
-        return res.status(400).json({ success: false, message: tikwmData.msg || 'Video bilgisi alınamadı.' });
+    const { url } = req.body;
+    if (!url) {
+        return res.status(400).json({ success: false, message: 'URL yok' });
     }
 
-    const videoInfo = tikwmData.data;
-    let shortId;
-    let exists;
-    
-    // Rastgele kısa ID oluştur ve benzersiz olduğundan emin ol
-    do {
-      shortId = generateShortId();
-      exists = await VideoLink.findOne({ shortId });
-    } while (exists);
-    
-    // Veritabanına hem orijinal URL'yi hem de video bilgilerini kaydet
-    const newVideoLink = new VideoLink({
-      shortId,
-      originalUrl: url,
-      videoInfo: {
-        id: videoInfo.id,
-        author: videoInfo.author,
-        title: videoInfo.title,
-        cover: videoInfo.cover,
-        play: videoInfo.play,
-        hdplay: videoInfo.hdplay,
-        music: videoInfo.music,
-        play_count: videoInfo.play_count,
-        digg_count: videoInfo.digg_count,
-        comment_count: videoInfo.comment_count,
-        share_count: videoInfo.share_count,
-        create_time: videoInfo.create_time,
-      }
-    });
+    try {
+        const tikwmRes = await axios.post('https://www.tikwm.com/api/', { url });
+        const tikwmData = tikwmRes.data;
 
-    await newVideoLink.save();
-    console.log(`Yeni video bağlantısı kaydedildi: ${shortId}`);
+        if (tikwmData.code !== 0 || !tikwmData.data) {
+            console.error('TikWM API hatası:', tikwmData.msg);
+            // TikWM'den gelen asıl hata mesajını kullanıcıya gönder
+            return res.status(400).json({ success: false, message: tikwmData.msg || 'Video bilgisi alınamadı.' });
+        }
 
-    res.json({ success: true, shortId, videoInfo });
-  } catch (err) {
-    console.error('API işleme hatası:', err);
-    res.status(500).json({ success: false, message: 'Sunucu hatası.' });
-  }
+        const videoInfo = tikwmData.data;
+        let shortId;
+        let exists;
+        
+        do {
+          shortId = generateShortId();
+          exists = await VideoLink.findOne({ shortId });
+        } while (exists);
+        
+        const newVideoLink = new VideoLink({
+            shortId,
+            originalUrl: url,
+            videoInfo: {
+                id: videoInfo.id,
+                author: videoInfo.author,
+                title: videoInfo.title,
+                cover: videoInfo.cover,
+                play: videoInfo.play,
+                hdplay: videoInfo.hdplay,
+                music: videoInfo.music,
+                play_count: videoInfo.play_count,
+                digg_count: videoInfo.digg_count,
+                comment_count: videoInfo.comment_count,
+                share_count: videoInfo.share_count,
+                create_time: videoInfo.create_time,
+            }
+        });
+
+        await newVideoLink.save();
+        console.log(`Yeni video bağlantısı kaydedildi: ${shortId}`);
+
+        res.json({ success: true, shortId, videoInfo });
+    } catch (err) {
+        console.error('API işleme hatası:', err.message);
+        // Axios'tan dönen hatayı yakala ve mesajını gönder
+        if (err.response && err.response.data) {
+             console.error('TikWM hata yanıtı:', err.response.data);
+             return res.status(400).json({ success: false, message: err.response.data.msg || 'TikWM API ile bağlantı hatası.' });
+        }
+        res.status(500).json({ success: false, message: 'Sunucu hatası.' });
+    }
 });
+
 
 // Bu rota, Discord botunun shortId ile video bilgilerini çekmesini sağlar.
 app.get('/api/info/:shortId', async (req, res) => {
