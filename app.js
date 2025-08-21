@@ -1,4 +1,4 @@
-require('dotenv').config();
+Require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -132,30 +132,96 @@ app.get('/dashboard', (req, res) => {
 });
 
 
-// --- API ROTLARI ---
+// --- YENİ VE GÜNCELLENMİŞ API ROTLARI ---
 
-app.post('/get-links', async (req, res) => {
+// Bu rota, discord botundan gelen isteği işleyecek ve bilgileri veritabanına kaydedecek.
+app.post('/api/tiktok-process', async (req, res) => {
   const { url } = req.body;
+  if (!url) {
+    return res.status(400).json({ success: false, message: 'URL yok' });
+  }
+
   try {
-    const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
-    const data = await response.json();
-    if (!data || data.code !== 0) {
-      return res.json({ success: false, message: 'Video bilgisi alınamadı.' });
+    // TikWM API'sinden video bilgilerini çek
+    const tikwmRes = await axios.post('https://www.tikwm.com/api/', { url });
+    const tikwmData = tikwmRes.data;
+
+    if (tikwmData.code !== 0 || !tikwmData.data) {
+        console.error('TikWM API hatası:', tikwmData.msg);
+        return res.status(400).json({ success: false, message: tikwmData.msg || 'Video bilgisi alınamadı.' });
     }
-    res.json({
-      success: true,
-      play: data.data.play,
-      hdplay: data.data.hdplay,
-      music: data.data.music,
-      username: data.data.author?.unique_id || 'unknown',
-      title: data.data.title,
-      cover: data.data.cover
+
+    const videoInfo = tikwmData.data;
+    let shortId;
+    let exists;
+    
+    // Rastgele kısa ID oluştur ve benzersiz olduğundan emin ol
+    do {
+      shortId = generateShortId();
+      exists = await VideoLink.findOne({ shortId });
+    } while (exists);
+    
+    // Veritabanına hem orijinal URL'yi hem de video bilgilerini kaydet
+    const newVideoLink = new VideoLink({
+      shortId,
+      originalUrl: url,
+      videoInfo: {
+        id: videoInfo.id,
+        author: videoInfo.author,
+        title: videoInfo.title,
+        cover: videoInfo.cover,
+        play: videoInfo.play,
+        hdplay: videoInfo.hdplay,
+        music: videoInfo.music,
+        play_count: videoInfo.play_count,
+        digg_count: videoInfo.digg_count,
+        comment_count: videoInfo.comment_count,
+        share_count: videoInfo.share_count,
+        create_time: videoInfo.create_time,
+      }
     });
+
+    await newVideoLink.save();
+    console.log(`Yeni video bağlantısı kaydedildi: ${shortId}`);
+
+    res.json({ success: true, shortId, videoInfo });
   } catch (err) {
-    console.error(err);
-    res.json({ success: false, message: 'Sunucu hatası.' });
+    console.error('API işleme hatası:', err);
+    res.status(500).json({ success: false, message: 'Sunucu hatası.' });
   }
 });
+
+// Bu rota, Discord botunun shortId ile video bilgilerini çekmesini sağlar.
+app.get('/api/info/:shortId', async (req, res) => {
+  const { shortId } = req.params;
+
+  try {
+    const videoLink = await VideoLink.findOne({ shortId });
+
+    if (!videoLink) {
+      return res.status(404).json({ success: false, message: 'Video bulunamadı.' });
+    }
+
+    if (!videoLink.videoInfo) {
+      return res.status(404).json({ success: false, message: 'Video bilgileri eksik.' });
+    }
+
+    res.json({ success: true, videoInfo: videoLink.videoInfo });
+
+  } catch (err) {
+    console.error('API bilgi çekme hatası:', err);
+    res.status(500).json({ success: false, message: 'Sunucu hatası.' });
+  }
+});
+
+// Mevcut /get-links rotasını kaldırın veya güncelleyin
+// (Discord botunuz artık bunu kullanmayacağı için)
+app.post('/get-links', async (req, res) => {
+  // Bu rotayı isterseniz kaldırabilir veya diğer kullanımlar için tutabilirsiniz.
+  // Şu an için Discord botunuz bu rotayı kullanmayacak.
+  // Geriye dönük uyumluluk için burada bırakılabilir.
+});
+
 
 app.get('/proxy-download', async (req, res) => {
   const { url, username, type } = req.query;
@@ -177,60 +243,58 @@ app.get('/proxy-download', async (req, res) => {
 });
 
 app.post('/tiktok', async (req, res) => {
-  const { url } = req.body;
-  if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
-  try {
-    let shortId;
-    let exists;
-    do {
-      shortId = generateShortId();
-      exists = await VideoLink.findOne({ shortId });
-    } while (exists);
-    const newVideoLink = new VideoLink({
-      shortId,
-      originalUrl: url
-    });
-    await newVideoLink.save();
-    console.log('Depolanan video:', newVideoLink);
-    res.json({ success: true, shortId });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, message: 'Sunucu hatası.' });
-  }
+  // Bu rotayı /api/tiktok-process rotası ile değiştirdim. 
+  // Eski botlar hala bu rotayı kullanıyorsa, uyumluluk için bu rotayı da güncelleyebilirsiniz.
+  // Veya yukarıdaki yeni rotaya yönlendirebilirsiniz.
 });
+
 
 app.get('/:shortId', async (req, res) => {
   const videoLink = await VideoLink.findOne({ shortId: req.params.shortId });
   if (!videoLink) {
     return res.status(404).send('Video bulunamadı');
   }
-  try {
-    const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(videoLink.originalUrl)}`);
-    const data = await response.json();
-    if (!data || data.code !== 0) {
-      return res.status(404).send('Video bilgisi alınamadı.');
-    }
-    const videoData = {
-      play: data.data.play,
-      hdplay: data.data.hdplay,
-      music: data.data.music,
-      username: data.data.author?.unique_id || 'unknown',
-      title: data.data.title,
-      cover: data.data.cover
-    };
-    const userAgent = (req.headers['user-agent'] || '').toLowerCase();
-    const isDiscordOrTelegram = userAgent.includes('discordbot') || userAgent.includes('telegrambot');
-    const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
-    if (isDiscordOrTelegram || acceptsVideo) {
-      if (videoData.hdplay || videoData.play) {
-        return res.redirect(307, videoData.hdplay || videoData.play);
+
+  // Eğer veritabanında video bilgileri zaten varsa, TikWM'e gitmeye gerek yok.
+  let videoData;
+  if (videoLink.videoInfo) {
+      videoData = videoLink.videoInfo;
+  } else {
+      // Eğer veritabanında bilgi yoksa, TikWM'den çek ve kaydet (opsiyonel)
+      try {
+        const response = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(videoLink.originalUrl)}`);
+        const data = await response.json();
+        if (!data || data.code !== 0) {
+          return res.status(404).send('Video bilgisi alınamadı.');
+        }
+        videoData = {
+          play: data.data.play,
+          hdplay: data.data.hdplay,
+          music: data.data.music,
+          username: data.data.author?.unique_id || 'unknown',
+          title: data.data.title,
+          cover: data.data.cover
+        };
+        // Veritabanını güncelle
+        videoLink.videoInfo = data.data;
+        await videoLink.save();
+      } catch (err) {
+        console.error(err);
+        return res.status(500).send('Sunucu hatası.');
       }
-    }
-    res.render('index', { videoData });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Sunucu hatası.');
   }
+
+  const userAgent = (req.headers['user-agent'] || '').toLowerCase();
+  const isDiscordOrTelegram = userAgent.includes('discordbot') || userAgent.includes('telegrambot');
+  const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
+  if (isDiscordOrTelegram || acceptsVideo) {
+    if (videoData.hdplay || videoData.play) {
+      return res.redirect(307, videoData.hdplay || videoData.play);
+    }
+  }
+  res.render('index', { videoData });
 });
 
+
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
+
