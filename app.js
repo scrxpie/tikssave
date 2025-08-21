@@ -228,24 +228,58 @@ app.post('/get-links', async (req, res) => {
 });
 
 
+// In your `app.js` server file
+
+// Find the existing '/proxy-download' route
 app.get('/proxy-download', async (req, res) => {
-  const { url, username, type } = req.query;
-  if (!url) return res.status(400).send('Video linki yok');
+  const { url, username, type, shortId } = req.query; // Add 'shortId' to the destructured query
+
+  // Check if a shortId was provided
+  let videoUrl = url;
+  if (shortId) {
+    try {
+      const videoLink = await VideoLink.findOne({ shortId });
+      if (videoLink && videoLink.videoInfo) {
+        // Use the URL from your database
+        videoUrl = videoLink.videoInfo.hdplay || videoLink.videoInfo.play;
+        // You can also get the username from the database
+        const videoUsername = videoLink.videoInfo.author?.unique_id || 'unknown';
+        
+        // Optional: Update username and type for filename from DB
+        // (if you passed them to the DB originally)
+        // If not, you might need to find a way to get them from the original request
+        
+      } else {
+        return res.status(404).send('Video not found or info is missing.');
+      }
+    } catch (dbErr) {
+      console.error('Database lookup error:', dbErr);
+      return res.status(500).send('Database error.');
+    }
+  }
+
+  // If there's no URL, return an error
+  if (!videoUrl) {
+    return res.status(400).send('Video link is missing.');
+  }
+
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  await new Download({ url, ip }).save();
-  const extension = type === 'music' ? 'mp3' : 'mp4';
+  await new Download({ url: videoUrl, ip }).save();
+  const extension = (type === 'music') ? 'mp3' : 'mp4';
   const safeUsername = sanitize((username || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
   const filename = `tikssave_${safeUsername}_${Date.now()}.${extension}`;
   console.log('Filename:', filename);
-  https.get(url, fileRes => {
+
+  https.get(videoUrl, fileRes => {
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     fileRes.pipe(res);
   }).on('error', err => {
     console.error(err);
-    res.status(500).send('İndirme hatası.');
+    res.status(500).send('Download error.');
   });
 });
+
 
 app.post('/tiktok', async (req, res) => {
   // Bu rotayı /api/tiktok-process rotası ile değiştirdim. 
