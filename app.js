@@ -184,4 +184,127 @@ app.post('/api/instagram-process', async (req, res) => {
             try {
                 const apiData = JSON.parse(rawData);
                 if (!apiData.success) {
-                    return res.status(400).
+                    return res.status(400).json({ success: false, message: apiData.message || 'Video bilgisi alınamadı.' });
+                }
+                
+                const videoInfo = apiData.data;
+                let shortId;
+                let exists;
+                do {
+                    shortId = generateShortId();
+                    exists = await InstagramVideoLink.findOne({ shortId });
+                } while (exists);
+                
+                const newVideoLink = new InstagramVideoLink({
+                    shortId,
+                    originalUrl: url,
+                    videoInfo: videoInfo,
+                });
+
+                await newVideoLink.save();
+                res.json({ success: true, shortId, videoInfo });
+
+            } catch (parseError) {
+                console.error('JSON parse hatası:', parseError);
+                res.status(500).json({ success: false, message: 'Sunucu hatası: JSON ayrıştırılamadı.' });
+            }
+        });
+    } catch (err) {
+        console.error('Spawn hatası:', err.message);
+        res.status(500).json({ success: false, message: 'Sunucu hatası: İşlem başlatılamadı.' });
+    }
+});
+
+// Bilgi Çekme Rotası (TikTok)
+app.get('/api/info/:shortId', async (req, res) => {
+    const { shortId } = req.params;
+    try {
+        const videoLink = await VideoLink.findOne({ shortId });
+        if (!videoLink) return res.status(404).json({ success: false, message: 'Video bulunamadı.' });
+        if (!videoLink.videoInfo) return res.status(404).json({ success: false, message: 'Video bilgileri eksik.' });
+        res.json({ success: true, videoInfo: videoLink.videoInfo });
+    } catch (err) {
+        console.error('API bilgi çekme hatası:', err);
+        res.status(500).json({ success: false, message: 'Sunucu hatası.' });
+    }
+});
+
+// Bilgi Çekme Rotası (Instagram)
+app.get('/api/instagram/info/:shortId', async (req, res) => {
+    const { shortId } = req.params;
+    try {
+        const videoLink = await InstagramVideoLink.findOne({ shortId });
+        if (!videoLink) return res.status(404).json({ success: false, message: 'Video bulunamadı.' });
+        if (!videoLink.videoInfo) return res.status(404).json({ success: false, message: 'Video bilgileri eksik.' });
+        res.json({ success: true, videoInfo: videoLink.videoInfo });
+    } catch (err) {
+        console.error('API bilgi çekme hatası:', err);
+        res.status(500).json({ success: false, message: 'Sunucu hatası.' });
+    }
+});
+
+
+// Proxy İndirme Rotası
+app.get('/proxy-download', async (req, res) => {
+    const { shortId, username, type } = req.query;
+    let videoUrl, videoUsername;
+
+    try {
+        const videoLink = await VideoLink.findOne({ shortId });
+        if (!videoLink || !videoLink.videoInfo) {
+            return res.status(404).send('Video not found or info is missing.');
+        }
+        videoUrl = videoLink.videoInfo.hdplay || videoLink.videoInfo.play;
+        videoUsername = videoLink.videoInfo.author?.unique_id || 'unknown';
+    } catch (dbErr) {
+        console.error('Database lookup error:', dbErr);
+        return res.status(500).send('Database error.');
+    }
+
+    if (!videoUrl) {
+        return res.status(400).send('Video link is missing.');
+    }
+
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    await new Download({ url: videoUrl, ip }).save();
+    const extension = (type === 'music') ? 'mp3' : 'mp4';
+    const safeUsername = sanitize((videoUsername || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
+    const filename = `tikssave_${safeUsername}_${Date.now()}.${extension}`;
+
+    https.get(videoUrl, fileRes => {
+        res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        fileRes.pipe(res);
+    }).on('error', err => {
+        console.error(err);
+        res.status(500).send('Download error.');
+    });
+});
+
+// Eski rotalar
+app.post('/get-links', (req, res) => {
+    res.status(404).send('Bu rota kaldırılmıştır, lütfen yeni API rotasını kullanın.');
+});
+
+// Video Görüntüleme Rotası
+app.get('/:shortId', async (req, res) => {
+    const videoLink = await VideoLink.findOne({ shortId: req.params.shortId });
+    if (!videoLink) {
+        return res.status(404).send('Video bulunamadı');
+    }
+
+    let videoData = videoLink.videoInfo;
+
+    const userAgent = (req.headers['user-agent'] || '').toLowerCase();
+    const isDiscordOrTelegram = userAgent.includes('discordbot') || userAgent.includes('telegrambot');
+    const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
+    if (isDiscordOrTelegram || acceptsVideo) {
+        if (videoData.hdplay || videoData.play) {
+            return res.redirect(307, videoData.hdplay || videoData.play);
+        }
+    }
+    res.render('index', { videoData });
+});
+
+
+app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
