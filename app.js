@@ -136,88 +136,63 @@ app.get('/dashboard', (req, res) => {
 
 // Bu rota, discord botundan gelen isteği işleyecek ve bilgileri veritabanına kaydedecek.
 // app.js dosyanızda
+// --- /api/tiktok-process rotası ---
 app.post('/api/tiktok-process', async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
 
     try {
-        // --- TikWM ile dene ---
+        // Önce TikWM dene
+        let videoInfo;
         try {
             const tikwmRes = await axios.post('https://www.tikwm.com/api/', { url });
             const tikwmData = tikwmRes.data;
-
             if (tikwmData.code === 0 && tikwmData.data) {
-                const videoInfo = tikwmData.data;
-
-                // ShortId oluştur
-                let shortId;
-                let exists;
-                do {
-                    shortId = generateShortId();
-                    exists = await VideoLink.findOne({ shortId });
-                } while (exists);
-
-                const newVideoLink = new VideoLink({
-                    shortId,
-                    originalUrl: url,
-                    videoInfo: {
-                        id: videoInfo.id,
-                        author: videoInfo.author,
-                        title: videoInfo.title,
-                        cover: videoInfo.cover,
-                        play: videoInfo.play,
-                        hdplay: videoInfo.hdplay,
-                        music: videoInfo.music,
-                        play_count: videoInfo.play_count,
-                        digg_count: videoInfo.digg_count,
-                        comment_count: videoInfo.comment_count,
-                        share_count: videoInfo.share_count,
-                        create_time: videoInfo.create_time,
-                    }
-                });
-                await newVideoLink.save();
-                console.log(`TikWM success: Yeni video kaydedildi: ${shortId}`);
-                return res.json({ success: true, shortId, videoInfo });
+                videoInfo = tikwmData.data;
+                console.log('TikWM success: Yeni video kaydedildi:', videoInfo.id);
             } else {
                 console.warn('TikWM başarısız:', tikwmData.msg);
+                throw new Error('TikWM failed');
             }
         } catch (tikwmErr) {
-            console.warn('TikWM API hatası:', tikwmErr.message);
-        }
+            console.warn('TikWM başarısız:', tikwmErr.message);
+            console.log('RapidAPI fallback çalışıyor...');
 
-        // --- RapidAPI fallback ---
-        console.log('RapidAPI fallback çalışıyor...');
-        const rapidRes = await axios.get(`https://tiktok-downloader-download-tik-tok-videos-without-watermark.p.rapidapi.com/vid/download`, {
-            params: { url },
-            headers: {
-                'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
-                'X-RapidAPI-Host': 'tiktok-downloader-download-tik-tok-videos-without-watermark.p.rapidapi.com'
+            // RapidAPI ile fallback
+            const rapidRes = await axios.get('https://tiktok-downloader-api.p.rapidapi.com/video', {
+                params: { url },
+                headers: {
+                    'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+                    'X-RapidAPI-Host': 'tiktok-downloader-api.p.rapidapi.com'
+                }
+            });
+            const rapidData = rapidRes.data;
+
+            if (!rapidData || !rapidData.video) {
+                return res.status(404).json({ success: false, message: 'RapidAPI ile video alınamadı.' });
             }
-        });
-        const rapidData = rapidRes.data;
 
-        if (!rapidData || !rapidData.video || !rapidData.author) {
-            return res.status(400).json({ success: false, message: 'RapidAPI ile video bilgisi alınamadı.' });
+            // RapidAPI datasını TikWM formatına uyarlayalım
+            videoInfo = {
+                id: rapidData.id || generateShortId(),
+                author: rapidData.author || { unique_id: rapidData.username || 'unknown', nickname: rapidData.username || 'unknown', avatar: rapidData.avatar },
+                title: rapidData.title,
+                cover: rapidData.cover,
+                play: rapidData.video || rapidData.play,
+                hdplay: rapidData.video || rapidData.play,
+                music: rapidData.music,
+                play_count: rapidData.play_count,
+                digg_count: rapidData.likes,
+                comment_count: rapidData.comments,
+                share_count: rapidData.shares,
+                create_time: rapidData.create_time
+            };
+
+            console.log('RapidAPI success: Yeni video kaydedildi:', videoInfo.id);
         }
 
-        const videoInfo = {
-            id: rapidData.id || 'unknown',
-            author: rapidData.author,
-            title: rapidData.title,
-            cover: rapidData.thumbnail,
-            play: rapidData.video, // video linki
-            hdplay: rapidData.video, // rapidapi genellikle HD aynı link
-            music: rapidData.music,
-            play_count: rapidData.views || 0,
-            digg_count: rapidData.likes || 0,
-            comment_count: rapidData.comments || 0,
-            share_count: rapidData.shares || 0,
-            create_time: rapidData.create_time || Date.now()
-        };
-
-        // ShortId oluştur
-        let shortId;
-        let exists;
+        // ShortId üret ve kaydet
+        let shortId, exists;
         do {
             shortId = generateShortId();
             exists = await VideoLink.findOne({ shortId });
@@ -229,12 +204,11 @@ app.post('/api/tiktok-process', async (req, res) => {
             videoInfo
         });
         await newVideoLink.save();
-        console.log(`RapidAPI fallback: Yeni video kaydedildi: ${shortId}`);
 
         res.json({ success: true, shortId, videoInfo });
 
     } catch (err) {
-        console.error('API işleme hatası:', err.message);
+        console.error('API işleme hatası:', err);
         res.status(500).json({ success: false, message: 'Sunucu hatası.' });
     }
 });
