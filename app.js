@@ -22,9 +22,9 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const CALLBACK_URL = process.env.DISCORD_CALLBACK_URL;
 
-// Proxy listesi (sırasıyla veya fallback ile)
+// Proxy listesi (sırasıyla veya rastgele seçilecek)
 const PROXIES = [
-  process.env.PROXY1_URL, // örn: 'https://proxy1.example.com/api/get-video'
+  process.env.PROXY1_URL,
   process.env.PROXY2_URL
 ];
 
@@ -33,20 +33,24 @@ function generateShortId() {
   return nanoid();
 }
 
-// TikWM Proxy üzerinden video al (fallback destekli)
+// TikWM Proxy üzerinden video al (retry + fallback)
 async function fetchVideoFromProxy(url) {
   for (const proxyUrl of PROXIES) {
-    try {
-      const res = await axios.post(proxyUrl, { url }, { timeout: 10000 });
-      if (res.data && res.data.code === 0 && res.data.data) {
-        return res.data.data;
-      } else if (res.data && res.data.code === 1001) { // örnek limit hatası
-        console.warn(`Proxy limit reached: ${proxyUrl} - ${res.data.msg}`);
-      } else {
-        console.warn(`Proxy başarısız: ${proxyUrl} - ${res.data?.msg || 'Unknown error'}`);
+    for (let attempt = 0; attempt < 2; attempt++) { // 2 deneme
+      try {
+        const res = await axios.post(proxyUrl, { url }, { timeout: 10000 });
+        if (res.data && res.data.code === 0 && res.data.data) {
+          return res.data.data;
+        } else if (res.data?.msg?.toLowerCase().includes('limit')) {
+          console.warn(`Proxy limit: ${proxyUrl} - ${res.data.msg}`);
+          break; // diğer proxyye geç
+        } else {
+          console.warn(`Proxy başarısız: ${proxyUrl} - ${res.data?.msg || 'Unknown error'}`);
+        }
+      } catch (err) {
+        console.warn(`Proxy hatası: ${proxyUrl} - ${err.message}`);
+        await new Promise(r => setTimeout(r, 1000)); // 1 saniye bekle
       }
-    } catch (err) {
-      console.warn(`Proxy hatası: ${proxyUrl} - ${err.message}`);
     }
   }
   throw new Error('Tüm proxyler başarısız oldu veya limit aşıldı');
@@ -138,7 +142,7 @@ app.post('/api/tiktok-process', async (req, res) => {
 
   } catch (err) {
     console.error('API işleme hatası:', err.message);
-    res.status(500).json({ success: false, message: 'Sunucu hatası veya proxy limit aşıldı.' });
+    res.status(500).json({ success: false, message: 'Tüm proxyler başarısız oldu veya limit aşıldı.' });
   }
 });
 
