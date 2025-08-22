@@ -159,6 +159,7 @@ app.get('/api/info/:shortId', async (req, res) => {
 });
 
 // Proxy download
+// Proxy download
 app.get('/proxy-download', async (req, res) => {
   const { url, username, type, shortId } = req.query;
   let videoUrl = url;
@@ -183,14 +184,24 @@ app.get('/proxy-download', async (req, res) => {
   const safeUsername = sanitize((username || 'unknown').replace(/[\s\W]+/g, '_')).substring(0, 30);
   const filename = `tikssave_${safeUsername}_${Date.now()}.${extension}`;
 
-  https.get(videoUrl, fileRes => {
+  try {
+    const videoRes = await axios.get(videoUrl, {
+      responseType: 'stream',
+      maxRedirects: 5,
+      headers: {
+        'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0'
+      },
+      timeout: 15000
+    });
+
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    fileRes.pipe(res);
-  }).on('error', err => {
-    console.error(err);
+    videoRes.data.pipe(res);
+
+  } catch (err) {
+    console.error('Download error:', err.message);
     res.status(500).send('Download error');
-  });
+  }
 });
 
 // ShortId ile redirect
