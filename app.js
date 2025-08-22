@@ -100,6 +100,7 @@ app.get('/dashboard', (req, res) => {
 
 // TikTok İşleme Rotası
 
+// TikTok İşleme Rotası
 const Tiktok = require('@tobyg74/tiktok-api-dl'); // Paketi içeri aktar
 
 app.post('/api/tiktok-process', async (req, res) => {
@@ -109,19 +110,16 @@ app.post('/api/tiktok-process', async (req, res) => {
         return res.status(400).json({ success: false, message: 'URL belirtilmedi.' });
     }
     
-    // Yöntem 1: Doğrudan NPM paketini kullan
-   // ...
+    // Doğrudan NPM paketini kullan
     try {
-        try {
         const tiktokData = await Tiktok.Downloader(url, { version: 'v3' });
         
-        // Bu satırı ekleyin:
+        // NPM paketinden gelen ham veriyi logla
         console.log('NPM paketinden gelen ham veri:', tiktokData);
         
-        if (tiktokData && tiktokData.status === 'success' && tiktokData.result)  {
+        if (tiktokData && tiktokData.status === 'success' && tiktokData.result) {
             const result = tiktokData.result;
             const formattedData = {
-                // author objesi yoksa hata vermez
                 id: result.id,
                 author: {
                     unique_id: result.author?.unique_id || 'unknown',
@@ -129,18 +127,36 @@ app.post('/api/tiktok-process', async (req, res) => {
                     avatar: result.author?.avatar || 'unknown'
                 },
                 title: result.title || '',
-                // video linkleri eksikse hata vermez
                 cover: result.cover?.[0] || '',
                 play: result.video_no_watermark || '',
                 hdplay: result.video_no_watermark_hd || '',
                 music: result.music || '',
-                // stats objesi yoksa hata vermez
-                play_count: result.stats?.play_count || 0,
-                digg_count: result.stats?.digg_count || 0,
-                comment_count: result.stats?.comment_count || 0,
-                share_count: result.stats?.share_count || 0
+                stats: {
+                    play_count: result.stats?.play_count || 0,
+                    digg_count: result.stats?.digg_count || 0,
+                    comment_count: result.stats?.comment_count || 0,
+                    share_count: result.stats?.share_count || 0
+                }
             };
-            return res.status(200).json({ success: true, data: formattedData });
+            
+            // Veritabanına kaydetmek için doğru veriyi döndür
+            const videoInfo = formattedData;
+            let shortId;
+            let exists;
+            do {
+                shortId = generateShortId();
+                exists = await VideoLink.findOne({ shortId });
+            } while (exists);
+
+            const newVideoLink = new VideoLink({
+                shortId,
+                originalUrl: url,
+                videoInfo: videoInfo,
+            });
+
+            await newVideoLink.save();
+            return res.json({ success: true, shortId, videoInfo });
+
         } else {
             return res.status(500).json({ success: false, message: 'NPM paketinden veri alınamadı.' });
         }
@@ -148,6 +164,9 @@ app.post('/api/tiktok-process', async (req, res) => {
         console.error('NPM paketi hatası:', error.message);
         return res.status(500).json({ success: false, message: 'API hatası.' });
     }
+});
+
+// ... Instagram İşleme Rotası ve diğer kodlar ...
 // ...
     
 });
