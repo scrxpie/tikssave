@@ -100,6 +100,7 @@ app.get('/dashboard', (req, res) => {
 // --- API ROTLARI (Kendi Scraper'ınızla) ---
 
 // TikTok İşleme Rotası
+// TikTok İşleme Rotası
 app.post('/api/tiktok-process', async (req, res) => {
     const { url } = req.body;
 
@@ -114,26 +115,29 @@ app.post('/api/tiktok-process', async (req, res) => {
 
         if (tiktokData && tiktokData.status === 'success' && tiktokData.result) {
             const result = tiktokData.result;
+
+            // Düzeltilmiş formatlama, yeni anahtarları kullanıyor
             const formattedData = {
-                id: result.id,
+                id: result.id || '',
                 author: {
                     unique_id: result.author?.unique_id || 'unknown',
                     nickname: result.author?.nickname || 'unknown',
                     avatar: result.author?.avatar || 'unknown'
                 },
-                title: result.title || '',
+                title: result.desc || '', // 'desc' alanını başlık olarak kullanıyoruz
                 cover: result.cover?.[0] || '',
-                play: result.video_no_watermark || '',
-                hdplay: result.video_no_watermark_hd || '',
+                play: result.videoSD || '', // videoSD kullanılıyor
+                hdplay: result.videoHD || '', // videoHD kullanılıyor
                 music: result.music || '',
+                // Stats objesi olmadığı için varsayılan değerler atıyoruz
                 stats: {
-                    play_count: result.stats?.play_count || 0,
-                    digg_count: result.stats?.digg_count || 0,
-                    comment_count: result.stats?.comment_count || 0,
-                    share_count: result.stats?.share_count || 0
+                    play_count: result.play_count || 0,
+                    digg_count: result.digg_count || 0,
+                    comment_count: result.comment_count || 0,
+                    share_count: result.share_count || 0
                 }
             };
-
+            
             const videoInfo = formattedData;
             let shortId;
             let exists;
