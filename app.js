@@ -112,9 +112,13 @@ app.post('/api/tiktok-process', async (req, res) => {
     // Yöntem 1: Doğrudan NPM paketini kullan
    // ...
     try {
+        try {
         const tiktokData = await Tiktok.Downloader(url, { version: 'v3' });
-
-        if (tiktokData && tiktokData.status === 'success' && tiktokData.result) {
+        
+        // Bu satırı ekleyin:
+        console.log('NPM paketinden gelen ham veri:', tiktokData);
+        
+        if (tiktokData && tiktokData.status === 'success' && tiktokData.result)  {
             const result = tiktokData.result;
             const formattedData = {
                 // author objesi yoksa hata vermez
