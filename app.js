@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const https = require('https');
 const sanitize = require('sanitize-filename');
 const session = require('express-session');
 const passport = require('passport');
@@ -10,6 +9,7 @@ const { Strategy: DiscordStrategy } = require('passport-discord');
 const Visit = require('./models/Visit');
 const Download = require('./models/Download');
 const VideoLink = require('./models/VideoLink');
+const InstagramLink = require('./models/InstagramLink'); // Yeni model
 const { customAlphabet } = require('nanoid');
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
 const axios = require('axios');
@@ -27,8 +27,6 @@ const PROXIES = [
   process.env.PROXY1_URL,
   process.env.PROXY2_URL,
   process.env.PROXY3_URL,
-  process.env.PROXY4_URL,
-  process.env.PROXY5_URL,
 ];
 
 // Rastgele proxy seç
@@ -37,30 +35,27 @@ function getRandomProxy() {
   return PROXIES[index];
 }
 
-// Proxy üzerinden video çek (random + fallback)
+// TikTok/Instagram proxy üzerinden video çek (random + fallback)
 async function fetchVideoFromProxy(url) {
   const tried = new Set();
-
   for (let i = 0; i < PROXIES.length; i++) {
     const proxy = getRandomProxy();
-    if (tried.has(proxy)) continue; // aynı proxyyi tekrar deneme
+    if (tried.has(proxy)) continue;
     tried.add(proxy);
 
     try {
       console.log(`🎯 Proxy deneniyor: ${proxy}`);
       const response = await axios.post(proxy, { url }, { timeout: 10000 });
-
       if (response.data && response.data.code === 0 && response.data.data) {
         console.log(`✅ Proxy başarılı: ${proxy}`);
         return response.data.data;
       } else {
         console.warn(`⚠️ Proxy başarısız: ${proxy} - ${response.data?.msg || 'Unknown error'}`);
       }
-    } catch (error) {
-      console.error(`❌ Proxy hatası: ${proxy} - ${error.message}`);
+    } catch (err) {
+      console.error(`❌ Proxy hatası: ${proxy} - ${err.message}`);
     }
   }
-
   throw new Error("Tüm proxyler başarısız oldu veya limit aşıldı");
 }
 
@@ -98,11 +93,9 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 
 // --- ROTLAR ---
 
-// Ana sayfa
 app.get('/', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
-  await visit.save();
+  await new Visit({ ip, userAgent: req.headers['user-agent'] }).save();
   const count = await Visit.countDocuments();
   res.render('index', { count, videoData: null });
 });
@@ -128,6 +121,7 @@ app.get('/dashboard', (req, res) => {
 
 // --- API ROTLARI ---
 
+// TikTok API
 app.post('/api/tiktok-process', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
@@ -135,7 +129,6 @@ app.post('/api/tiktok-process', async (req, res) => {
   try {
     const videoInfo = await fetchVideoFromProxy(url);
 
-    // ShortId üret ve kaydet
     let shortId, exists;
     do {
       shortId = nanoid();
@@ -145,19 +138,43 @@ app.post('/api/tiktok-process', async (req, res) => {
     const newVideoLink = new VideoLink({ shortId, originalUrl: url, videoInfo });
     await newVideoLink.save();
 
-    console.log(`Yeni video kaydedildi: ${shortId}`);
     res.json({ success: true, shortId, videoInfo });
-
   } catch (err) {
-    console.error('API işleme hatası:', err.message);
+    console.error(err);
     res.status(500).json({ success: false, message: 'Tüm proxyler başarısız oldu veya limit aşıldı.' });
   }
 });
 
-// ShortId ile info çek
+// Instagram API
+app.post('/api/instagram-process', async (req, res) => {
+  const { url } = req.body;
+  if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
+
+  try {
+    const response = await axios.get(`https://gram-grabberz.vercel.app/api?url=${encodeURIComponent(url)}`, { timeout: 10000 });
+    if (!response.data || !response.data.data) return res.status(404).json({ success: false, message: 'Video alınamadı' });
+
+    let shortId, exists;
+    do {
+      shortId = nanoid();
+      exists = await InstagramLink.findOne({ shortId });
+    } while (exists);
+
+    const newIGLink = new InstagramLink({ shortId, originalUrl: url, videoInfo: response.data.data });
+    await newIGLink.save();
+
+    res.json({ success: true, shortId, videoInfo: response.data.data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Instagram API hatası' });
+  }
+});
+
+// ShortId info
 app.get('/api/info/:shortId', async (req, res) => {
   try {
-    const videoLink = await VideoLink.findOne({ shortId: req.params.shortId });
+    let videoLink = await VideoLink.findOne({ shortId: req.params.shortId });
+    if (!videoLink) videoLink = await InstagramLink.findOne({ shortId: req.params.shortId });
     if (!videoLink || !videoLink.videoInfo) return res.status(404).json({ success: false, message: 'Video bulunamadı veya bilgiler eksik.' });
     res.json({ success: true, videoInfo: videoLink.videoInfo });
   } catch (err) {
@@ -173,7 +190,7 @@ app.get('/proxy-download', async (req, res) => {
 
   if (shortId) {
     try {
-      const videoLink = await VideoLink.findOne({ shortId });
+      let videoLink = await VideoLink.findOne({ shortId }) || await InstagramLink.findOne({ shortId });
       if (!videoLink || !videoLink.videoInfo) return res.status(404).send('Video bulunamadı');
       videoUrl = videoLink.videoInfo.hdplay || videoLink.videoInfo.play;
     } catch (err) {
@@ -192,52 +209,22 @@ app.get('/proxy-download', async (req, res) => {
   const filename = `tikssave_${safeUsername}_${Date.now()}.${extension}`;
 
   try {
-    const videoRes = await axios.get(videoUrl, {
-      responseType: 'stream',
-      maxRedirects: 5,
-      headers: {
-        'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0'
-      },
-      timeout: 15000
-    });
-
+    const videoRes = await axios.get(videoUrl, { responseType: 'stream', maxRedirects: 5, headers: { 'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0' }, timeout: 15000 });
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     videoRes.data.pipe(res);
-
   } catch (err) {
-    console.error('Download error:', err.message);
+    console.error(err);
     res.status(500).send('Download error');
   }
 });
 
-// ShortId ile redirect
+// ShortId redirect
 app.get('/:shortId', async (req, res) => {
-  const videoLink = await VideoLink.findOne({ shortId: req.params.shortId });
+  let videoLink = await VideoLink.findOne({ shortId: req.params.shortId }) || await InstagramLink.findOne({ shortId: req.params.shortId });
   if (!videoLink) return res.status(404).send('Video bulunamadı');
 
   let videoData = videoLink.videoInfo;
-  if (!videoData) {
-    try {
-      const response = await axios.post('https://www.tikwm.com/api/', { url: videoLink.originalUrl });
-      const data = response.data;
-      if (!data || data.code !== 0) return res.status(404).send('Video bilgisi alınamadı');
-      videoData = data.data;
-      videoLink.videoInfo = videoData;
-      await videoLink.save();
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send('Sunucu hatası');
-    }
-  }
-
-  const userAgent = (req.headers['user-agent'] || '').toLowerCase();
-  const isDiscordOrTelegram = userAgent.includes('discordbot') || userAgent.includes('telegrambot');
-  const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
-  if (isDiscordOrTelegram || acceptsVideo) {
-    if (videoData.hdplay || videoData.play) return res.redirect(307, videoData.hdplay || videoData.play);
-  }
-
   res.render('index', { videoData });
 });
 
