@@ -81,7 +81,7 @@ async function fetchInstagramMedia(url) {
             console.log('Gönderilen başlıklar:', headers); // 🧪 Hata ayıklama için başlıkları konsola yazdır
             
             const response = await axios.post(proxy, { url }, {
-                timeout: 10000,
+                timeout: 30000, // Instagram API için zaman aşımı süresi 30 saniyeye çıkarıldı
                 headers: headers
             });
             if (response.data && response.data.success) {
@@ -92,6 +92,10 @@ async function fetchInstagramMedia(url) {
             }
         } catch (error) {
             console.error(`❌ Instagram Proxy hatası: ${proxy} - ${error.message}`);
+            // AxiosError detaylarını yazdır
+            if (axios.isAxiosError(error)) {
+                console.error('Axios Hata Detayları:', error.response ? error.response.data : error.message);
+            }
         }
     }
     throw new Error("Tüm Instagram proxyleri başarısız oldu veya limit aşıldı");
