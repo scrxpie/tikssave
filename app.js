@@ -250,7 +250,13 @@ app.get('/proxy-download', async (req, res) => {
         try {
             const videoLink = await VideoLink.findOne({ shortId });
             if (!videoLink || !videoLink.videoInfo) return res.status(404).send('Video bulunamadı');
-            videoUrl = videoLink.videoInfo.hdplay || videoLink.videoInfo.play || videoLink.videoInfo.media_url;
+            
+            // Düzeltme: URL'nin Instagram'a ait olup olmadığını kontrol et
+            if (videoLink.originalUrl.includes('instagram.com') || videoLink.originalUrl.includes('instagr.am')) {
+                videoUrl = videoLink.videoInfo.media_url;
+            } else {
+                videoUrl = videoLink.videoInfo.hdplay || videoLink.videoInfo.play;
+            }
         } catch (err) {
             console.error(err);
             return res.status(500).send('Database error');
@@ -294,11 +300,19 @@ app.get('/:shortId', async (req, res) => {
 
         let videoData;
 
-        // ✅ Her zaman proxy API’den yeniden çek
+        // Düzeltme: URL'nin Instagram'a mı yoksa TikTok'a mı ait olduğunu kontrol et
+        const isInstagram = videoLink.originalUrl.includes('instagram.com') || videoLink.originalUrl.includes('instagr.am');
+
         try {
-            const freshData = await fetchTikTokVideoFromProxy(videoLink.originalUrl); // Burayı daha akıllı bir hale getirebilirsin
-            videoData = freshData;
-            videoLink.videoInfo = freshData;
+            if (isInstagram) {
+                const freshData = await fetchInstagramMedia(videoLink.originalUrl);
+                videoData = freshData;
+                videoLink.videoInfo = freshData;
+            } else {
+                const freshData = await fetchTikTokVideoFromProxy(videoLink.originalUrl);
+                videoData = freshData;
+                videoLink.videoInfo = freshData;
+            }
             await videoLink.save();
             console.log(`♻️ Video bilgisi güncellendi: ${videoLink.shortId}`);
         } catch (err) {
@@ -315,8 +329,10 @@ app.get('/:shortId', async (req, res) => {
         const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
 
         if (isDiscordOrTelegram || acceptsVideo) {
-            if (videoData.hdplay || videoData.play) {
-                return res.redirect(307, videoData.hdplay || videoData.play);
+            // Düzeltme: Instagram ve TikTok için doğru URL'yi seç
+            const redirectUrl = isInstagram ? videoData.media_url : videoData.hdplay || videoData.play;
+            if (redirectUrl) {
+                return res.redirect(307, redirectUrl);
             }
         }
 
