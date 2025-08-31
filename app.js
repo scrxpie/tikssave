@@ -75,7 +75,13 @@ async function fetchInstagramMedia(url) {
 
         try {
             console.log(`🎯 Instagram Proxy deneniyor: ${proxy}`);
-            const response = await axios.post(proxy, { url }, { timeout: 10000 });
+            // POST isteği yapılıyor
+            const response = await axios.post(proxy, { url }, {
+                timeout: 10000,
+                headers: {
+                    'x-source': 'bot' // Python API'nizin beklediği başlık eklendi
+                }
+            });
             if (response.data && response.data.success) {
                 console.log(`✅ Instagram Proxy başarılı: ${proxy}`);
                 return response.data.data;
