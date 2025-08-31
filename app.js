@@ -42,6 +42,7 @@ function getRandomProxy(proxies) {
 }
 
 // --- TİKTOK İÇİN PROXY İŞLEMCİSİ ---
+// Bu fonksiyon sadece TikTok URL'lerini işler.
 async function fetchTikTokVideoFromProxy(url) {
     const tried = new Set();
     for (let i = 0; i < TIKTOK_PROXIES.length; i++) {
@@ -66,6 +67,7 @@ async function fetchTikTokVideoFromProxy(url) {
 }
 
 // --- INSTAGRAM İÇİN PROXY İŞLEMCİSİ ---
+// Bu fonksiyon sadece Instagram URL'lerini işler.
 async function fetchInstagramMedia(url) {
     const tried = new Set();
     for (let i = 0; i < INSTAGRAM_PROXIES.length; i++) {
@@ -187,6 +189,7 @@ app.post('/api/tiktok-process', async (req, res) => {
 });
 
 // Instagram Discord bot rotası
+// Bu rota sadece Instagram URL'lerini işler. TikTok ile karışmaz.
 app.post('/api/instagram-process', async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
@@ -213,6 +216,7 @@ app.post('/api/instagram-process', async (req, res) => {
 });
 
 // Yeni Instagram web rotası
+// Bu rota da sadece web arayüzü için Instagram URL'lerini işler.
 app.post('/api/instagram-download', async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
