@@ -174,7 +174,7 @@ app.post('/api/tiktok-process', async (req, res) => {
     }
 });
 
-// Instagram işleme rotası (yeni)
+// Instagram Discord bot rotası
 app.post('/api/instagram-process', async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
@@ -192,6 +192,19 @@ app.post('/api/instagram-process', async (req, res) => {
     } catch (err) {
         console.error('Instagram API işleme hatası:', err.message);
         res.status(500).json({ success: false, message: 'Instagram proxy hatası veya limit aşıldı.' });
+    }
+});
+
+// Yeni Instagram web rotası
+app.post('/api/instagram-download', async (req, res) => {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
+    try {
+        const mediaInfo = await fetchInstagramMedia(url);
+        res.json({ success: true, data: mediaInfo });
+    } catch (err) {
+        console.error('Web Instagram API işleme hatası:', err.message);
+        res.status(500).json({ success: false, message: err.message || 'Beklenmedik bir hata oluştu.' });
     }
 });
 
