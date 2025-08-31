@@ -13,6 +13,7 @@ const VideoLink = require('./models/VideoLink');
 const { customAlphabet } = require('nanoid');
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
 const axios = require('axios');
+const url = require('url');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -37,6 +38,9 @@ const INSTAGRAM_PROXIES = [
 
 // Rastgele proxy seç
 function getRandomProxy(proxies) {
+    if (!proxies || proxies.length === 0) {
+        throw new Error("Proxy listesi boş.");
+    }
     const index = Math.floor(Math.random() * proxies.length);
     return proxies[index];
 }
@@ -80,15 +84,16 @@ async function fetchInstagramMedia(url) {
             const headers = {
                 'x-source': 'bot' // Python API'nizin beklediği başlık eklendi
             };
-            console.log('Gönderilen başlıklar:', headers); // 🧪 Hata ayıklama için başlıkları konsola yazdır
             
             const response = await axios.post(proxy, { url }, {
                 timeout: 30000, // Instagram API için zaman aşımı süresi 30 saniyeye çıkarıldı
                 headers: headers
             });
-            if (response.data && response.data.success) {
+            
+            // Python API'nizin doğrudan medya bilgisini döndürdüğünü varsayarak
+            if (response.data) {
                 console.log(`✅ Instagram Proxy başarılı: ${proxy}`);
-                return response.data.data;
+                return response.data; // Python API'nin döndürdüğü doğrudan medya bilgisi
             } else {
                 console.warn(`⚠️ Instagram Proxy başarısız: ${proxy} - ${response.data?.message || 'Unknown error'}`);
             }
@@ -196,18 +201,16 @@ app.post('/api/instagram-process', async (req, res) => {
     try {
         const mediaInfo = await fetchInstagramMedia(url);
         
-        // TikTok'ta olduğu gibi rastgele shortId oluşturma
         let shortId, exists;
         do {
             shortId = nanoid();
             exists = await VideoLink.findOne({ shortId });
         } while (exists);
 
-        // `shortcode`'u veritabanına kaydetme artık gerekli değil.
         const newVideoLink = new VideoLink({ shortId, originalUrl: url, videoInfo: mediaInfo });
         await newVideoLink.save();
         console.log(`Yeni Instagram medyası kaydedildi: ${shortId}`);
-        res.json({ success: true, shortId, mediaInfo }); // shortcode'u yanıttan kaldırma
+        res.json({ success: true, shortId, mediaInfo });
     } catch (err) {
         console.error('Instagram API işleme hatası:', err.message);
         res.status(500).json({ success: false, message: 'Instagram proxy hatası veya limit aşıldı.' });
@@ -221,7 +224,8 @@ app.post('/api/instagram-download', async (req, res) => {
     if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
     try {
         const mediaInfo = await fetchInstagramMedia(url);
-        res.json({ success: true, data: { mediaInfo } }); // shortcode'u yanıttan kaldırma
+        // Doğrudan döndürülen veriyi kullanın. Python API'si zaten 'success' anahtarı döndürmüyor.
+        res.json({ success: true, data: mediaInfo });
     } catch (err) {
         console.error('Web Instagram API işleme hatası:', err.message);
         res.status(500).json({ success: false, message: err.message || 'Beklenmedik bir hata oluştu.' });
@@ -251,8 +255,9 @@ app.get('/proxy-download', async (req, res) => {
             const videoLink = await VideoLink.findOne({ shortId });
             if (!videoLink || !videoLink.videoInfo) return res.status(404).send('Video bulunamadı');
             
-            // Düzeltme: URL'nin Instagram'a ait olup olmadığını kontrol et
-            if (videoLink.originalUrl.includes('instagram.com') || videoLink.originalUrl.includes('instagr.am')) {
+            const isInstagram = videoLink.originalUrl.includes('instagram.com') || videoLink.originalUrl.includes('instagr.am');
+            
+            if (isInstagram) {
                 videoUrl = videoLink.videoInfo.media_url;
             } else {
                 videoUrl = videoLink.videoInfo.hdplay || videoLink.videoInfo.play;
@@ -300,7 +305,6 @@ app.get('/:shortId', async (req, res) => {
 
         let videoData;
 
-        // Düzeltme: URL'nin Instagram'a mı yoksa TikTok'a mı ait olduğunu kontrol et
         const isInstagram = videoLink.originalUrl.includes('instagram.com') || videoLink.originalUrl.includes('instagr.am');
 
         try {
@@ -329,7 +333,6 @@ app.get('/:shortId', async (req, res) => {
         const acceptsVideo = (req.headers['accept'] || '').includes('video/mp4');
 
         if (isDiscordOrTelegram || acceptsVideo) {
-            // Düzeltme: Instagram ve TikTok için doğru URL'yi seç
             const redirectUrl = isInstagram ? videoData.media_url : videoData.hdplay || videoData.play;
             if (redirectUrl) {
                 return res.redirect(307, redirectUrl);
