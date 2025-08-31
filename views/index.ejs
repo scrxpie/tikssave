@@ -961,7 +961,19 @@
                     videoElement.appendChild(sourceElement);
                     previewContainer.appendChild(videoElement);
                 }
+// Handle Instagram video/image
+else if (data.media_info?.media_url) {
+    const mediaUrl = data.media_info.media_url;
+    const mediaType = mediaUrl.endsWith('.mp4') ? 'video' : 'image';
+    const mediaElement = document.createElement(mediaType);
+    mediaElement.setAttribute('controls', mediaType === 'video' ? '' : null);
+    mediaElement.setAttribute('poster', data.media_info.thumbnail_url || '');
+    mediaElement.className = 'w-full max-w-xl rounded-2xl';
+    mediaElement.innerHTML = `<source src="${mediaUrl}" type="${mediaType}/mp4">`;
+    videoPlayerContainer.appendChild(mediaElement);
 
+    downloadButtonsHtml += `<a class="download-btn" href="/proxy-download?url=${encodeURIComponent(mediaUrl)}&username=${encodeURIComponent(data.media_info.owner_username)}&type=${mediaType}">Download ${mediaType.charAt(0).toUpperCase() + mediaType.slice(1)}</a>`;
+}
                 // Clear old options and inject new ones dynamically
                 optionsContainer.innerHTML = '';
                 if (data.music) {
