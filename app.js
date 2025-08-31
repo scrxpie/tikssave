@@ -195,20 +195,19 @@ app.post('/api/instagram-process', async (req, res) => {
     if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
     try {
         const mediaInfo = await fetchInstagramMedia(url);
-        // URL'den shortcode'u çıkarma
-        const match = url.match(/(?:p|reel)\/([a-zA-Z0-9_-]+)/);
-        const shortcode = match ? match[1] : null;
-
+        
+        // TikTok'ta olduğu gibi rastgele shortId oluşturma
         let shortId, exists;
         do {
             shortId = nanoid();
             exists = await VideoLink.findOne({ shortId });
         } while (exists);
-        // `shortcode`'u veritabanına kaydetmek için `newVideoLink` nesnesine ekleme
-        const newVideoLink = new VideoLink({ shortId, originalUrl: url, videoInfo: mediaInfo, shortcode });
+
+        // `shortcode`'u veritabanına kaydetme artık gerekli değil.
+        const newVideoLink = new VideoLink({ shortId, originalUrl: url, videoInfo: mediaInfo });
         await newVideoLink.save();
         console.log(`Yeni Instagram medyası kaydedildi: ${shortId}`);
-        res.json({ success: true, shortId, mediaInfo, shortcode }); // shortcode'u yanıta ekleme
+        res.json({ success: true, shortId, mediaInfo }); // shortcode'u yanıttan kaldırma
     } catch (err) {
         console.error('Instagram API işleme hatası:', err.message);
         res.status(500).json({ success: false, message: 'Instagram proxy hatası veya limit aşıldı.' });
@@ -222,9 +221,7 @@ app.post('/api/instagram-download', async (req, res) => {
     if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
     try {
         const mediaInfo = await fetchInstagramMedia(url);
-        const match = url.match(/(?:p|reel)\/([a-zA-Z0-9_-]+)/);
-        const shortcode = match ? match[1] : null;
-        res.json({ success: true, data: { mediaInfo, shortcode } }); // shortcode'u yanıta ekleme
+        res.json({ success: true, data: { mediaInfo } }); // shortcode'u yanıttan kaldırma
     } catch (err) {
         console.error('Web Instagram API işleme hatası:', err.message);
         res.status(500).json({ success: false, message: err.message || 'Beklenmedik bir hata oluştu.' });
