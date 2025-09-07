@@ -212,6 +212,8 @@ app.post('/api/instagram-process', async (req, res) => {
 
 // --- YENİ: Twitter Fixupx ---
 // Short link üretip, direk fixupx mp4/jpg formatı
+// --- YENİ: Twitter Fixupx ---
+// Short link üretip, direk fixupx mp4/jpg formatı
 app.post('/api/twitter-process', async (req, res) => {
     const { url: tweetUrl } = req.body;
     if (!tweetUrl) return res.status(400).json({ success: false, message: 'URL yok' });
@@ -221,17 +223,20 @@ app.post('/api/twitter-process', async (req, res) => {
         const regex = /twitter\.com\/([a-zA-Z0-9_]+)\/status\/(\d+)/;
         const match = tweetUrl.match(regex);
         if (!match) return res.status(400).json({ success: false, message: 'Geçersiz Twitter URL' });
+
         const username = match[1];
         const statusId = match[2];
 
         const fixupUrl = `https://d.fixupx.com/${username}/status/${statusId}.mp4`;
 
+        // ShortId oluştur
         let shortId, exists;
         do {
-            shortId = nanoid();
+            shortId = nanoid(); // random shortId
             exists = await VideoLink.findOne({ shortId });
         } while (exists);
 
+        // MongoDB kaydı
         const newVideoLink = new VideoLink({
             shortId,
             originalUrl: tweetUrl,
@@ -239,8 +244,15 @@ app.post('/api/twitter-process', async (req, res) => {
         });
         await newVideoLink.save();
 
-        console.log(`Yeni Twitter medyası kaydedildi: ${shortId}`);
-        res.json({ success: true, shortId, mediaInfo: { media_url: fixupUrl } });
+        console.log(`✅ Yeni Twitter medyası kaydedildi: ${shortId}`);
+
+        // Kullanıcıya short link dön
+        res.json({ 
+            success: true, 
+            shortId, 
+            mediaInfo: { media_url: fixupUrl }, 
+            link: `${process.env.SITE_URL}/${shortId}` 
+        });
 
     } catch (err) {
         console.error('Twitter işleme hatası:', err.message);
