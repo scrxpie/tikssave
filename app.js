@@ -2,18 +2,15 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const https = require('https');
 const sanitize = require('sanitize-filename');
 const session = require('express-session');
 const passport = require('passport');
 const { Strategy: DiscordStrategy } = require('passport-discord');
 const Visit = require('./models/Visit');
-const Download = require('nanoid');
 const VideoLink = require('./models/VideoLink');
 const { customAlphabet } = require('nanoid');
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
 const axios = require('axios');
-const url = require('url');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -24,28 +21,22 @@ const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const CALLBACK_URL = process.env.DISCORD_CALLBACK_URL;
 
 // --- PROXY LİSTELERİ ---
-// Her bir API için ayrı proxy listesi
 const TIKTOK_PROXIES = [
     process.env.PROXY1_URL,
     process.env.PROXY2_URL,
     process.env.PROXY3_URL,
 ];
-
-// Senin kendi oluşturduğun Instagram proxy'si
 const INSTAGRAM_PROXIES = [
     process.env.INSTA_PROXY_URL
 ];
 
-// Rastgele proxy seç
 function getRandomProxy(proxies) {
-    if (!proxies || proxies.length === 0) {
-        throw new Error("Proxy listesi boş.");
-    }
+    if (!proxies || proxies.length === 0) throw new Error("Proxy listesi boş.");
     const index = Math.floor(Math.random() * proxies.length);
     return proxies[index];
 }
 
-// --- TİKTOK İÇİN PROXY İŞLEMCİSİ ---
+// --- TİKTOK ---
 async function fetchTikTokVideoFromProxy(url) {
     const tried = new Set();
     for (let i = 0; i < TIKTOK_PROXIES.length; i++) {
@@ -54,13 +45,9 @@ async function fetchTikTokVideoFromProxy(url) {
         tried.add(proxy);
 
         try {
-            console.log(`🎯 TikTok Proxy deneniyor: ${proxy}`);
             const response = await axios.post(proxy, { url }, { timeout: 10000 });
             if (response.data && response.data.code === 0 && response.data.data) {
-                console.log(`✅ TikTok Proxy başarılı: ${proxy}`);
                 return response.data.data;
-            } else {
-                console.warn(`⚠️ TikTok Proxy başarısız: ${proxy} - ${response.data?.msg || 'Unknown error'}`);
             }
         } catch (error) {
             console.error(`❌ TikTok Proxy hatası: ${proxy} - ${error.message}`);
@@ -69,7 +56,7 @@ async function fetchTikTokVideoFromProxy(url) {
     throw new Error("Tüm TikTok proxyleri başarısız oldu veya limit aşıldı");
 }
 
-// --- INSTAGRAM İÇİN PROXY İŞLEMCİSİ ---
+// --- INSTAGRAM ---
 async function fetchInstagramMedia(url) {
     const tried = new Set();
     for (let i = 0; i < INSTAGRAM_PROXIES.length; i++) {
@@ -78,33 +65,17 @@ async function fetchInstagramMedia(url) {
         tried.add(proxy);
 
         try {
-            console.log(`🎯 Instagram Proxy deneniyor: ${proxy}`);
-            const headers = {
-                'x-source': 'bot'
-            };
-            
-            const response = await axios.post(proxy, { url }, {
-                timeout: 30000,
-                headers: headers
-            });
-            
-            if (response.data) {
-                console.log(`✅ Instagram Proxy başarılı: ${proxy}`);
-                return response.data;
-            } else {
-                console.warn(`⚠️ Instagram Proxy başarısız: ${proxy} - ${response.data?.message || 'Unknown error'}`);
-            }
+            const headers = { 'x-source': 'bot' };
+            const response = await axios.post(proxy, { url }, { timeout: 30000, headers });
+            if (response.data) return response.data;
         } catch (error) {
-            console.error(`❌ Instagram Proxy hatası: ${proxy} - ${error.message}`);
-            if (axios.isAxiosError(error)) {
-                console.error('Axios Hata Detayları:', error.response ? error.response.data : error.message);
-            }
+            console.error(`❌ Instagram Proxy hatası: ${error.message}`);
         }
     }
     throw new Error("Tüm Instagram proxyleri başarısız oldu veya limit aşıldı");
 }
 
-// EJS ve static
+// EJS & Middleware
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -120,7 +91,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Discord OAuth2
 passport.use(new DiscordStrategy({
     clientID: CLIENT_ID,
     clientSecret: CLIENT_SECRET,
@@ -136,7 +106,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error(err));
 
-// --- ROTLAR ---
+// --- ROUTES ---
 app.get('/', async (req, res) => {
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const visit = new Visit({ ip, userAgent: req.headers['user-agent'] });
@@ -151,7 +121,7 @@ app.get('/privacy', (req, res) => res.render('privacy'));
 app.get('/terms', (req, res) => res.render('terms'));
 app.get('/rights', (req, res) => res.render('rights'));
 
-// Discord Dashboard
+// Dashboard
 app.get('/auth/discord', passport.authenticate('discord'));
 app.get('/auth/discord/callback',
     passport.authenticate('discord', { failureRedirect: '/dashboard' }),
@@ -165,7 +135,6 @@ app.get('/dashboard', (req, res) => {
 });
 
 // --- API ROTLARI ---
-
 // TikTok
 app.post('/api/tiktok-process', async (req, res) => {
     const { url } = req.body;
@@ -177,12 +146,11 @@ app.post('/api/tiktok-process', async (req, res) => {
             shortId = nanoid();
             exists = await VideoLink.findOne({ shortId });
         } while (exists);
+
         const newVideoLink = new VideoLink({ shortId, originalUrl: url, videoInfo });
         await newVideoLink.save();
-        console.log(`Yeni video kaydedildi: ${shortId}`);
         res.json({ success: true, shortId, videoInfo });
-    } catch (err) {
-        console.error('API işleme hatası:', err.message);
+    } catch {
         res.status(500).json({ success: false, message: 'Tüm proxyler başarısız oldu veya limit aşıldı.' });
     }
 });
@@ -193,7 +161,6 @@ app.post('/api/instagram-process', async (req, res) => {
     if (!url) return res.status(400).json({ success: false, message: 'URL yok' });
     try {
         const mediaInfo = await fetchInstagramMedia(url);
-        
         let shortId, exists;
         do {
             shortId = nanoid();
@@ -202,24 +169,18 @@ app.post('/api/instagram-process', async (req, res) => {
 
         const newVideoLink = new VideoLink({ shortId, originalUrl: url, videoInfo: mediaInfo });
         await newVideoLink.save();
-        console.log(`Yeni Instagram medyası kaydedildi: ${shortId}`);
         res.json({ success: true, shortId, mediaInfo });
-    } catch (err) {
-        console.error('Instagram API işleme hatası:', err.message);
+    } catch {
         res.status(500).json({ success: false, message: 'Instagram proxy hatası veya limit aşıldı.' });
     }
 });
 
-// --- YENİ: Twitter Fixupx ---
-// Short link üretip, direk fixupx mp4/jpg formatı
-// --- YENİ: Twitter Fixupx ---
-// Short link üretip, direk fixupx mp4/jpg formatı
+// --- Twitter (Fixupx) ---
 app.post('/api/twitter-process', async (req, res) => {
     const { url: tweetUrl } = req.body;
     if (!tweetUrl) return res.status(400).json({ success: false, message: 'URL yok' });
 
     try {
-        // Twitter/X regex kontrolü
         const regex = /(?:twitter\.com|x\.com)\/([a-zA-Z0-9_]+)\/status\/(\d+)/;
         const match = tweetUrl.match(regex);
         if (!match) return res.status(400).json({ success: false, message: 'Geçersiz Twitter/X URL' });
@@ -228,50 +189,59 @@ app.post('/api/twitter-process', async (req, res) => {
         const statusId = match[2];
         const fixupUrl = `https://d.fixupx.com/${username}/status/${statusId}.mp4`;
 
-        // Unique shortId oluştur
         let shortId, exists;
         do {
             shortId = nanoid();
             exists = await VideoLink.findOne({ shortId });
         } while (exists);
 
-        // Zorunlu alanları dolduruyoruz
         const newVideoLink = new VideoLink({
             shortId,
             originalUrl: tweetUrl,
-            videoInfo: {
-                media_url: fixupUrl, // bu zorunlu alan
-                title: '',           // opsiyonel alanlar varsa boş string
-                thumbnail: ''        // opsiyonel alanlar varsa boş string
-            }
+            videoInfo: { media_url: fixupUrl }
         });
 
         await newVideoLink.save();
 
-        res.json({ 
-            success: true, 
-            shortId, 
-            mediaInfo: { media_url: fixupUrl }, 
-            link: `${process.env.SITE_URL}/${shortId}` 
+        res.json({
+            success: true,
+            shortId,
+            mediaInfo: { media_url: fixupUrl },
+            link: `${process.env.SITE_URL}/${shortId}`
         });
 
-    } catch (err) {
-        console.error('Twitter işleme hatası:', err.message);
+    } catch {
         res.status(500).json({ success: false, message: 'Twitter işleme hatası' });
     }
 });
 
-// ShortId ile redirect
+// --- Proxy Download (⬇️ butonu için) ---
+app.get('/proxy-download', async (req, res) => {
+    try {
+        const { shortId } = req.query;
+        if (!shortId) return res.status(400).json({ success: false, message: 'shortId missing' });
+
+        const video = await VideoLink.findOne({ shortId });
+        if (!video || !video.videoInfo?.media_url) {
+            return res.status(404).json({ success: false, message: 'Video not found' });
+        }
+
+        return res.redirect(video.videoInfo.media_url);
+    } catch (err) {
+        console.error('Proxy download error:', err);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+// ShortId redirect
 app.get('/:shortId', async (req, res) => {
     try {
         const videoLink = await VideoLink.findOne({ shortId: req.params.shortId });
         if (!videoLink) return res.status(404).send('Video bulunamadı');
 
         let videoData = videoLink.videoInfo;
-
-        // Instagram veya TikTok için yeniden fetch
         const isInstagram = videoLink.originalUrl.includes('instagram.com') || videoLink.originalUrl.includes('instagr.am');
-        const isTwitter = videoLink.originalUrl.includes('twitter.com');
+        const isTwitter = videoLink.originalUrl.includes('twitter.com') || videoLink.originalUrl.includes('x.com');
 
         try {
             if (isInstagram) {
