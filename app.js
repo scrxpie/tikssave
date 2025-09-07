@@ -214,7 +214,36 @@ app.post('/api/twitter-process', async (req, res) => {
         res.status(500).json({ success: false, message: 'Twitter işleme hatası' });
     }
 });
+// --- Twitter Direct Download (Video veya Foto) ---
+app.get('/twitter-download/:statusId', async (req, res) => {
+    try {
+        const statusId = req.params.statusId;
+        if (!statusId) return res.status(400).send('Tweet ID yok');
 
+        // Varsayılan video URL (fixupx video)
+        const fixupVideoUrl = `https://d.fixupx.com/i/status/${statusId}.mp4`;
+        const fixupPhotoUrl = `https://d.fixupx.com/i/status/${statusId}.jpg`;
+
+        // Önce video var mı diye kontrol et
+        const headCheck = await axios.head(fixupVideoUrl).catch(() => null);
+
+        if (headCheck && headCheck.status === 200) {
+            // Video bulundu → mp4 yönlendir
+            return res.redirect(307, fixupVideoUrl);
+        }
+
+        // Video yoksa fotoğrafı dene
+        const imgCheck = await axios.head(fixupPhotoUrl).catch(() => null);
+        if (imgCheck && imgCheck.status === 200) {
+            return res.redirect(307, fixupPhotoUrl);
+        }
+
+        return res.status(404).send('Tweet medyası bulunamadı');
+    } catch (err) {
+        console.error('Twitter download error:', err.message);
+        res.status(500).send('Sunucu hatası');
+    }
+});
 // --- Proxy Download (⬇️ butonu için) ---
 app.get('/proxy-download', async (req, res) => {
     try {
