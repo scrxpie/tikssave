@@ -219,24 +219,21 @@ app.post('/api/twitter-process', async (req, res) => {
     if (!tweetUrl) return res.status(400).json({ success: false, message: 'URL yok' });
 
     try {
-        // Tweetten username ve status ID çek
-        const regex = /twitter\.com\/([a-zA-Z0-9_]+)\/status\/(\d+)/;
+        // X ve Twitter destekli regex
+        const regex = /(?:twitter\.com|x\.com)\/([a-zA-Z0-9_]+)\/status\/(\d+)/;
         const match = tweetUrl.match(regex);
-        if (!match) return res.status(400).json({ success: false, message: 'Geçersiz Twitter URL' });
+        if (!match) return res.status(400).json({ success: false, message: 'Geçersiz Twitter/X URL' });
 
         const username = match[1];
         const statusId = match[2];
-
         const fixupUrl = `https://d.fixupx.com/${username}/status/${statusId}.mp4`;
 
-        // ShortId oluştur
         let shortId, exists;
         do {
-            shortId = nanoid(); // random shortId
+            shortId = nanoid();
             exists = await VideoLink.findOne({ shortId });
         } while (exists);
 
-        // MongoDB kaydı
         const newVideoLink = new VideoLink({
             shortId,
             originalUrl: tweetUrl,
@@ -244,9 +241,6 @@ app.post('/api/twitter-process', async (req, res) => {
         });
         await newVideoLink.save();
 
-        console.log(`✅ Yeni Twitter medyası kaydedildi: ${shortId}`);
-
-        // Kullanıcıya short link dön
         res.json({ 
             success: true, 
             shortId, 
