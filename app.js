@@ -220,25 +220,41 @@ app.get('/twitter-download/:statusId', async (req, res) => {
         const statusId = req.params.statusId;
         if (!statusId) return res.status(400).send('Tweet ID yok');
 
-        // Varsayılan video URL (fixupx video)
         const fixupVideoUrl = `https://d.fixupx.com/i/status/${statusId}.mp4`;
         const fixupPhotoUrl = `https://d.fixupx.com/i/status/${statusId}.jpg`;
 
-        // Önce video var mı diye kontrol et
-        const headCheck = await axios.head(fixupVideoUrl).catch(() => null);
-
-        if (headCheck && headCheck.status === 200) {
-            // Video bulundu → mp4 yönlendir
-            return res.redirect(307, fixupVideoUrl);
+        // Video var mı?
+        const headVideo = await axios.head(fixupVideoUrl).catch(() => null);
+        if (headVideo && headVideo.status === 200) {
+            const filename = `tikssave_${statusId}.mp4`;
+            return axios({
+                url: fixupVideoUrl,
+                method: 'GET',
+                responseType: 'stream'
+            }).then(response => {
+                res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+                res.setHeader('Content-Type', 'video/mp4');
+                response.data.pipe(res);
+            });
         }
 
-        // Video yoksa fotoğrafı dene
-        const imgCheck = await axios.head(fixupPhotoUrl).catch(() => null);
-        if (imgCheck && imgCheck.status === 200) {
-            return res.redirect(307, fixupPhotoUrl);
+        // Foto var mı?
+        const headPhoto = await axios.head(fixupPhotoUrl).catch(() => null);
+        if (headPhoto && headPhoto.status === 200) {
+            const filename = `tikssave_${statusId}.jpg`;
+            return axios({
+                url: fixupPhotoUrl,
+                method: 'GET',
+                responseType: 'stream'
+            }).then(response => {
+                res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+                res.setHeader('Content-Type', 'image/jpeg');
+                response.data.pipe(res);
+            });
         }
 
         return res.status(404).send('Tweet medyası bulunamadı');
+
     } catch (err) {
         console.error('Twitter download error:', err.message);
         res.status(500).send('Sunucu hatası');
