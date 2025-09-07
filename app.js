@@ -219,7 +219,7 @@ app.post('/api/twitter-process', async (req, res) => {
     if (!tweetUrl) return res.status(400).json({ success: false, message: 'URL yok' });
 
     try {
-        // X ve Twitter destekli regex
+        // Twitter/X regex kontrolü
         const regex = /(?:twitter\.com|x\.com)\/([a-zA-Z0-9_]+)\/status\/(\d+)/;
         const match = tweetUrl.match(regex);
         if (!match) return res.status(400).json({ success: false, message: 'Geçersiz Twitter/X URL' });
@@ -228,17 +228,24 @@ app.post('/api/twitter-process', async (req, res) => {
         const statusId = match[2];
         const fixupUrl = `https://d.fixupx.com/${username}/status/${statusId}.mp4`;
 
+        // Unique shortId oluştur
         let shortId, exists;
         do {
             shortId = nanoid();
             exists = await VideoLink.findOne({ shortId });
         } while (exists);
 
+        // Zorunlu alanları dolduruyoruz
         const newVideoLink = new VideoLink({
             shortId,
             originalUrl: tweetUrl,
-            videoInfo: { media_url: fixupUrl }
+            videoInfo: {
+                media_url: fixupUrl, // bu zorunlu alan
+                title: '',           // opsiyonel alanlar varsa boş string
+                thumbnail: ''        // opsiyonel alanlar varsa boş string
+            }
         });
+
         await newVideoLink.save();
 
         res.json({ 
